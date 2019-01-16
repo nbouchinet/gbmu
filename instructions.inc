@@ -632,52 +632,52 @@ case 0x1F:
   exec_instruction([&] () { instr_rra(); }, 4);
   break;
 case 0xC3:
-  exec_instruction([&] () { instr_jp(None, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::None, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xC2:
-  exec_instruction([&] () { instr_jp(NonZero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::NonZero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xCA:
-  exec_instruction([&] () { instr_jp(Zero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::Zero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xD2:
-  exec_instruction([&] () { instr_jp(NonCarry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::NonCarry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xDA:
-  exec_instruction([&] () { instr_jp(Carry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::Carry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xE9:
-  exec_instruction([&] () { instr_jp(None, read_byte(_hl.word)); }, 4);
+  exec_instruction([&] () { instr_jp(JumpCondition::None, read_byte(_hl.word)); }, 4);
   break;
 case 0x18:
-  exec_instruction([&] () { instr_jr(None, *it++); }, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::None, *it++); }, 8);
   break;
 case 0x20:
-  exec_instruction([&] () { instr_jr(NonZero, *it++); }, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::NonZero, *it++); }, 8);
   break;
 case 0x28:
-  exec_instruction([&] () { instr_jr(Zero, *it++); }, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::Zero, *it++); }, 8);
   break;
 case 0x30:
-  exec_instruction([&] () { instr_jr(NonCarry, *it++); }, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::NonCarry, *it++); }, 8);
   break;
 case 0x38:
-  exec_instruction([&] () { instr_jr(Carry, *it++); }, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::Carry, *it++); }, 8);
   break;
 case 0xCD:
-  exec_instruction([&] () { instr_call(None, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::None, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xC4:
-  exec_instruction([&] () { instr_call(NonZero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::NonZero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xCC:
-  exec_instruction([&] () { instr_call(Zero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::Zero, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xD4:
-  exec_instruction([&] () { instr_call(NonCarry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::NonCarry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xDC:
-  exec_instruction([&] () { instr_call(Carry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::Carry, static_cast<Word>(*it++) << 8 | *it++); }, 12);
   break;
 case 0xC7:
   exec_instruction([&] () { instr_rst(0x00); }, 32);
@@ -704,24 +704,24 @@ case 0xFF:
   exec_instruction([&] () { instr_rst(0x38); }, 32);
   break;
 case 0xC9:
-  exec_instruction([&] () { instr_ret(None); }, 8);
+  exec_instruction([&] () { instr_ret(JumpCondition::None); }, 8);
   break;
 case 0xC0:
-  exec_instruction([&] () { instr_ret(NonZero); }, 8);
+  exec_instruction([&] () { instr_ret(JumpCondition::NonZero); }, 8);
   break;
 case 0xC8:
-  exec_instruction([&] () { instr_ret(Zero); }, 8);
+  exec_instruction([&] () { instr_ret(JumpCondition::Zero); }, 8);
   break;
 case 0xD0:
-  exec_instruction([&] () { instr_ret(NonCarry); }, 8);
+  exec_instruction([&] () { instr_ret(JumpCondition::NonCarry); }, 8);
   break;
 case 0xD8:
-  exec_instruction([&] () { instr_ret(Carry); }, 8);
+  exec_instruction([&] () { instr_ret(JumpCondition::Carry); }, 8);
   break;
 case 0xD9:
   exec_instruction([&] () { instr_reti(); }, 8);
   break;
-switch(*(++it)) {
+switch(*it++) {
 case 0x07:
   exec_instruction([&] () { instr_rlc(_af.high); }, 8);
   break;

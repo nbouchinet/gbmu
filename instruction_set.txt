@@ -77,8 +77,8 @@ ld	(HL),A	77	8
 ld	(nn),A	EA	16
 ld	A,(C)	F2	8
 ld	($FF00+C),A	E2	8
-ldd	A,HL	3A	8
-ldd	HL,A	32	8
+ldd	A,(HL)	3A	8
+ldd	(HL),A	32	8
 ldi	A,HL	2A	8
 ld	A,($FF00+n)	F0	12
 ld	(BC),nn	01	12

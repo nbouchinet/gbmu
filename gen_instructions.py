@@ -49,7 +49,7 @@ def get_arg(arg):
     if arg == "-/-":
         return Argument(False, "")
     if (arg[:2] == "c:"):
-        return Argument(False, CONDITIONS.get(arg[2:]))
+        return Argument(False, "JumpCondition::" + CONDITIONS.get(arg[2:]))
     return Argument(False, arg)
 
 def parse_args(args):
@@ -59,11 +59,11 @@ def parse_args(args):
         ret.append(get_arg(arg))
     return ret
 
-file = open("cycles.txt", "r")
+file = open("./instruction_set.txt", "r")
 
 for line in file:
     if line == "<CB>\n":
-        print("switch(*(++it)) {")
+        print("switch(*it++) {")
     elif line == "</CB>\n":
         print("}")
     else:

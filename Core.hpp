@@ -3,7 +3,6 @@
 
 using Byte = uint8_t;
 using Word = uint16_t;
-using Flags = Byte;
 
 union Register {
   Word word;
@@ -14,8 +13,18 @@ union Register {
 
 Byte read_byte(Word addr);
 void write_byte(Word addr, Byte v);
+bool test_bit(uint8_t bit, Byte b);
+void set_bit(uint8_t bit, Byte& b);
+void reset_bit(uint8_t bit, Byte& b);
 
 class Core {
+ public:
+  enum Flags { CY = 4, H, N, Z };
+  static constexpr uint8_t Z_FLAG = 0x80;
+  static constexpr uint8_t N_FLAG = 0x40;
+  static constexpr uint8_t H_FLAG = 0x20;
+  static constexpr uint8_t CY_FLAG = 0x10;
+
  private:
   Register _pc;
   Register _sp;
@@ -23,20 +32,28 @@ class Core {
   Register _bc;
   Register _de;
   Register _hl;
-  Flags _flags;
+  Byte _flags;
   Word _clock;
 
-  void instr_ld(Byte& a, Byte b);
-  void instr_ld(Word& a, Word b);
-  void instr_ldd(Word a, Byte b);
-  void instr_ldd(Byte a, Word b);
-  void instr_ldi(Byte a, Word b);
+  template <typename T>
+  void instr_ld(T& a, T b) {
+    a = b;
+  }
+  void instr_ldd(Byte&, Byte);
+  void instr_ldi(Byte&, Byte);
   void instr_ldhl(Byte a);
   void instr_push(Word v);
   void instr_pop(Word& dest);
 
-  void instr_add(Byte&, Byte);
+  template <typename T>
+  void instr_add(T& a, T b) {
+    _flags = 0u;
+    if (test_bit())
+    a += b;
+    if (a == 0u) set_bit(Z, _flags);
+  }
   void instr_adc(Byte&, Byte);
+  void instr_sub(Byte&, Byte);
   void instr_sbc(Byte&, Byte);
   void instr_and(Byte&, Byte);
   void instr_or(Byte&, Byte);
@@ -57,6 +74,7 @@ class Core {
   void instr_scf();
   void instr_nop();
   void instr_halt();
+  void instr_stop();
   void instr_di();
   void instr_ei();
   void instr_rlca();
@@ -70,7 +88,7 @@ class Core {
   void instr_call(JumpCondition, Word);
   void instr_ret(JumpCondition);
   void instr_reti();
-  
+
   void instr_rst(Byte);
 
   void instr_rlc(Byte&);
@@ -101,10 +119,13 @@ class Core {
  public:
   using Iterator = std::string::iterator;
   void execute(Iterator& it) {
-    Iterator original_i = it;
+    Iterator original_it = it;
     switch (*it++) {
 #include "instructions.inc"
+      default:
+        assert(false);
+        break;
     }
-    _pc.word += i - original_i;
+    _pc.word += it - original_it;
   }
 };
