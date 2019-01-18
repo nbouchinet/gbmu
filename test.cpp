@@ -3,13 +3,12 @@
 #include <vector>
 using Word = uint16_t;
 using Byte = uint8_t;
-int main () {
-  std::vector<Byte> b;
-  Word _clock = 0u;
-  for (auto it = b.begin(); it != b.end(); ++it) { 
-    switch (*it) {
-#include "instructions.inc"
-    }
-  }
+template <typename T>
+void exec(std::function<void(T&)> f, T& t) {
+  f(t);
+}
 
+int main () {
+  int i= 0;
+  exec([] (int &a) {++a; }, i);
 }

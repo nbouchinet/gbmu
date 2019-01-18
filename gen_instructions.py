@@ -15,7 +15,7 @@ FORMAT_1 = """case 0x{}:
   break;"""
 
 FORMAT_2 = """case 0x{}:
-  exec_instruction([&] (Byte &b) {{ instr_{}(b{}); }}, {}, {});
+  exec_instruction([&] ({} &v) {{ instr_{}(v{}); }}, {}, {});
   break;"""
 
 REGISTERS = {"A": "_af.high", "F": "_af.low", "AF": "_af.word",
@@ -42,7 +42,7 @@ def get_arg(arg):
     if arg in ("n", "b"):
         return Argument(is_deref_addr, fmt.format("*it++"))
     if arg == "nn":
-        return Argument(is_deref_addr, fmt.format("static_cast<Word>(*it++) << 8 | *it++"))
+        return Argument(is_deref_addr, fmt.format("static_cast<Word>(*it++ << 8 | *it++)"))
     register = REGISTERS.get(arg)
     if register != None:
         return Argument(is_deref_addr, fmt.format(register))
@@ -73,13 +73,18 @@ for line in file:
         opcode = line[Indexes.OPCODE.value]
         cycles = line[Indexes.CYCLES.value]
         if args[0].is_deref_addr:
-            str_args = ", " + args[1].value if len(args) == 2 else ""
-            print(FORMAT_2.format(opcode, name, str_args, args[0].value, cycles))
+            if len(args) < 2:
+                print(FORMAT_2.format(opcode, "Byte", name, "", args[0].value, cycles))
+            else:
+                if "word" in args[1].value:
+                    print(FORMAT_2.format(opcode, "Word", name, ", " + args[1].value, args[0].value, cycles))
+                else:
+                    print(FORMAT_2.format(opcode, "Byte", name, ", " + args[1].value, args[0].value, cycles))
         else:
             str_args = ""
             for e in args:
                 if e.is_deref_addr:
-                    str_args += "read_byte(" + e.value +")"
+                    str_args += "read<Byte>(" + e.value +")"
                 else:
                     str_args += e.value
                 str_args += ", "
