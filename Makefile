@@ -6,7 +6,7 @@
 #    By: asenat <marvin@42.fr>                      +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/10/22 10:52:15 by asenat            #+#    #+#              #
-#    Updated: 2019/01/22 14:22:03 by asenat           ###   ########.fr        #
+#    Updated: 2019/01/22 15:29:11 by asenat           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@
 .SUFFIXES:
 NAME		:= gbmu
 CC 		:= clang++
-CFLAGS		:= -I. -Wall -Wextra -Werror -std='c++14'
+CFLAGS		:= -I. -Wall -Wextra -Werror -O2 -std='c++14'
 RM		:= rm -f
 OBJECT_DIR	:= obj
 COMP		:= $(CC) $(CFLAGS) -c -o
