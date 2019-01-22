@@ -31,11 +31,11 @@ clear_tests:
 	rm -f $(TEST_TARGETS)
 
 test_%: all $(TEST_OBJ_DIR) $(CURR_DIR)/%
-	$(eval FAIL := $(shell script $*.out $(CURR_DIR)/$* > /dev/null; echo $$?))
+	$(eval FAIL := $(shell script -q $*.out $(CURR_DIR)/$* > /dev/null; echo $$?))
 	@if [ $(FAIL) -gt 0 ]; \
 	then \
 		$(ECHO) "["$(RED)KO$(RESET)"] -" $*; \
-		cat tmp; \
+		cat $*.out; \
 	else \
 		$(ECHO)  "["$(GREEN)OK$(RESET)"] -" $*; \
 	fi
