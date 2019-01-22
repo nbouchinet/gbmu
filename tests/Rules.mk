@@ -9,7 +9,8 @@ COMPLINK		:= $(CC) $(TEST_CFLAGS) $(TEST_LFLAGS) -o
 
 CURR_DIR		:= tests
 ## Put all the tests here
-TEST_FILES		:= sample.cpp
+TEST_FILES		:= 	sample.cpp \
+									Operations_utils.cpp
 #
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
@@ -42,7 +43,7 @@ test_%: all $(TEST_OBJ_DIR) $(CURR_DIR)/%
 	@rm $*.out
 
 $(CURR_DIR)/%: $(CURR_DIR)/$(OBJECT_DIR)/%.o $(NAME)
-	$(TEST_CC) $(TEST_LFLAGS) -o $@ $<
+	$(TEST_CC) $(TEST_LFLAGS) -o $@ $< $(subst src/obj/main.o,,$(OBJECTS))
 
 $(CURR_DIR)/$(OBJECT_DIR)/%.o: $(CURR_DIR)/%.cpp
 	$(TEST_CC) $(CFLAGS) $(TEST_CFLAGS) -c -o $@ $<

@@ -1,5 +1,7 @@
 #include "Core.hpp"
 
+#include <cassert>
+
 void Core::instr_ldd(Byte& a, Byte b) {
   a = b;
   --_hl.word;
@@ -27,7 +29,7 @@ void Core::instr_pop(Word& dest) {
 }
 
 void Core::instr_adc(Byte& a, Byte b) {
-  instr_add(a, get_flag(Flags::C));
+  instr_add<Byte, Byte>(a, get_flag(Flags::C));
   Byte saved_flags = _af.low;
   instr_add(a, b);
   _af.low &= saved_flags;
@@ -260,19 +262,16 @@ void Core::instr_swap(Byte& reg) { reg = (reg >> 4) | (reg << 4); }
 // ----------------------------------------------------------------------------
 
 void Core::instr_bit(Byte reg, Byte bit) {
-  reg >>= bit;
-  set_flag(Flags::Z, reg & 1);
+  set_flag(Flags::Z, test_bit(bit, reg));
   set_flag(Flags::N, false);
   set_flag(Flags::H, true);
 }
 
 void Core::instr_set(Byte& reg, Byte bit) {
-  // reg = (reg & ~(1 << bit)) | (1 << bit)
   set_bit(reg, bit);
 }
 
 void Core::instr_res(Byte& reg, Byte bit) {
-  // reg = (reg & ~(1 << bit)) | (0 << bit)
   reset_bit(reg, bit);
 }
 

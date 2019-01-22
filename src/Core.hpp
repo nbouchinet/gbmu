@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "Operations_utils.hpp"
 
@@ -8,19 +9,29 @@ using Byte = uint8_t;
 using Word = uint16_t;
 
 union Register {
-  Word word;
+  Word word = 0;
   struct {
     Byte low, high;
   };
 };
 
+std::array<Byte, 0xFFFF> tmp_memory;
+
 template <typename T>
-T read(Word addr);
+T read(Word addr) {
+  T ret = 0;
+  for (auto i = sizeof(T); i > 0; --i) {
+    ret |= tmp_memory[addr + i] << i * 8;
+  }
+  return ret;
+}
+
 template <typename T>
-void write(Word addr, T v);
-bool test_bit(uint8_t bit, Byte b);
-void set_bit(uint8_t bit, Byte& b);
-void reset_bit(uint8_t bit, Byte& b);
+void write(Word addr, T v) {
+  for (auto i = sizeof(T); i > 0; --i) {
+    tmp_memory[addr + i] =  v << i * 8;
+  }
+}
 
 class Core {
  public:
