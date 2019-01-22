@@ -10,6 +10,8 @@ COMPLINK		:= $(CC) $(TEST_CFLAGS) $(TEST_LFLAGS) -o
 CURR_DIR		:= tests
 ## Put all the tests here
 TEST_FILES		:= 	sample.cpp \
+				Operations_utils.cpp
+#
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
 RUN_TEST_RULES	:= $(addprefix test_, $(TEST_FILES:.cpp=))
