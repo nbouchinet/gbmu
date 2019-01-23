@@ -1,9 +1,8 @@
-#include <cstdint>
-#include <functional>
-#include <string>
-#include <vector>
-
 #include "Operations_utils.hpp"
+
+#include <functional>
+#include <vector>
+#include <array>
 
 using Byte = uint8_t;
 using Word = uint16_t;
@@ -15,7 +14,7 @@ union Register {
   };
 };
 
-std::array<Byte, 0xFFFF> tmp_memory;
+static std::array<Byte, 0xFFFF> tmp_memory;
 
 template <typename T>
 T read(Word addr) {
@@ -33,6 +32,8 @@ void write(Word addr, T v) {
   }
 }
 
+class TestCoreFixture;
+
 class Core {
  public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
@@ -46,6 +47,8 @@ class Core {
   Register _hl;
   Word _clock;
   bool _in_jump_state = false;
+
+  friend class TestCoreFixture;
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles) {
     instr();
@@ -170,7 +173,7 @@ class Core {
 };
 
 template <>
-void Core::instr_add<Byte, Byte>(Byte& a, Byte b) {
+inline void Core::instr_add<Byte, Byte>(Byte& a, Byte b) {
   _af.low = 0u;
   Byte overflowing_nibbles = check_add_overflows(a, b);
   set_flag(Flags::H, test_bit(3, overflowing_nibbles));
@@ -180,7 +183,7 @@ void Core::instr_add<Byte, Byte>(Byte& a, Byte b) {
 }
 
 template <>
-void Core::instr_add<Word, Word>(Word& a, Word b) {
+inline void Core::instr_add<Word, Word>(Word& a, Word b) {
   _af.low = 0u;
   Word overflowing_nibbles = check_add_overflows(a, b);
   set_flag(Flags::H, test_bit(11, overflowing_nibbles));
@@ -190,6 +193,6 @@ void Core::instr_add<Word, Word>(Word& a, Word b) {
 }
 
 template <>
-void Core::instr_add<Word, Byte>(Word& a, Byte b) {
+inline void Core::instr_add<Word, Byte>(Word& a, Byte b) {
   instr_add<Word, Word>(a, static_cast<Word>(b));
 }
