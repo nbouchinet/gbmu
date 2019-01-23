@@ -86,6 +86,13 @@ class Core {
   void instr_push(Word v);
   void instr_pop(Word& dest);
 
+  //TEST {
+  //  Core core;
+  //  std::vector<Byte> opcodes{0x06, 0x02};
+  //  core.execute(opcodes.begin());
+  //  EXPECT_EQ(core.bc().high, 0x02);
+  //}
+  // asenat:
   template <typename A, typename B>
   void instr_add(A& a, B b);
   void instr_adc(Byte&, Byte);
@@ -100,7 +107,9 @@ class Core {
   void instr_inc(Word&);
   void instr_dec(Byte&);
   void instr_dec(Word&);
+//fi
 
+  // nbouchin:
   void instr_daa();
   void instr_cpl();
   void instr_ccf();
@@ -110,7 +119,9 @@ class Core {
   void instr_stop() {}
   void instr_di() {}
   void instr_ei() {}
+//fi
 
+  // hublanc:
   enum class JumpCondition { None, NonZero, Zero, NonCarry, Carry };
   bool is_condition_fulfilled(JumpCondition);
   void instr_jp(JumpCondition, Word);
@@ -118,9 +129,10 @@ class Core {
   void instr_call(JumpCondition, Word);
   void instr_ret(JumpCondition);
   void instr_reti();
-
   void instr_rst(Byte);
+ //fi
 
+  // ogu:
   void flag_handle(std::function<void(Byte&)> action, Byte& reg);
   void instr_rlc(Byte&);
   void instr_rl(Byte&);
@@ -134,6 +146,7 @@ class Core {
   void instr_rla() { instr_rl(_af.high); }
   void instr_rrca() { instr_rrc(_af.high); }
   void instr_rra() { instr_rr(_af.high); }
+ //fi
 
   void instr_swap(Byte&);
   void instr_bit(Byte, Byte);
@@ -153,6 +166,7 @@ class Core {
 
   using Iterator = std::vector<Byte>::iterator;
   void execute(Iterator& it);
+
 };
 
 template <>

@@ -3,12 +3,16 @@
 #include <vector>
 using Word = uint16_t;
 using Byte = uint8_t;
-template <typename T>
-void exec(std::function<void(T&)> f, T& t) {
-  f(t);
-}
+
+union Register {
+  Word word = 0;
+  struct {
+    Byte low, high;
+  };
+};
 
 int main () {
-  int i= 0;
-  exec([] (int &a) {++a; }, i);
+  Register r;
+  r.word = 0xffaa;
+  std::cout << std::hex << (int)r.high <<  ", " << (int)r.low << std::endl;
 }
