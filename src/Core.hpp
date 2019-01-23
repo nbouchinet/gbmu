@@ -72,6 +72,7 @@ class Core {
     _clock += clock_cycles;
   }
 
+ public:
   void set_flag(Flags f, bool v) {
     int mask = static_cast<int>(f);
     if (v)
