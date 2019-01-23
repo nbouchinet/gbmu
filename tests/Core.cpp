@@ -20,10 +20,10 @@ class TestCoreFixture : public ::testing::Test {
 
 TEST_F(TestCoreFixture, basic_test)
 {
-	std::vector<Byte> opcode{0xC3, 0x4};
-	auto a = opcode.begin();
-	_accesser._core.execute(a);
-	EXPECT_EQ(_accesser._core.pc(), 0x4);
+	//std::vector<Byte> opcode{0xC3, 0x4};
+	//auto a = opcode.begin();
+	_accesser._core.instr_jp(Core::JumpCondition::None, 0x4);
+	EXPECT_EQ(_accesser.getPc().word, 0x4);
 }
 
 int main(int ac, char *av[]) {
