@@ -32,11 +32,13 @@ void write(Word addr, T v) {
   }
 }
 
-class TestCoreFixture;
+class Accesser;
 
 class Core {
  public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
+
+ friend class Accesser;
 
  private:
   Register _pc;
@@ -48,7 +50,6 @@ class Core {
   Word _clock;
   bool _in_jump_state = false;
 
-  friend class TestCoreFixture;
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles) {
     instr();
