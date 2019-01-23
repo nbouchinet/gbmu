@@ -2,15 +2,16 @@ TEST_CC			:= clang++
 TEST_CFLAGS		:=
 TEST_LFLAGS		:= -lgtest
 ifeq ($(shell uname -s), Darwin)
-TEST_CFLAGS		+= -I ~/.brew/include
-TEST_LFLAGS		+= -L ~/.brew/lib
+	TEST_CFLAGS		+= -I ~/.brew/include
+	TEST_LFLAGS		+= -L ~/.brew/lib
 endif
 COMPLINK		:= $(CC) $(TEST_CFLAGS) $(TEST_LFLAGS) -o
 
 CURR_DIR		:= tests
 ## Put all the tests here
 TEST_FILES		:= 	sample.cpp \
-				Operations_utils.cpp
+	Operations_utils.cpp \
+	Core.cpp
 #
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
@@ -34,12 +35,12 @@ clear_tests:
 test_%: all $(TEST_OBJ_DIR) $(CURR_DIR)/%
 	$(eval FAIL := $(shell script -q $*.out $(CURR_DIR)/$* > /dev/null; echo $$?))
 	@if [ $(FAIL) -gt 0 ]; \
-	then \
+		then \
 		$(ECHO) "["$(RED)KO$(RESET)"] -" $*; \
 		cat $*.out; \
-	else \
+		else \
 		$(ECHO)  "["$(GREEN)OK$(RESET)"] -" $*; \
-	fi
+		fi
 	@rm $*.out
 
 $(CURR_DIR)/%: $(CURR_DIR)/$(OBJECT_DIR)/%.o $(NAME)
