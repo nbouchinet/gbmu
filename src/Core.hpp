@@ -1,7 +1,7 @@
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
-#include <functional>
 
 #include "Operations_utils.hpp"
 
@@ -29,7 +29,7 @@ T read(Word addr) {
 template <typename T>
 void write(Word addr, T v) {
   for (auto i = sizeof(T); i > 0; --i) {
-    tmp_memory[addr + i] =  v << i * 8;
+    tmp_memory[addr + i] = v << i * 8;
   }
 }
 
@@ -46,7 +46,6 @@ class Core {
   Register _hl;
   Word _clock;
   bool _in_jump_state = false;
-
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles) {
     instr();
@@ -146,6 +145,11 @@ class Core {
   auto clock() const { return _clock; }
   Word pc() const { return _pc.word; }
   Word sp() const { return _sp.word; }
+  Register af() const { return _af; };
+  Register bc() const { return _bc; };
+  Register de() const { return _de; };
+  Register hl() const { return _hl; };
+  bool in_jump_state() const { return _in_jump_state; }
 
   using Iterator = std::vector<Byte>::iterator;
   void execute(Iterator& it);
@@ -175,4 +179,3 @@ template <>
 void Core::instr_add<Word, Byte>(Word& a, Byte b) {
   instr_add<Word, Word>(a, static_cast<Word>(b));
 }
-

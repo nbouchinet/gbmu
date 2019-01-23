@@ -81,9 +81,7 @@ void Core::instr_inc(Byte& b) {
   set_flag(Flags::Z, b == 0u);
 }
 
-void Core::instr_inc(Word& b) {
-  ++b;
-}
+void Core::instr_inc(Word& b) { ++b; }
 
 void Core::instr_dec(Byte& b) {
   set_flag(Flags::N, true);
@@ -92,9 +90,7 @@ void Core::instr_dec(Byte& b) {
   set_flag(Flags::Z, b == 0u);
 }
 
-void Core::instr_dec(Word& b) {
-  --b;
-}
+void Core::instr_dec(Word& b) { --b; }
 
 /*
  * Turn the content of A that has been affected by and add or a sub between two
@@ -198,61 +194,75 @@ void Core::flag_handle(std::function<void(Byte&)> action, Byte& reg) {
 }
 
 void Core::instr_rlc(Byte& reg) {
-  flag_handle([this](Byte& reg) {
-    bool bit7 = test_bit(7, reg);
-    set_flag(Flags::C, bit7);
-    reg <<= 1;
-    reg |= bit7;
-  }, reg);
+  flag_handle(
+      [this](Byte& reg) {
+        bool bit7 = test_bit(7, reg);
+        set_flag(Flags::C, bit7);
+        reg <<= 1;
+        reg |= bit7;
+      },
+      reg);
 }
 
 void Core::instr_rl(Byte& reg) {
-  flag_handle([this](Byte & reg) {
-    bool bit7 = test_bit(7, reg);
-    reg <<= 1;
-    reg |= get_flag(Flags::C);
-    set_flag(Flags::C, bit7);
-  }, reg);
+  flag_handle(
+      [this](Byte& reg) {
+        bool bit7 = test_bit(7, reg);
+        reg <<= 1;
+        reg |= get_flag(Flags::C);
+        set_flag(Flags::C, bit7);
+      },
+      reg);
 }
 
 void Core::instr_rrc(Byte& reg) {
-  flag_handle([this](Byte & reg) {
-    bool bit0 = test_bit(0, reg);
-    set_flag(Flags::C, bit0);
-    reg >>= 1;
-    reg |= bit0;
-  }, reg);
+  flag_handle(
+      [this](Byte& reg) {
+        bool bit0 = test_bit(0, reg);
+        set_flag(Flags::C, bit0);
+        reg >>= 1;
+        reg |= bit0;
+      },
+      reg);
 }
 
 void Core::instr_rr(Byte& reg) {
-  flag_handle([this](Byte &reg) {
-    bool bit0 = test_bit(0, reg);
-    reg >>= 1;
-    reg |= get_flag(Flags::C);
-    set_flag(Flags::C, bit0);
-  }, reg);
+  flag_handle(
+      [this](Byte& reg) {
+        bool bit0 = test_bit(0, reg);
+        reg >>= 1;
+        reg |= get_flag(Flags::C);
+        set_flag(Flags::C, bit0);
+      },
+      reg);
 }
 
 void Core::instr_sla(Byte& reg) {
-  flag_handle([this](Byte& reg) {
-    set_flag(Flags::C, test_bit(7, reg));
-    reg <<= 1;
-  }, reg);
+  flag_handle(
+      [this](Byte& reg) {
+        set_flag(Flags::C, test_bit(7, reg));
+        reg <<= 1;
+      },
+      reg);
 }
 
 void Core::instr_sra(Byte& reg) {
-  flag_handle([this](Byte &reg) {
-    set_flag(Flags::C, test_bit(0, reg));
-    reg <<= 1;
-  }, reg);
+  flag_handle(
+      [this](Byte& reg) {
+        set_flag(Flags::C, test_bit(0, reg));
+        reg <<= 1;
+      },
+      reg);
 }
 
 void Core::instr_srl(Byte& reg) {
-  flag_handle([this](Byte & reg) {
-    set_flag(Flags::C, test_bit(0, reg));
-    reg >>= 1;
-    set_flag(Flags::Z, reg == 0);
-  }, reg);
+  flag_handle(
+      [this](Byte& reg) {
+        set_flag(Flags::C, test_bit(0, reg));
+        reg >>= 1;
+        set_flag(Flags::Z, reg == 0);
+      },
+      reg);
 }
 
 void Core::instr_swap(Byte& reg) { reg = (reg >> 4) | (reg << 4); }
@@ -267,15 +277,11 @@ void Core::instr_bit(Byte reg, Byte bit) {
   set_flag(Flags::H, true);
 }
 
-void Core::instr_set(Byte& reg, Byte bit) {
-  set_bit(reg, bit);
-}
+void Core::instr_set(Byte& reg, Byte bit) { set_bit(reg, bit); }
 
-void Core::instr_res(Byte& reg, Byte bit) {
-  reset_bit(reg, bit);
-}
+void Core::instr_res(Byte& reg, Byte bit) { reset_bit(reg, bit); }
 
-void Core::execute(Core::Iterator& it) {
+void Core : execute(Core::Iterator& it) {
   Iterator original_it = it;
   switch (*it++) {
 #include "instructions.inc"
