@@ -93,7 +93,7 @@ void Core::instr_dec(Byte& b) {
 void Core::instr_dec(Word& b) { --b; }
 
 /*
- * Turn the content of A that has been affected by and add or a sub between two
+ * Turn the content of A that has been affected by an 'add' or a 'sub' between two
  * BCD values into a correct value ex: A = (0000 1000)bcd, B = (0100 0010)bcd
  *  ADD A, B -> A = (0100 1010)b # Incorrect BCD value
  *  DAA -> A = (0101 0000)b # correct BCD addition result
@@ -281,7 +281,7 @@ void Core::instr_set(Byte& reg, Byte bit) { set_bit(reg, bit); }
 
 void Core::instr_res(Byte& reg, Byte bit) { reset_bit(reg, bit); }
 
-void Core : execute(Core::Iterator& it) {
+void Core::execute(Core::Iterator& it) {
   Iterator original_it = it;
   switch (*it++) {
 #include "instructions.inc"
