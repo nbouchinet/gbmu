@@ -1,8 +1,9 @@
 #ifndef OPERATIONS_UTILS_HPP
 #define OPERATIONS_UTILS_HPP
 
-#include <array>
 #include <type_traits>
+#include <cstdint>
+#include <limits>
 
 template <typename T>
 bool test_bit(uint8_t bit, T t) {
