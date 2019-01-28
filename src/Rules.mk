@@ -34,3 +34,9 @@ src/$(OBJECT_DIR)/MemoryBus.o: src/MemoryBus.cpp src/MemoryBus.hpp \
   src/MemoryBankController1.hpp src/AMemoryBankController.hpp \
   src/Gameboy.hpp src/cpu/Core.hpp utils/Operations_utils.hpp \
   src/cpu/Timer.hpp src/cpu/InterruptController.hpp
+src/$(OBJECT_DIR)/PPU.class.o: src/PPU.class.cpp src/PPU.class.h \
+  src/ScreenOutput.class.h
+src/PPU.class.h:
+src/ScreenOutput.class.h:
+src/$(OBJECT_DIR)/ScreenOutput.class.o: src/ScreenOutput.class.cpp \
+  src/ScreenOutput.class.h
