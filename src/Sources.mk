@@ -3,6 +3,8 @@
 OBJ_FILES_src := Cartridge.o \
                  Gameboy.o \
                  main.o \
-                 MemoryBus.o
+                 MemoryBus.o \
+                 PPU.class.o \
+                 ScreenOutput.class.o
 
 OBJECTS += $(patsubst %, src/$(OBJECT_DIR)/%, $(OBJ_FILES_src))
