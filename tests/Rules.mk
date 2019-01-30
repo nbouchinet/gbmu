@@ -1,6 +1,6 @@
 TEST_CC			:= clang++
 TEST_CFLAGS		:=
-TEST_LFLAGS		:= -lgtest
+TEST_LFLAGS		:= -lgtest -pthread
 ifeq ($(shell uname -s), Darwin)
 	TEST_CFLAGS		+= -I ~/.brew/include
 	TEST_LFLAGS		+= -L ~/.brew/lib
@@ -33,7 +33,11 @@ clear_tests:
 	rm -f $(TEST_TARGETS)
 
 test_%: all $(TEST_OBJ_DIR) $(CURR_DIR)/%
+ifeq ($(shell uname -s), Darwin)
 	$(eval FAIL := $(shell script -q $*.out $(CURR_DIR)/$* > /dev/null; echo $$?))
+else
+	$(eval FAIL := $(shell script -qec $(CURR_DIR)/$* $*.out > /dev/null; echo $$?))
+endif
 	@if [ $(FAIL) -gt 0 ]; \
 		then \
 		$(ECHO) "["$(RED)KO$(RESET)"] -" $*; \
@@ -44,7 +48,7 @@ test_%: all $(TEST_OBJ_DIR) $(CURR_DIR)/%
 	@rm $*.out
 
 $(CURR_DIR)/%: $(CURR_DIR)/$(OBJECT_DIR)/%.o $(NAME)
-	$(TEST_CC) $(TEST_LFLAGS) -o $@ $< $(subst src/obj/main.o,,$(OBJECTS))
+	$(TEST_CC) -o $@ $< $(subst src/obj/main.o,,$(OBJECTS)) $(TEST_LFLAGS)
 
 $(CURR_DIR)/$(OBJECT_DIR)/%.o: $(CURR_DIR)/%.cpp
 	$(TEST_CC) $(CFLAGS) $(TEST_CFLAGS) -c -o $@ $<
