@@ -1,6 +1,7 @@
 #include "src/Core.hpp"
 
 #include "gtest/gtest.h"
+#define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
 class Accesser {
 	public:
@@ -11,10 +12,19 @@ class Accesser {
 		Register& getBc(void){return _core._bc;}
 		Register& getDe(void){return _core._de;}
 		Register& getHl(void){return _core._hl;}
+
+		void test_flags_base(struct s_flags f)
+		{
+			EXPECT_EQ(_accesser._core.get_flag(Core::Flags::C), f.c);
+			EXPECT_EQ(_accesser._core.get_flag(Core::Flags::Z), f.z);
+			EXPECT_EQ(_accesser._core.get_flag(Core::Flags::N), f.n);
+			EXPECT_EQ(_accesser._core.get_flag(Core::Flags::H), f.h);
+		}
 };
 
 class TestCoreFixture : public ::testing::Test {
 	public:
+		struct s_flags { bool c, z, n, h; };
 		Accesser _accesser;
 };
 
