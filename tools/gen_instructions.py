@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import sys
 from enum import Enum
 from collections import namedtuple
 
@@ -59,13 +60,15 @@ def parse_args(args):
         ret.append(get_arg(arg))
     return ret
 
-file = open("./instruction_set.txt", "r")
+if len(sys.argv) != 2:
+    sys.exit(1)
+file = open(sys.argv[1], "r")
 
 for line in file:
     if line == "<CB>\n":
-        print("switch(*it++) {")
+        print("""case 0xCB:\nswitch(*it++) {""")
     elif line == "</CB>\n":
-        print("}")
+        print("}\nbreak;")
     else:
         line = line.split()
         name = line[Indexes.NAME.value]

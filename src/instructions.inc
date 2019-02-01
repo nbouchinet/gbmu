@@ -721,6 +721,7 @@ case 0xD8:
 case 0xD9:
   exec_instruction([&] () { instr_reti(); }, 8);
   break;
+case 0xCB:
 switch(*it++) {
 case 0x07:
   exec_instruction([&] () { instr_rlc(_af.high); }, 8);
@@ -987,3 +988,4 @@ case 0x86:
   exec_instruction([&] (Byte &v) { instr_res(v, *it++); }, _hl.word, 16);
   break;
 }
+break;
