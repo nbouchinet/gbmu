@@ -30,13 +30,13 @@ void reset_bit(uint8_t bit, T& t) {
  */
 template <typename T, typename = std::enable_if_t<std::is_unsigned<T>::value>>
 T check_add_overflows(T a, T b) {
-  constexpr T t_max = std::numeric_limits<T>::max();
+  constexpr std::size_t nibbles = sizeof(T) * 2;
   T ret = 0u;
-  T op = a + b;
-  for (T mask = 0x10; mask <= t_max; mask <<= 4) {
-    if (op & mask) ret |= mask >> 1;
+  T mask = 0xf;
+  for (auto i = 0u; i < nibbles; ++i) {
+    if ((a & mask) > mask - (b & mask)) ret |= (0x8 << i * 4);
+    mask |= mask << 4;
   }
-  if (a > t_max - b) ret |= 1 << sizeof(T) * 8;
   return ret;
 }
 
@@ -49,14 +49,14 @@ T check_add_overflows(T a, T b) {
  *                                  ^    ^ Those bits are set because they made their nibble overflow
  */
 template <typename T, typename = std::enable_if_t<std::is_unsigned<T>::value>>
-T check_sub_overflows(
-    T a, T b) {
+T check_sub_overflows(T a, T b) {
+  constexpr std::size_t nibbles = sizeof(T) * 2;
   T ret = 0u;
-  T op = a - b;
-  for (T mask = 0xF; mask <= std::numeric_limits<T>::max(); mask <<= 4) {
-    if (op & mask) ret |= mask << 1;
+  T mask = std::numeric_limits<T>::max();
+  for (auto i = 0u; i < nibbles; ++i) {
+    if ((a & mask) < (b & mask)) ret |= (0x1 << i * 4);
+    mask <<= 4;
   }
-  if (a < std::numeric_limits<T>::min() - b) ret |= 1;
   return ret;
 }
 #endif // OPERATIONS_UTILS_HPP

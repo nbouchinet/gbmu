@@ -1,5 +1,9 @@
 #include "Operations_utils.hpp"
+#pragma once
+#ifndef CORE_HPP
+#define CORE_HPP
 
+#include <cstdint>
 #include <functional>
 #include <vector>
 #include <array>
@@ -19,16 +23,19 @@ static std::array<Byte, 0xFFFF> tmp_memory;
 template <typename T>
 T read(Word addr) {
   T ret = 0;
-  for (auto i = sizeof(T); i > 0; --i) {
-    ret |= tmp_memory[addr + i] << i * 8;
+  auto i = sizeof(T);
+  while (i > 0){
+	i--;
+	ret |= tmp_memory[addr + i]  >> (i * 8);
   }
   return ret;
 }
-
 template <typename T>
 void write(Word addr, T v) {
-  for (auto i = sizeof(T); i > 0; --i) {
-    tmp_memory[addr + i] = v << i * 8;
+  auto i = sizeof(T);
+  while (i > 0){
+	  i--;
+	  tmp_memory[addr + i] = v >> (i * 8);
   }
 }
 
@@ -41,8 +48,8 @@ class Core {
  friend class Accesser;
 
  private:
-  Register _pc;
-  Register _sp;
+  Register _pc = {.word = 0x150};
+  Register _sp = {.word = 0xfffe};
   Register _af;
   Register _bc;
   Register _de;
@@ -81,6 +88,7 @@ class Core {
       _af.low ^= mask;
   }
 
+ public:
   template <typename T>
   void instr_ld(T& a, T b) {
     a = b;
@@ -116,7 +124,7 @@ class Core {
 
   // nbouchin:
   void instr_daa();
-  void instr_cpl();
+  void instr_cpl(); 
   void instr_ccf();
   void instr_scf();
   void instr_nop() {}
@@ -143,9 +151,11 @@ class Core {
   void instr_rl(Byte&);
   void instr_rrc(Byte&);
   void instr_rr(Byte&);
+  //nbouchin
   void instr_sla(Byte&);
   void instr_sra(Byte&);
   void instr_srl(Byte&);
+  //fi
 
   void instr_rlca() { instr_rlc(_af.high); }
   void instr_rla() { instr_rl(_af.high); }
@@ -158,7 +168,6 @@ class Core {
   void instr_set(Byte&, Byte);
   void instr_res(Byte&, Byte);
 
- public:
   bool get_flag(Flags f) const { return _af.low & static_cast<int>(f); }
   auto clock() const { return _clock; }
   Word pc() const { return _pc.word; }
@@ -198,3 +207,4 @@ template <>
 inline void Core::instr_add<Word, Byte>(Word& a, Byte b) {
   instr_add<Word, Word>(a, static_cast<Word>(b));
 }
+#endif
