@@ -2,6 +2,10 @@
 #include <cassert>
 #include <iostream>
 
+// ----------------------------------------------------------------------------
+// ld
+// ----------------------------------------------------------------------------
+
 void Core::instr_ldd(Byte& a, Byte b) {
 	a = b;
 	--_hl.word;
@@ -29,6 +33,10 @@ void Core::instr_ldhl(Byte n) {
   set_flag(Flags::N, false);
 }
 
+// ----------------------------------------------------------------------------
+// Push/pop
+// ----------------------------------------------------------------------------
+
 void Core::instr_push(Word v) {
   write<Byte>(--_sp.word, static_cast<Byte>((v  & 0xFF00) >> 8));
   write<Byte>(--_sp.word, static_cast<Byte>((v & 0x00FF)));
@@ -38,6 +46,10 @@ void Core::instr_pop(Word& dest) {
   dest = read<Byte>(_sp.word++);
   dest |= static_cast<Word>(read<Byte>(_sp.word++)) << 8;
 }
+
+// ----------------------------------------------------------------------------
+// Add/sub
+// ----------------------------------------------------------------------------
 
 void Core::instr_adc(Byte& a, Byte b) {
   instr_add<Byte, Byte>(a, get_flag(Flags::C));
@@ -63,6 +75,10 @@ void Core::instr_sbc(Byte& a, Byte b) {
   _af.low |= (saved_flags & 0x30);
 }
 
+// ----------------------------------------------------------------------------
+// Logical operations
+// ----------------------------------------------------------------------------
+
 void Core::instr_and(Byte& a, Byte b) {
 	a &= b;
 	_af.low = 0x20u;
@@ -85,6 +101,10 @@ void Core::instr_cp(Byte& a, Byte b) {
 	Byte tmp = a;
 	instr_sub(tmp, b);
 }
+
+// ----------------------------------------------------------------------------
+// Increment/decrement
+// ----------------------------------------------------------------------------
 
 void Core::instr_inc(Byte& b) {
   set_flag(Flags::N, false);
@@ -125,6 +145,10 @@ void Core::instr_daa() {
 	set_flag(Flags::Z, _af.high == 0);
 }
 
+// ----------------------------------------------------------------------------
+// Flags manipulation
+// ----------------------------------------------------------------------------
+
 void Core::instr_cpl() {
 	set_flag(Flags::N, true);
 	set_flag(Flags::H, true);
@@ -143,6 +167,7 @@ void Core::instr_scf() {
 	set_flag(Flags::C, true);
 }
 
+
 bool Core::is_condition_fulfilled(JumpCondition jc) {
 	switch (jc) {
 		case JumpCondition::None:
@@ -159,6 +184,10 @@ bool Core::is_condition_fulfilled(JumpCondition jc) {
 	}
 	return false;
 }
+
+// ----------------------------------------------------------------------------
+// Conditionnal jumps
+// ----------------------------------------------------------------------------
 
 void Core::instr_jp(JumpCondition jc, Word addr) {
 	_in_jump_state = is_condition_fulfilled(jc);
@@ -186,14 +215,18 @@ void Core::instr_ret(JumpCondition jc) {
 	}
 }
 
-void Core::instr_reti() {
-	instr_ret(JumpCondition::None);
-	// TODO Enable interrupts
-}
-
 void Core::instr_rst(Byte addr) {
 	instr_push(_pc.word + 2);
 	_pc.word = addr;
+}
+
+// ----------------------------------------------------------------------------
+// Ret
+// ----------------------------------------------------------------------------
+
+void Core::instr_reti() {
+	instr_ret(JumpCondition::None);
+	// TODO Enable interrupts
 }
 
 // ----------------------------------------------------------------------------

@@ -1,7 +1,8 @@
-#include "Operations_utils.hpp"
 #pragma once
 #ifndef CORE_HPP
 #define CORE_HPP
+
+#include "utils/Operations_utils.hpp"
 
 #include <array>
 #include <cstdint>
