@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: asenat <marvin@42.fr>                      +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2018/10/22 10:52:15 by asenat            #+#    #+#              #
-#    Updated: 2019/02/04 13:57:23 by asenat           ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 ## Standard things
 #
 .SUFFIXES:
@@ -29,7 +17,7 @@ endif
 ## Sources directories
 #
 TEST_DIRS	:= tests
-SRC_DIRS	:= src
+SRC_DIRS	:= src src/cpu
 #
 
 ## Colors
@@ -83,4 +71,4 @@ re: fclean all
 
 .PHONY: makedeps
 makedeps:
-	python3.6 ./tools/gen_make_sources.py --source='.cpp' $(SRC_DIRS)
+	python3 ./tools/gen_make_sources.py --source='.cpp' $(SRC_DIRS)

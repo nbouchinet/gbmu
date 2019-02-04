@@ -1,4 +1,4 @@
-#include "src/Core.hpp"
+#include "src/cpu/Core.hpp"
 #include "gtest/gtest.h"
 #define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
