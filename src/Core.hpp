@@ -48,13 +48,13 @@ class Core {
   friend class Accessor;
 
  private:
-  Register _pc = {.word = 0x150};
-  Register _sp = {.word = 0xfffe};
-  Register _af;
-  Register _bc;
-  Register _de;
-  Register _hl;
-  Word _clock;
+  Register _pc = {.word = 0X150};
+  Register _sp = {.word = 0XFFFE};
+  Register _af = {.word = 0X01B0};
+  Register _bc = {.word = 0X0013};
+  Register _de = {.word = 0X00D8};
+  Register _hl = {.word = 0X014D};
+  Word _clock = 0x00;
   bool _in_jump_state = false;
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles) {
