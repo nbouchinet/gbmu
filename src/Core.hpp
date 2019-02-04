@@ -3,10 +3,10 @@
 #ifndef CORE_HPP
 #define CORE_HPP
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <vector>
-#include <array>
 
 using Byte = uint8_t;
 using Word = uint16_t;
@@ -24,28 +24,28 @@ template <typename T>
 T read(Word addr) {
   T ret = 0;
   auto i = sizeof(T);
-  while (i > 0){
-	i--;
-	ret |= tmp_memory[addr + i]  >> (i * 8);
+  while (i > 0) {
+    i--;
+    ret |= tmp_memory[addr + i] >> (i * 8);
   }
   return ret;
 }
 template <typename T>
 void write(Word addr, T v) {
   auto i = sizeof(T);
-  while (i > 0){
-	  i--;
-	  tmp_memory[addr + i] = v >> (i * 8);
+  while (i > 0) {
+    i--;
+    tmp_memory[addr + i] = v >> (i * 8);
   }
 }
 
-class Accesser;
+class Accessor;
 
 class Core {
  public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
 
- friend class Accesser;
+  friend class Accessor;
 
  private:
   Register _pc = {.word = 0x150};
@@ -56,7 +56,6 @@ class Core {
   Register _hl;
   Word _clock;
   bool _in_jump_state = false;
-
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles) {
     instr();
@@ -99,13 +98,6 @@ class Core {
   void instr_push(Word v);
   void instr_pop(Word& dest);
 
-  //TEST {
-  //  Core core;
-  //  std::vector<Byte> opcodes{0x06, 0x02};
-  //  core.execute(opcodes.begin());
-  //  EXPECT_EQ(core.bc().high, 0x02);
-  //}
-  // asenat:
   template <typename A, typename B>
   void instr_add(A& a, B b);
   void instr_adc(Byte&, Byte);
@@ -120,11 +112,9 @@ class Core {
   void instr_inc(Word&);
   void instr_dec(Byte&);
   void instr_dec(Word&);
-//fi
 
-  // nbouchin:
   void instr_daa();
-  void instr_cpl(); 
+  void instr_cpl();
   void instr_ccf();
   void instr_scf();
   void instr_nop() {}
@@ -132,9 +122,7 @@ class Core {
   void instr_stop() {}
   void instr_di() {}
   void instr_ei() {}
-//fi
 
-  // hublanc:
   enum class JumpCondition { None, NonZero, Zero, NonCarry, Carry };
   bool is_condition_fulfilled(JumpCondition);
   void instr_jp(JumpCondition, Word);
@@ -143,25 +131,20 @@ class Core {
   void instr_ret(JumpCondition);
   void instr_reti();
   void instr_rst(Byte);
- //fi
 
-  // ogu:
   void flag_handle(std::function<void(Byte&)> action, Byte& reg);
   void instr_rlc(Byte&);
   void instr_rl(Byte&);
   void instr_rrc(Byte&);
   void instr_rr(Byte&);
-  //nbouchin
   void instr_sla(Byte&);
   void instr_sra(Byte&);
   void instr_srl(Byte&);
-  //fi
 
   void instr_rlca() { instr_rlc(_af.high); }
   void instr_rla() { instr_rl(_af.high); }
   void instr_rrca() { instr_rrc(_af.high); }
   void instr_rra() { instr_rr(_af.high); }
- //fi
 
   void instr_swap(Byte&);
   void instr_bit(Byte, Byte);
@@ -180,7 +163,6 @@ class Core {
 
   using Iterator = std::vector<Byte>::iterator;
   void execute(Iterator& it);
-
 };
 
 template <>
