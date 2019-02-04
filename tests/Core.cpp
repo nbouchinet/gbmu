@@ -44,6 +44,8 @@ class TestCoreFixture : public ::testing::Test {
     accessor.core.set_flag(Core::Flags::N, false);
     accessor.core.set_flag(Core::Flags::H, false);
   }
+
+  void SetUp() override { reset_flags(); }
 };
 
 const std::tuple<Core::Flags, bool>& get_flag_tuple(Core::JumpCondition jc) {
