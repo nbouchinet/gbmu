@@ -1,3 +1,4 @@
+#pragma once
 #ifndef OPERATIONS_UTILS_HPP
 #define OPERATIONS_UTILS_HPP
 
