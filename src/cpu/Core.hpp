@@ -163,7 +163,7 @@ class Core {
   bool in_jump_state() const { return _in_jump_state; }
 
   using Iterator = std::vector<Byte>::iterator;
-  void execute(Iterator& it);
+  void execute(Iterator it);
 };
 
 template <>
