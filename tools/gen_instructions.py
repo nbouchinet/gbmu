@@ -43,7 +43,7 @@ def get_arg(arg):
     if arg in ("n", "b"):
         return Argument(is_deref_addr, fmt.format("*it++"))
     if arg == "nn":
-        return Argument(is_deref_addr, fmt.format("static_cast<Word>(*it++ << 8 | *it++)"))
+        return Argument(is_deref_addr, fmt.format("fetch_word()"))
     register = REGISTERS.get(arg)
     if register != None:
         return Argument(is_deref_addr, fmt.format(register))

@@ -194,7 +194,7 @@ case 0x1A:
   exec_instruction([&] () { instr_ld(_af.high, read<Byte>(_de.word)); }, 8);
   break;
 case 0xFA:
-  exec_instruction([&] () { instr_ld(_af.high, read<Byte>(static_cast<Word>(*it++ << 8 | *it++))); }, 16);
+  exec_instruction([&] () { instr_ld(_af.high, read<Byte>(fetch_word())); }, 16);
   break;
 case 0x3E:
   exec_instruction([&] () { instr_ld(_af.high, *it++); }, 8);
@@ -227,7 +227,7 @@ case 0x77:
   exec_instruction([&] (Byte &v) { instr_ld(v, _af.high); }, _hl.word, 8);
   break;
 case 0xEA:
-  exec_instruction([&] (Byte &v) { instr_ld(v, _af.high); }, static_cast<Word>(*it++ << 8 | *it++), 16);
+  exec_instruction([&] (Byte &v) { instr_ld(v, _af.high); }, fetch_word(), 16);
   break;
 case 0xF2:
   exec_instruction([&] () { instr_ld(_af.high, read<Byte>(_bc.low)); }, 8);
@@ -248,16 +248,16 @@ case 0xF0:
   exec_instruction([&] () { instr_ld(_af.high, read<Byte>(0xFF00 + *it++)); }, 12);
   break;
 case 0x01:
-  exec_instruction([&] () { instr_ld(_bc.word, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_ld(_bc.word, fetch_word()); }, 12);
   break;
 case 0x11:
-  exec_instruction([&] () { instr_ld(_de.word, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_ld(_de.word, fetch_word()); }, 12);
   break;
 case 0x21:
-  exec_instruction([&] () { instr_ld(_hl.word, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_ld(_hl.word, fetch_word()); }, 12);
   break;
 case 0x31:
-  exec_instruction([&] () { instr_ld(_sp.word, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_ld(_sp.word, fetch_word()); }, 12);
   break;
 case 0xF9:
   exec_instruction([&] () { instr_ld(_sp.word, _hl.word); }, 8);
@@ -266,7 +266,7 @@ case 0xF8:
   exec_instruction([&] () { instr_ldhl(*it++); }, 12);
   break;
 case 0x08:
-  exec_instruction([&] (Word &v) { instr_ld(v, _sp.word); }, static_cast<Word>(*it++ << 8 | *it++), 20);
+  exec_instruction([&] (Word &v) { instr_ld(v, _sp.word); }, fetch_word(), 20);
   break;
 case 0xF5:
   exec_instruction([&] () { instr_push(_af.word); }, 16);
@@ -632,19 +632,19 @@ case 0x1F:
   exec_instruction([&] () { instr_rr(_af.high); }, 4);
   break;
 case 0xC3:
-  exec_instruction([&] () { instr_jp(JumpCondition::None, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::None, fetch_word()); }, 12);
   break;
 case 0xC2:
-  exec_instruction([&] () { instr_jp(JumpCondition::NonZero, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::NonZero, fetch_word()); }, 12);
   break;
 case 0xCA:
-  exec_instruction([&] () { instr_jp(JumpCondition::Zero, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::Zero, fetch_word()); }, 12);
   break;
 case 0xD2:
-  exec_instruction([&] () { instr_jp(JumpCondition::NonCarry, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::NonCarry, fetch_word()); }, 12);
   break;
 case 0xDA:
-  exec_instruction([&] () { instr_jp(JumpCondition::Carry, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_jp(JumpCondition::Carry, fetch_word()); }, 12);
   break;
 case 0xE9:
   exec_instruction([&] () { instr_jp(JumpCondition::None, read<Byte>(_hl.word)); }, 4);
@@ -665,19 +665,19 @@ case 0x38:
   exec_instruction([&] () { instr_jr(JumpCondition::Carry, *it++); }, 8);
   break;
 case 0xCD:
-  exec_instruction([&] () { instr_call(JumpCondition::None, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::None, fetch_word()); }, 12);
   break;
 case 0xC4:
-  exec_instruction([&] () { instr_call(JumpCondition::NonZero, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::NonZero, fetch_word()); }, 12);
   break;
 case 0xCC:
-  exec_instruction([&] () { instr_call(JumpCondition::Zero, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::Zero, fetch_word()); }, 12);
   break;
 case 0xD4:
-  exec_instruction([&] () { instr_call(JumpCondition::NonCarry, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::NonCarry, fetch_word()); }, 12);
   break;
 case 0xDC:
-  exec_instruction([&] () { instr_call(JumpCondition::Carry, static_cast<Word>(*it++ << 8 | *it++)); }, 12);
+  exec_instruction([&] () { instr_call(JumpCondition::Carry, fetch_word()); }, 12);
   break;
 case 0xC7:
   exec_instruction([&] () { instr_rst(0x00); }, 32);
