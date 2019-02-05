@@ -330,6 +330,11 @@ void Core::instr_res(Byte& reg, Byte bit) { reset_bit(bit, reg); }
 
 void Core::execute(Core::Iterator& it) {
   Iterator original_it = it;
+  auto fetch_word = [&] () -> Word {
+    Word ret = *it++ << 8;
+    ret |= *it++;
+    return ret;
+  };
   switch (*it++) {
 #include "instructions.inc"
     default:
