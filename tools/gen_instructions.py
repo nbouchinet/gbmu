@@ -61,7 +61,7 @@ def parse_args(args):
     return ret
 
 def print_debug(name, args):
-    fmt = 'std::cerr << "{}(" << {} << ")" << std::endl;';
+    fmt = 'std::cerr << std::hex << "{}(" << {} << ")" << std::endl;';
     args_list = list()
     args_len = len(args)
     for e in args:
