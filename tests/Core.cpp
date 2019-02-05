@@ -532,6 +532,7 @@ TEST_F(TestCoreFixture, rr) {
 TEST_F(TestCoreFixture, program_1) {
   reg = 0x00;
   accessor.getBc().high = 0x00;
+  accessor.getPc().word = 0x00;
   std::vector<Byte> opcodes{0x3E, 0x42, 0x06, 0xF0, 0xAF, 0x78, 0xAF};
   int i = 0;
 
@@ -540,7 +541,7 @@ TEST_F(TestCoreFixture, program_1) {
   accessor.core.execute(it);  // ld a, 0x42
   accessor.core.execute(it);  // ld b, 0xF0
 
-  while (it != opcodes.end()) {
+  while (it + accessor.getPc().word != opcodes.end()) {
     accessor.core.execute(it);
     switch (i) {
       case 0:

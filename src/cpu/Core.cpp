@@ -328,7 +328,8 @@ void Core::instr_set(Byte& reg, Byte bit) { set_bit(bit, reg); }
 
 void Core::instr_res(Byte& reg, Byte bit) { reset_bit(bit, reg); }
 
-void Core::execute(Core::Iterator& it) {
+void Core::execute(Core::Iterator it) {
+  it += _pc.word;
   Iterator original_it = it;
   auto fetch_word = [&] () -> Word {
     Word ret = *it++ << 8;
