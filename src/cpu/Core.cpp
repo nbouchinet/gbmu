@@ -38,13 +38,13 @@ void Core::instr_ldhl(Byte n) {
 // ----------------------------------------------------------------------------
 
 void Core::instr_push(Word v) {
-  write<Byte>(--_sp.word, static_cast<Byte>((v  & 0xFF00) >> 8));
-  write<Byte>(--_sp.word, static_cast<Byte>((v & 0x00FF)));
+  mem_bus->write<Byte>(--_sp.word, static_cast<Byte>((v  & 0xFF00) >> 8));
+  mem_bus->write<Byte>(--_sp.word, static_cast<Byte>((v & 0x00FF)));
 }
 
 void Core::instr_pop(Word& dest) {
-  dest = read<Byte>(_sp.word++);
-  dest |= static_cast<Word>(read<Byte>(_sp.word++)) << 8;
+  dest = mem_bus->read<Byte>(_sp.word++);
+  dest |= static_cast<Word>(mem_bus->read<Byte>(_sp.word++)) << 8;
 }
 
 // ----------------------------------------------------------------------------
@@ -167,6 +167,13 @@ void Core::instr_scf() {
 	set_flag(Flags::C, true);
 }
 
+void Core::instr_di() {
+	ic->SetIME(0);
+}
+
+void Core::instr_ei() {
+	ic->SetIME(1);
+}
 
 bool Core::is_condition_fulfilled(JumpCondition jc) {
 	switch (jc) {
@@ -215,10 +222,6 @@ void Core::instr_ret(JumpCondition jc) {
 	}
 }
 
-void Core::instr_rst(Byte addr) {
-	instr_push(_pc.word + 2);
-	_pc.word = addr;
-}
 
 // ----------------------------------------------------------------------------
 // Ret
@@ -226,7 +229,12 @@ void Core::instr_rst(Byte addr) {
 
 void Core::instr_reti() {
 	instr_ret(JumpCondition::None);
-	// TODO Enable interrupts
+	ic->SetIME(1);
+}
+
+void Core::instr_rst(Byte addr) {
+	instr_push(_pc.word + 2);
+	_pc.word = addr;
 }
 
 // ----------------------------------------------------------------------------
