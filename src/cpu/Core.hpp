@@ -3,6 +3,7 @@
 #define CORE_HPP
 
 #include "utils/Operations_utils.hpp"
+#include "../MemoryBus.hpp"
 
 #include <array>
 #include <cstdint>
@@ -19,44 +20,51 @@ union Register {
   };
 };
 
-static std::array<Byte, 0xFFFF> tmp_memory;
-
-template <typename T>
-T read(Word addr) {
-  T ret = 0;
-  auto i = sizeof(T);
-  while (i > 0) {
-    i--;
-    ret |= tmp_memory[addr + i] >> (i * 8);
-  }
-  return ret;
-}
-template <typename T>
-void write(Word addr, T v) {
-  auto i = sizeof(T);
-  while (i > 0) {
-    i--;
-    tmp_memory[addr + i] = v >> (i * 8);
-  }
-}
+//static std::array<Byte, 0xFFFF> tmp_memory;
+//
+//template <typename T>
+//T read(Word addr) {
+//  T ret = 0;
+//  auto i = sizeof(T);
+//  while (i > 0) {
+//    i--;
+//    ret |= tmp_memory[addr + i] >> (i * 8);
+//  }
+//  return ret;
+//}
+//template <typename T>
+//void write(Word addr, T v) {
+//  auto i = sizeof(T);
+//  while (i > 0) {
+//    i--;
+//    tmp_memory[addr + i] = v >> (i * 8);
+//  }
+//}
 
 class Accessor;
+class MemoryBus;
+class InterruptController;
 
 class Core {
  public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
 
+  Core(MemoryBus *b, InterruptController *ic) : mem_bus(b), ic(ic){}
+
   friend class Accessor;
 
  private:
-  Register _pc = {.word = 0X150};
-  Register _sp = {.word = 0XFFFE};
-  Register _af = {.word = 0X01B0};
-  Register _bc = {.word = 0X0013};
-  Register _de = {.word = 0X00D8};
-  Register _hl = {.word = 0X014D};
+  Register _pc = {.word = 0x0100};
+  Register _sp = {.word = 0xfffe};
+  Register _af = {.word = 0x01b0};
+  Register _bc = {.word = 0x0013};
+  Register _de = {.word = 0x00d8};
+  Register _hl = {.word = 0x014d};
   Word _clock = 0x00;
   bool _in_jump_state = false;
+
+  MemoryBus *mem_bus;
+  InterruptController *ic;
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles) {
     instr();
@@ -65,17 +73,17 @@ class Core {
 
   void exec_instruction(std::function<void(Byte&)> instr, Word addr,
                         Byte clock_cycles) {
-    Byte b = read<Byte>(addr);
+    Byte b = mem_bus->read<Byte>(addr);
     instr(b);
-    write<Byte>(addr, b);
+    mem_bus->write<Byte>(addr, b);
     _clock += clock_cycles;
   }
 
   void exec_instruction(std::function<void(Word&)> instr, Word addr,
                         Byte clock_cycles) {
-    Word b = read<Word>(addr);
+    Word b = mem_bus->read<Word>(addr);
     instr(b);
-    write<Word>(addr, b);
+    mem_bus->write<Word>(addr, b);
     _clock += clock_cycles;
   }
 
@@ -121,8 +129,8 @@ class Core {
   void instr_nop() {}
   void instr_halt() {}
   void instr_stop() {}
-  void instr_di() {}
-  void instr_ei() {}
+  void instr_di();
+  void instr_ei();
 
   enum class JumpCondition { None, NonZero, Zero, NonCarry, Carry };
   bool is_condition_fulfilled(JumpCondition);
