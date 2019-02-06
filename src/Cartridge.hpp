@@ -1,7 +1,10 @@
 #ifndef CARTRIDGE_HPP
 # define CARTRIDGE_HPP
 
-#include "MemoryBankController1.hpp"
+# include <cstdint>
+# include <vector>
+# include <array>
+# include "IMemoryBankController.hpp"
 
 using Byte = uint8_t;
 using Word = uint16_t;

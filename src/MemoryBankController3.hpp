@@ -5,11 +5,13 @@
 #include "RealTimeClock.hpp"
 #include <cstdint>
 #include <cstring>
+#include <vector>
+#include <array>
 
 class MemoryBankController3 : public IMemoryBankController {
 private:
-  uint8_t *romData;
-  uint8_t ramData[0xFFFF];
+  std::vector<uint8_t> *romData;
+  std::array<uint8_t, 0x20000> *ramData;
   uint8_t romBank : 7;
   uint8_t ramBank : 4;
   bool isRamRtcEnabled;
@@ -31,24 +33,15 @@ public:
       : romData(NULL), romBank(1), isRamRtcEnabled(false), isRamMode(true),
         rtc() {}
 
-  MemoryBankController3(uint8_t *romPtr)
-      : romData(romPtr), romBank(1), ramBank(0), isRamRtcEnabled(false),
-        isRamMode(true), rtc() {
-    memset(ramData, 0, sizeof(ramData));
+  MemoryBankController3(std::vector<uint8_t> *romPtr,
+                        std::array<uint8_t, 0x20000> *ramPtr)
+      : romData(romPtr), ramData(ramPtr), romBank(1), ramBank(0),
+        isRamRtcEnabled(false), isRamMode(true), rtc() {
     memset(&latchData, 0, sizeof(latchData));
   }
 
   bool getRamEnabled() const { return isRamRtcEnabled; }
   uint8_t getRomBank() const { return romBank; }
-
-  void reset() {
-    romBank = 1;
-    isRamRtcEnabled = false;
-    isRamMode = true;
-    rtc.reset();
-    memset(ramData, 0, sizeof(ramData));
-    memset(&latchData, 0, sizeof(latchData));
-  }
 
   void write(uint16_t addr, uint8_t value) {
     switch (addr & 0xF000) {
@@ -83,7 +76,7 @@ public:
       if (!isRamRtcEnabled)
         break;
       if (isRamMode)
-        ramData[(addr - 0xA000) + ramBank * 0x2000] = value;
+        (*ramData)[(addr - 0xA000) + ramBank * 0x2000] = value;
       else
         rtc.set(value);
       break;
@@ -98,14 +91,14 @@ public:
     switch (addr & 0xF000) {
     case 0x0000:
     case 0x3000:
-      return romData[addr];
+      return (*romData)[addr];
     case 0x4000:
     case 0x7000:
-      return romData[(addr - 0x4000) + romBank * 0x4000];
+      return (*romData)[(addr - 0x4000) + romBank * 0x4000];
     case 0xA000:
     case 0xB000:
       if (isRamMode)
-        return ramData[(addr - 0xA000) + ramBank * 0x2000];
+        return (*ramData)[(addr - 0xA000) + ramBank * 0x2000];
       else
         return rtc.get();
     }
