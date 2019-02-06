@@ -2,12 +2,14 @@
 #define MEMORYBANKCONTROLLER5_H
 
 #include "IMemoryBankController.hpp"
+#include <array>
 #include <cstdint>
+#include <vector>
 
 class MemoryBankController5 : public IMemoryBankController {
 private:
-  uint8_t *romData;
-  uint8_t *ramData;
+  std::vector<uint8_t> *romData;
+  std::array<uint8_t, 0x20000> *ramData;
   uint8_t ramBank : 2;
   uint16_t romBank : 9;
   bool isRamEnabled;
@@ -17,7 +19,8 @@ private:
   void disableRAM() { isRamEnabled = false; }
 
 public:
-  MemoryBankController5(uint8_t *romPtr, uint8_t *ramPtr)
+  MemoryBankController5(std::vector<uint8_t> *romPtr,
+                        std::array<uint8_t, 0x20000> *ramPtr)
       : romData(romPtr), ramData(ramPtr), ramBank(0), isRamEnabled(false) {}
 
   bool getRamEnabled() const { return isRamEnabled; }
@@ -43,7 +46,7 @@ public:
     case 0xB000: /* 0xA000 to 0xBFFF */
       if (!isRamEnabled)
         break;
-      ramData[(addr - 0xA000) + ramBank * 0x2000] = value;
+      (*ramData)[(addr - 0xA000) + ramBank * 0x2000] = value;
       break;
     default:
       break;
@@ -54,13 +57,13 @@ public:
     switch (addr & 0xF000) {
     case 0x0000:
     case 0x3000:
-      return romData[addr];
+      return (*romData)[addr];
     case 0x4000:
     case 0x7000:
-      return romData[(addr - 0x4000) + romBank * 0x4000];
+      return (*romData)[(addr - 0x4000) + romBank * 0x4000];
     case 0xA000:
     case 0xB000:
-      return ramData[(addr - 0xA000) + ramBank * 0x2000];
+      return (*ramData)[(addr - 0xA000) + ramBank * 0x2000];
     }
     return 0;
   }
