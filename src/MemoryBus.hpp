@@ -13,17 +13,15 @@ class MemoryBus {
 
 private:
 	Cartridge *cartridge;
-	InterruptController *interrupt_controller;
+	InterruptController *ic;
 
 public:
-	MemoryBus(Cartridge *c, InterruptController *ic);
+	MemoryBus(Cartridge *c, InterruptController *ic) : cartridge(c), ic(ic) {}
 
 	template <typename T>
 	T read(Word addr) {
 		T ret = 0;
 		auto i = sizeof(T);
-
-		std::cout << "Read " << std::hex << addr << std::endl;
 
 		if (addr < 0x8000) {
 			while (i > 0) {
@@ -32,16 +30,13 @@ public:
 			}
 		} else if (addr >= 0xFF04 && addr <= 0xFF07) {
 		} else if (addr == 0xFF0F || addr == 0xFFFF) {
-			interrupt_controller->Read(addr);
+			ic->Read(addr);
 		}
 		return ret;
 	}
 
 	template <typename T>
 	void write(Word addr, T v) {
-
-		std::cout << "Write" << std::endl;
-
 		auto i = sizeof(T);
 		if (addr < 0x8000) {
 			while (i > 0) {
@@ -49,7 +44,7 @@ public:
 				cartridge->write(addr + i, v >> (i * 8));
 			}
 		} else if (addr == 0xFF0F || addr == 0xFFFF) {
-			interrupt_controller->Write(addr, v);
+			ic->Write(addr, v);
 		}
 	}
 };

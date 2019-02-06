@@ -22,8 +22,5 @@ src/$(OBJECT_DIR)/InterruptController.o: src/InterruptController.cpp \
   src/MemoryBankController1.hpp src/IMemoryBankController.hpp
 src/cpu/../MemoryBus.hpp:
 src/$(OBJECT_DIR)/main.o: src/main.cpp src/Gameboy.hpp
-src/$(OBJECT_DIR)/MemoryBus.o: src/MemoryBus.cpp src/MemoryBus.hpp \
-  src/Cartridge.hpp src/MemoryBankController1.hpp \
-  src/IMemoryBankController.hpp src/InterruptController.hpp
 src/$(OBJECT_DIR)/Timer.o: src/Timer.cpp src/Timer.hpp \
   src/InterruptController.hpp
