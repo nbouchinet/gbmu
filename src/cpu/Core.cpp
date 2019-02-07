@@ -379,10 +379,10 @@ void Core::execute(Core::Iterator it) {
 
 Byte Core::read(Word addr) const {
   assert(addr >= 0xFF80 or addr <= 0xFFFE);
-  return _stack[0xFFFE - addr];
+  return _stack[addr - 0xFF80];
 }
 
 void Core::write(Word addr, Byte v) {
   assert(addr >= 0xFF80 or addr <= 0xFFFE);
-  _stack[0xFFFE - addr] = v;
+  _stack[addr - 0xFF80] = v;
 }
