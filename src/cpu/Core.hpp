@@ -2,16 +2,12 @@
 #ifndef CORE_HPP
 #define CORE_HPP
 
+#include "src/Fwd.hpp"
 #include "utils/Operations_utils.hpp"
-#include "../MemoryBus.hpp"
 
-#include <array>
 #include <cstdint>
 #include <functional>
 #include <vector>
-
-using Byte = uint8_t;
-using Word = uint16_t;
 
 union Register {
   Word word = 0;
@@ -20,36 +16,13 @@ union Register {
   };
 };
 
-//static std::array<Byte, 0xFFFF> tmp_memory;
-//
-//template <typename T>
-//T read(Word addr) {
-//  T ret = 0;
-//  auto i = sizeof(T);
-//  while (i > 0) {
-//    i--;
-//    ret |= tmp_memory[addr + i] >> (i * 8);
-//  }
-//  return ret;
-//}
-//template <typename T>
-//void write(Word addr, T v) {
-//  auto i = sizeof(T);
-//  while (i > 0) {
-//    i--;
-//    tmp_memory[addr + i] = v >> (i * 8);
-//  }
-//}
-
-class Accessor;
-class MemoryBus;
-class InterruptController;
+class Accessor; // Friend interface class for unit testing
 
 class Core {
  public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
 
-  Core(MemoryBus *b, InterruptController *ic) : mem_bus(b), ic(ic){}
+  Core(ComponentsContainer& components) : _components(components) {}
 
   friend class Accessor;
 
@@ -63,29 +36,7 @@ class Core {
   Word _clock = 0x00;
   bool _in_jump_state = false;
 
-  MemoryBus *mem_bus;
-  InterruptController *ic;
-
-  void exec_instruction(std::function<void(void)> instr, Byte clock_cycles) {
-    instr();
-    _clock += clock_cycles;
-  }
-
-  void exec_instruction(std::function<void(Byte&)> instr, Word addr,
-                        Byte clock_cycles) {
-    Byte b = mem_bus->read<Byte>(addr);
-    instr(b);
-    mem_bus->write<Byte>(addr, b);
-    _clock += clock_cycles;
-  }
-
-  void exec_instruction(std::function<void(Word&)> instr, Word addr,
-                        Byte clock_cycles) {
-    Word b = mem_bus->read<Word>(addr);
-    instr(b);
-    mem_bus->write<Word>(addr, b);
-    _clock += clock_cycles;
-  }
+  ComponentsContainer& _components;
 
  public:
   void set_flag(Flags f, bool v) {
@@ -170,7 +121,13 @@ class Core {
   Register hl() const { return _hl; };
   bool in_jump_state() const { return _in_jump_state; }
 
-  using Iterator = std::vector<Byte>::iterator;
+  void exec_instruction(std::function<void(void)> instr, Byte clock_cycles);
+  void exec_instruction(std::function<void(Byte&)> instr, Word addr,
+                        Byte clock_cycles);
+  void exec_instruction(std::function<void(Word&)> instr, Word addr,
+                        Byte clock_cycles);
+
+  using Iterator = std::vector<Byte>::const_iterator;
   void execute(Iterator it);
 };
 

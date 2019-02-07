@@ -75,7 +75,7 @@ def print_debug(name, args):
         args_list.append(arg_str + '="')
         arg_str = '+'
         if e.is_deref_addr:
-            arg_str += "mem_bus->read<Byte>("
+            arg_str += "_components.mem_bus->read<Byte>("
         if e.value == "fetch_word()":
             arg_str += 'static_cast<Word>(*it << 8 | *(it + 1))'
         elif e.value == "*it++":
@@ -118,7 +118,7 @@ for line in file:
             str_args = ""
             for e in args:
                 if e.is_deref_addr:
-                    str_args += "mem_bus->read<Byte>(" + e.value +")"
+                    str_args += "_components.mem_bus->read<Byte>(" + e.value +")"
                 else:
                     str_args += e.value
                 str_args += ", "
