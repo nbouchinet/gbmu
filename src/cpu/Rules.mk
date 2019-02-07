@@ -2,15 +2,15 @@
 src/cpu/$(OBJECT_DIR)/%.o: src/cpu/%.cpp
 	$(COMP) $@ $<
 src/cpu/$(OBJECT_DIR)/Core.o: src/cpu/Core.cpp src/cpu/Core.hpp \
-  src/Fwd.hpp utils/Operations_utils.hpp src/Gameboy.hpp \
-  src/MemoryBus.hpp src/IReadWrite.hpp src/cpu/InterruptController.hpp \
+  src/Fwd.hpp utils/Operations_utils.hpp src/IReadWrite.hpp \
+  src/Gameboy.hpp src/MemoryBus.hpp src/cpu/InterruptController.hpp \
   src/cpu/instructions.inc
 src/cpu/Core.hpp:
 src/Fwd.hpp:
 utils/Operations_utils.hpp:
+src/IReadWrite.hpp:
 src/Gameboy.hpp:
 src/MemoryBus.hpp:
-src/IReadWrite.hpp:
 src/cpu/InterruptController.hpp:
 src/cpu/instructions.inc:
 src/cpu/$(OBJECT_DIR)/InterruptController.o: \
