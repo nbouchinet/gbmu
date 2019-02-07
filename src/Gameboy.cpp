@@ -11,9 +11,9 @@
 ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
   cartridge = std::make_unique<Cartridge>(rom_path);
   interrupt_controller = std::make_unique<InterruptController>(*this);
-  mem_bus = std::make_unique<MemoryBus>(*this);
   core = std::make_unique<Core>(*this);
   timer = std::make_unique<Timer>(*this);
+  mem_bus = std::make_unique<MemoryBus>(*this);
 }
 
 // Dtor Implementation MUST be here where the types are complete
