@@ -37,7 +37,6 @@ class Core : public IReadWrite {
   Register _de = {.word = 0x00d8};
   Register _hl = {.word = 0x014d};
   Word _clock = 0x00;
-  bool _in_jump_state = false;
   std::array<Byte, StackSize> _stack;
 
   ComponentsContainer& _components;
@@ -88,7 +87,7 @@ class Core : public IReadWrite {
   void instr_ei();
 
   enum class JumpCondition { None, NonZero, Zero, NonCarry, Carry };
-  bool is_condition_fulfilled(JumpCondition);
+  bool can_jump(JumpCondition);
   void instr_jp(JumpCondition, Word);
   void instr_jr(JumpCondition, Byte);
   void instr_call(JumpCondition, Word);
@@ -123,7 +122,6 @@ class Core : public IReadWrite {
   Register bc() const { return _bc; };
   Register de() const { return _de; };
   Register hl() const { return _hl; };
-  bool in_jump_state() const { return _in_jump_state; }
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles);
   void exec_instruction(std::function<void(Byte&)> instr, Word addr,

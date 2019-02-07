@@ -177,7 +177,7 @@ void Core::instr_di() { _components.interrupt_controller->SetIME(0); }
 
 void Core::instr_ei() { _components.interrupt_controller->SetIME(1); }
 
-bool Core::is_condition_fulfilled(JumpCondition jc) {
+bool Core::can_jump(JumpCondition jc) {
   switch (jc) {
     case JumpCondition::None:
       return true;
@@ -199,29 +199,23 @@ bool Core::is_condition_fulfilled(JumpCondition jc) {
 // ----------------------------------------------------------------------------
 
 void Core::instr_jp(JumpCondition jc, Word addr) {
-  _in_jump_state = is_condition_fulfilled(jc);
-  if (_in_jump_state) _pc.word = addr;
+  if (can_jump(jc)) _pc.word = addr;
 }
 
 void Core::instr_jr(JumpCondition jc, Byte rel) {
   int8_t signed_rel = rel;
-  _in_jump_state = is_condition_fulfilled(jc);
-  if (_in_jump_state) _pc.word += signed_rel;
+  if (can_jump(jc)) _pc.word += signed_rel;
 }
 
 void Core::instr_call(JumpCondition jc, Word addr) {
-  _in_jump_state = is_condition_fulfilled(jc);
-  if (_in_jump_state) {
+  if (can_jump(jc)) {
     instr_push(_pc.word + 3);
     _pc.word = addr;
   }
 }
 
 void Core::instr_ret(JumpCondition jc) {
-  _in_jump_state = is_condition_fulfilled(jc);
-  if (_in_jump_state) {
-    instr_pop(_pc.word);
-  }
+  if (can_jump(jc)) instr_pop(_pc.word);
 }
 
 // ----------------------------------------------------------------------------
@@ -376,10 +370,7 @@ void Core::execute(Core::Iterator it) {
     default:
       break;
   }
-  if (_in_jump_state)
-    _in_jump_state = false;
-  else
-    _pc.word += it - original_it;
+  _pc.word += it - original_it;
 }
 
 // ----------------------------------------------------------------------------
