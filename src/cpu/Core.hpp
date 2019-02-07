@@ -4,10 +4,12 @@
 
 #include "src/Fwd.hpp"
 #include "utils/Operations_utils.hpp"
+#include "src/IReadWrite.hpp"
 
 #include <cstdint>
 #include <functional>
 #include <vector>
+#include <array>
 
 union Register {
   Word word = 0;
@@ -18,9 +20,10 @@ union Register {
 
 class Accessor; // Friend interface class for unit testing
 
-class Core {
+class Core : public IReadWrite {
  public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
+  static constexpr std::size_t StackSize = 0x7F;
 
   Core(ComponentsContainer& components) : _components(components) {}
 
@@ -35,6 +38,7 @@ class Core {
   Register _hl = {.word = 0x014d};
   Word _clock = 0x00;
   bool _in_jump_state = false;
+  std::array<Byte, StackSize> _stack;
 
   ComponentsContainer& _components;
 
@@ -129,6 +133,9 @@ class Core {
 
   using Iterator = std::vector<Byte>::const_iterator;
   void execute(Iterator it);
+
+  Byte read(Word addr) const override;
+  void write(Word addr, Byte) override;
 };
 
 template <>

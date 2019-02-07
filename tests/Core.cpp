@@ -1,7 +1,6 @@
 #include "src/cpu/Core.hpp"
 #include "gtest/gtest.h"
 #include "src/Gameboy.hpp"
-#include "src/MemoryBus.hpp"
 #define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
 #include <tuple>
@@ -194,8 +193,8 @@ TEST_F(TestCoreFixture, push) {
   Word value = 0x4242;
 
   accessor.core.instr_push(value);
-  Byte b1 = accessor.container.mem_bus->template read<Byte>(addrSaved - 1);
-  Byte b2 = accessor.container.mem_bus->template read<Byte>(addrSaved - 2);
+  Byte b1 = accessor.core.read(addrSaved - 1);
+  Byte b2 = accessor.core.read(addrSaved - 2);
   EXPECT_EQ(b1, ((value & 0xff00) >> 8));
   EXPECT_EQ(b2, (value & 0x00ff));
 }
@@ -214,16 +213,16 @@ void test_call(Accessor& access, Core::JumpCondition jc) {
     access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
   } else {
     EXPECT_EQ(access.getPc().word, 0x4242);
-    Byte b1 = access.container.mem_bus->template read<Byte>(orig_sp - 1);
-    Byte b2 = access.container.mem_bus->template read<Byte>(orig_sp - 2);
+    Byte b1 = access.core.read(orig_sp - 1);
+    Byte b2 = access.core.read(orig_sp - 2);
     EXPECT_EQ(b1, (((orig_pc + 3) & 0xff00) >> 8));
     EXPECT_EQ(b2, ((orig_pc + 3) & 0x00ff));
     return;
   }
   access.core.instr_call(jc, 0xaabb);
   EXPECT_EQ(access.getPc().word, 0xaabb);
-  Byte b1 = access.container.mem_bus->template read<Byte>(orig_sp - 1);
-  Byte b2 = access.container.mem_bus->template read<Byte>(orig_sp - 2);
+  Byte b1 = access.core.read(orig_sp - 1);
+  Byte b2 = access.core.read(orig_sp - 2);
   EXPECT_EQ(b1, (((orig_pc + 3) & 0xff00) >> 8));
   EXPECT_EQ(b2, ((orig_pc + 3) & 0x00ff));
 }
@@ -260,8 +259,8 @@ TEST_F(TestCoreFixture, pop) {
   Word ret;
 
   accessor.core.instr_push(value);
-  Byte b1 = accessor.container.mem_bus->template read<Byte>(addrSaved - 1);
-  Byte b2 = accessor.container.mem_bus->template read<Byte>(addrSaved - 2);
+  Byte b1 = accessor.core.read(addrSaved - 1);
+  Byte b2 = accessor.core.read(addrSaved - 2);
   EXPECT_EQ(b1, ((value & 0xff00) >> 8));
   EXPECT_EQ(b2, (value & 0x00ff));
   accessor.core.instr_pop(ret);
