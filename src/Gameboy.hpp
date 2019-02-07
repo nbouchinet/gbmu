@@ -1,31 +1,31 @@
 #ifndef GAMEBOY_HPP
 #define GAMEBOY_HPP
 
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <array>
+#include "src/Fwd.hpp"
 
-class MemoryBus;
-class Core;
-class Cartridge;
-class InterruptController;
-class Timer;
+#include <memory>
 
-using Byte = uint8_t;
-using Word = uint16_t;
+struct ComponentsContainer {
+  std::unique_ptr<MemoryBus> mem_bus;
+  std::unique_ptr<Core> core;
+  std::unique_ptr<Cartridge> cartridge;
+  std::unique_ptr<InterruptController> interrupt_controller;
+  std::unique_ptr<Timer> timer;
+
+  ComponentsContainer(const std::string &);
+  ~ComponentsContainer();
+};
 
 class Gameboy {
-	MemoryBus *mem_bus;
-	Core *core;
-	Cartridge *cartridge;
-	InterruptController *interrupt_controller;
-	Timer *timer;
+ private:
+  ComponentsContainer _components;
 
-public:
-	Gameboy(std::string const rom_path);
+ public:
+  Gameboy(const std::string &rom_path);
+  Gameboy() = delete;
 
-	int run();
-	void init();
+  int run();
+  void init();
 };
 
 #endif

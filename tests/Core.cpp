@@ -1,5 +1,7 @@
 #include "src/cpu/Core.hpp"
 #include "gtest/gtest.h"
+#include "src/Gameboy.hpp"
+#include "src/MemoryBus.hpp"
 #define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
 #include <tuple>
@@ -8,6 +10,7 @@
 
 class Accessor {
  public:
+  ComponentsContainer container;
   Core core;
   Register& getPc(void) { return core._pc; }
   Register& getSp(void) { return core._sp; }
@@ -15,6 +18,8 @@ class Accessor {
   Register& getBc(void) { return core._bc; }
   Register& getDe(void) { return core._de; }
   Register& getHl(void) { return core._hl; }
+
+  Accessor() : container("tools/Tetris.gb"), core(container) {}
 };
 
 class TestCoreFixture : public ::testing::Test {
@@ -146,12 +151,6 @@ TEST_F(TestCoreFixture, jr_c) {
   test_jr(accessor, Core::JumpCondition::Carry);
 }
 
-TEST_F(TestCoreFixture, writeMemory) {
-  Register& spSaved = accessor.getSp();
-  write<Byte>(spSaved.word, 55);
-  EXPECT_EQ(tmp_memory[spSaved.word], 55);
-}
-
 TEST_F(TestCoreFixture, daa) {
   reset_flags();
   accessor.getAf().high = 0xC;
@@ -195,8 +194,10 @@ TEST_F(TestCoreFixture, push) {
   Word value = 0x4242;
 
   accessor.core.instr_push(value);
-  EXPECT_EQ(tmp_memory[addrSaved - 1], ((value & 0xff00) >> 8));
-  EXPECT_EQ(tmp_memory[addrSaved - 2], (value & 0x00ff));
+  Byte b1 = accessor.container.mem_bus->template read<Byte>(addrSaved - 1);
+  Byte b2 = accessor.container.mem_bus->template read<Byte>(addrSaved - 2);
+  EXPECT_EQ(b1, ((value & 0xff00) >> 8));
+  EXPECT_EQ(b2, (value & 0x00ff));
 }
 
 void test_call(Accessor& access, Core::JumpCondition jc) {
@@ -213,14 +214,18 @@ void test_call(Accessor& access, Core::JumpCondition jc) {
     access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
   } else {
     EXPECT_EQ(access.getPc().word, 0x4242);
-    EXPECT_EQ(read<Byte>(orig_sp - 1), (((orig_pc + 3) & 0xff00) >> 8));
-    EXPECT_EQ(read<Byte>(orig_sp - 2), ((orig_pc + 3) & 0x00ff));
+    Byte b1 = access.container.mem_bus->template read<Byte>(orig_sp - 1);
+    Byte b2 = access.container.mem_bus->template read<Byte>(orig_sp - 2);
+    EXPECT_EQ(b1, (((orig_pc + 3) & 0xff00) >> 8));
+    EXPECT_EQ(b2, ((orig_pc + 3) & 0x00ff));
     return;
   }
   access.core.instr_call(jc, 0xaabb);
   EXPECT_EQ(access.getPc().word, 0xaabb);
-  EXPECT_EQ(read<Byte>(orig_sp - 1), (((orig_pc + 3) & 0xff00) >> 8));
-  EXPECT_EQ(read<Byte>(orig_sp - 2), ((orig_pc + 3) & 0x00ff));
+  Byte b1 = access.container.mem_bus->template read<Byte>(orig_sp - 1);
+  Byte b2 = access.container.mem_bus->template read<Byte>(orig_sp - 2);
+  EXPECT_EQ(b1, (((orig_pc + 3) & 0xff00) >> 8));
+  EXPECT_EQ(b2, ((orig_pc + 3) & 0x00ff));
 }
 
 TEST_F(TestCoreFixture, call_none) {
@@ -248,14 +253,6 @@ TEST_F(TestCoreFixture, call_c) {
   test_call(accessor, Core::JumpCondition::Carry);
 }
 
-TEST_F(TestCoreFixture, readMemory) {
-  Register& spSaved = accessor.getSp();
-  write<Byte>(spSaved.word, 55);
-  EXPECT_EQ(tmp_memory[spSaved.word], 55);
-  Byte ret = read<Byte>(spSaved.word);
-  EXPECT_EQ(ret, 55);
-}
-
 TEST_F(TestCoreFixture, pop) {
   Register& spSaved = accessor.getSp();
   Word addrSaved = spSaved.word;
@@ -263,8 +260,10 @@ TEST_F(TestCoreFixture, pop) {
   Word ret;
 
   accessor.core.instr_push(value);
-  EXPECT_EQ(tmp_memory[addrSaved - 1], ((value & 0xff00) >> 8));
-  EXPECT_EQ(tmp_memory[addrSaved - 2], (value & 0x00ff));
+  Byte b1 = accessor.container.mem_bus->template read<Byte>(addrSaved - 1);
+  Byte b2 = accessor.container.mem_bus->template read<Byte>(addrSaved - 2);
+  EXPECT_EQ(b1, ((value & 0xff00) >> 8));
+  EXPECT_EQ(b2, (value & 0x00ff));
   accessor.core.instr_pop(ret);
   EXPECT_EQ(ret, value);
 }
@@ -317,27 +316,8 @@ TEST_F(TestCoreFixture, ret_c) {
   test_call(accessor, Core::JumpCondition::Carry);
 }
 
-#define TEST_ADD(T, loop_begin, nibble_mask)                           \
-  {                                                                    \
-    constexpr T max = std::numeric_limits<T>::max();                   \
-    for (T a = loop_begin; a < max; ++a) {                             \
-      for (T b = loop_begin; b < max; ++b) {                           \
-        T a_bis = a;                                                   \
-        accessor.core.instr_add(a_bis, b);                             \
-        unsigned int res = a + b;                                      \
-        unsigned int half_res = (a & nibble_mask) + (b & nibble_mask); \
-        EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), res > max);  \
-        EXPECT_EQ(accessor.core.get_flag(Core::Flags::H),              \
-                  half_res > (max & nibble_mask));                     \
-        EXPECT_FALSE(accessor.core.get_flag(Core::Flags::N));          \
-        EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z),              \
-                  static_cast<T>(res) == 0);                           \
-        EXPECT_EQ(static_cast<T>(a_bis), static_cast<T>(res));         \
-      }                                                                \
-    }
-
 template <typename T>
-void test_add(Accessor access, T loop_begin, T nibble_mask) {
+void test_add(Accessor &access, T loop_begin, T nibble_mask) {
   constexpr T max = std::numeric_limits<T>::max();
   for (T a = loop_begin; a < max; ++a) {
     for (T b = loop_begin; b < max; ++b) {
