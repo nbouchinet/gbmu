@@ -30,4 +30,5 @@ src/$(OBJECT_DIR)/main.o: src/main.cpp src/Gameboy.hpp src/Fwd.hpp
 src/$(OBJECT_DIR)/MemoryBus.o: src/MemoryBus.cpp src/MemoryBus.hpp \
   src/Fwd.hpp src/IReadWrite.hpp src/Cartridge.hpp \
   src/MemoryBankController1.hpp src/IMemoryBankController.hpp \
-  src/Gameboy.hpp src/cpu/Timer.hpp src/cpu/InterruptController.hpp
+  src/Gameboy.hpp src/cpu/Timer.hpp src/cpu/InterruptController.hpp \
+  src/cpu/Core.hpp utils/Operations_utils.hpp

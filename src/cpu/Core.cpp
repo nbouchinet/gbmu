@@ -43,14 +43,13 @@ void Core::instr_ldhl(Byte n) {
 // ----------------------------------------------------------------------------
 
 void Core::instr_push(Word v) {
-  _components.mem_bus->write<Byte>(--_sp.word,
-                                   static_cast<Byte>((v & 0xFF00) >> 8));
-  _components.mem_bus->write<Byte>(--_sp.word, static_cast<Byte>((v & 0x00FF)));
+  write(--_sp.word, static_cast<Byte>((v & 0xFF00) >> 8));
+  write(--_sp.word, static_cast<Byte>((v & 0x00FF)));
 }
 
 void Core::instr_pop(Word& dest) {
-  dest = _components.mem_bus->read<Byte>(_sp.word++);
-  dest |= static_cast<Word>(_components.mem_bus->read<Byte>(_sp.word++)) << 8;
+  dest = read(_sp.word++);
+  dest |= static_cast<Word>(read(_sp.word++)) << 8;
 }
 
 // ----------------------------------------------------------------------------
@@ -381,4 +380,18 @@ void Core::execute(Core::Iterator it) {
     _in_jump_state = false;
   else
     _pc.word += it - original_it;
+}
+
+// ----------------------------------------------------------------------------
+// Read and write
+// ----------------------------------------------------------------------------
+
+Byte Core::read(Word addr) const {
+  assert(addr >= 0xFF80 or addr <= 0xFFFE);
+  return _stack[0xFFFE - addr];
+}
+
+void Core::write(Word addr, Byte v) {
+  assert(addr >= 0xFF80 or addr <= 0xFFFE);
+  _stack[0xFFFE - addr] = v;
 }
