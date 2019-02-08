@@ -1,3 +1,14 @@
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          packages:
+            - clang-9.0
+               env:
+         - MATRIX_EVAL="CC=clang-9.0 && CXX=clang-9.0"
+
+
 language: c++
 
 before_install:
@@ -9,7 +20,7 @@ install:
   - git clone https://github.com/google/googletest.git && pushd googletest && mkdir build && pushd build && cmake .. && make && sudo make install && popd && popd
 
 compiler:
-  - clang
+  - clang-9.0.0
 
 script:
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "make test_all"; fi'
