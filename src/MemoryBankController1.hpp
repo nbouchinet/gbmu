@@ -1,33 +1,37 @@
 #ifndef MEMORYBANKCONTROLLER1_H
 #define MEMORYBANKCONTROLLER1_H
 
-#include "IMemoryBankController.hpp"
+#include "AMemoryBankController.hpp"
 #include <array>
 #include <cstdint>
-#include <vector>
 #include <type_traits>
+#include <vector>
 
-class MemoryBankController1 : public IMemoryBankController {
+class MemoryBankController1 : public AMemoryBankController {
 private:
-  std::vector<uint8_t> *romData;
-  std::array<uint8_t, 0x20000> *ramData;
   uint8_t ramBank : 2;
   uint8_t romBank : 7;
   bool isRomBanking; // ROM or RAM banking
   bool isRamEnabled;
 
-private:
   void enableRAM() { isRamEnabled = true; };
   void disableRAM() { isRamEnabled = false; }
 
 public:
   MemoryBankController1()
-      : romData(0), ramData(0), ramBank(0), romBank(1), isRomBanking(true),
-        isRamEnabled(false) {}
+      : ramBank(0), romBank(1), isRomBanking(true),
+        isRamEnabled(false) {
+    romData = 0;
+    ramData = 0;
+  }
 
-  MemoryBankController1(std::vector<uint8_t> *romPtr, std::array<uint8_t, 0x20000> *ramPtr)
-      : romData(romPtr), ramData(ramPtr), ramBank(0), romBank(1),
-        isRomBanking(true), isRamEnabled(false) {}
+  MemoryBankController1(std::vector<uint8_t> *romPtr,
+                        std::array<uint8_t, 0x20000> *ramPtr)
+      : ramBank(0), romBank(1),
+        isRomBanking(true), isRamEnabled(false) {
+    romData = romPtr;
+    ramData = ramPtr;
+  }
 
   bool getRamEnabled() const { return isRamEnabled; }
   uint8_t getRomBank() const { return romBank; };
