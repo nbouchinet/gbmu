@@ -1,5 +1,7 @@
 language: c++
 # works on Precise and Trusty
+matrix:
+  include:
     - os: linux
       addons:
         apt:
