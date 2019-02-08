@@ -118,12 +118,12 @@ class Core : public IReadWrite {
 
   bool get_flag(Flags f) const { return _af.low & static_cast<int>(f); }
   auto clock() const { return _clock; }
-  Word pc() const { return _pc.word; }
-  Word sp() const { return _sp.word; }
-  Register af() const { return _af; };
-  Register bc() const { return _bc; };
-  Register de() const { return _de; };
-  Register hl() const { return _hl; };
+  auto pc() const { return _pc.word; }
+  auto sp() const { return _sp.word; }
+  auto af() const { return _af; };
+  auto bc() const { return _bc; };
+  auto de() const { return _de; };
+  auto hl() const { return _hl; };
   bool in_jump_state() const { return _in_jump_state; }
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles);
