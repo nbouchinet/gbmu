@@ -1,6 +1,8 @@
 #ifndef GAMEBOY_HPP
 #define GAMEBOY_HPP
 
+#include "AMemoryBankController.hpp"
+#include "cpu/Core.hpp"
 #include "src/Fwd.hpp"
 
 #include <memory>
@@ -16,16 +18,29 @@ struct ComponentsContainer {
   ~ComponentsContainer();
 };
 
+class Accessor;
+
 class Gameboy {
- private:
+private:
+  struct GameSave {
+    Byte ram[AMemoryBankController::RAMSize];
+  };
+
+  Core::Iterator _begin;
+  Core::Iterator _end;
   ComponentsContainer _components;
 
- public:
+  friend class Accessor;
+
+public:
   Gameboy(const std::string &rom_path);
   Gameboy() = delete;
 
   int run();
+  void step();
   void init();
+  void save(std::string save_name);
+  void load_save(std::string save_name);
 };
 
 #endif

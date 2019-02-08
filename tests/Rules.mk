@@ -11,7 +11,8 @@ CURR_DIR		:= tests
 ## Put all the tests here
 TEST_FILES		:= 	sample.cpp \
 				Operations_utils.cpp \
-				Core.cpp
+				Core.cpp \
+				Gameboy.cpp
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
 RUN_TEST_RULES	:= $(addprefix test_, $(TEST_FILES:.cpp=))
