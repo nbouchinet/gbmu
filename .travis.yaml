@@ -1,0 +1,11 @@
+before_install:
+  - sudo apt-get install -y clang
+  - git clone https://github.com/google/googletest.git && cd googletest && mkdir build && cd build && cmake .. && make && make install
+  - test -n $CC  && unset CC
+  - test -n $CXX && unset CXX
+
+compiler:
+  - clang
+
+script:
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "make test_all"; fi'
