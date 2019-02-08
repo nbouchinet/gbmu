@@ -1,17 +1,13 @@
 #ifndef MEMORYBANKCONTROLLER2_H
 #define MEMORYBANKCONTROLLER2_H
 
-#include "IMemoryBankController.hpp"
+#include "AMemoryBankController.hpp"
 #include <cstdint>
 #include <cstring>
-#include <array>
 #include <vector>
 
-class MemoryBankController2 : public IMemoryBankController {
+class MemoryBankController2 : public AMemoryBankController {
 private:
-public:
-  std::vector<uint8_t> *romData;
-  std::array<uint8_t, 0x20000> *ramData;
   uint8_t romBank : 4;
   bool isRamEnabled;
 
@@ -20,8 +16,11 @@ private:
   void disableRAM() { isRamEnabled = false; }
 
 public:
-  MemoryBankController2(std::vector<uint8_t> *romPtr, std::array<uint8_t,0x20000> *ramPtr)
-      : romData(romPtr), ramData(ramPtr), romBank(0), isRamEnabled(false) {
+  MemoryBankController2(std::vector<uint8_t> *romPtr,
+                        std::array<uint8_t, 0x20000> *ramPtr)
+      : romBank(0), isRamEnabled(false) {
+    romData = romPtr;
+    ramData = ramPtr;
   }
 
   bool getRamEnabled() const { return isRamEnabled; }

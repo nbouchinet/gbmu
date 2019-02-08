@@ -1,17 +1,14 @@
 #ifndef MEMORYBANKCONTROLLER3_H
 #define MEMORYBANKCONTROLLER3_H
 
-#include "IMemoryBankController.hpp"
+#include "AMemoryBankController.hpp"
 #include "RealTimeClock.hpp"
 #include <cstdint>
 #include <cstring>
 #include <vector>
-#include <array>
 
-class MemoryBankController3 : public IMemoryBankController {
+class MemoryBankController3 : public AMemoryBankController {
 private:
-  std::vector<uint8_t> *romData;
-  std::array<uint8_t, 0x20000> *ramData;
   uint8_t romBank : 7;
   uint8_t ramBank : 4;
   bool isRamRtcEnabled;
@@ -30,13 +27,16 @@ private:
 
 public:
   MemoryBankController3()
-      : romData(NULL), romBank(1), isRamRtcEnabled(false), isRamMode(true),
-        rtc() {}
+      : romBank(1), isRamRtcEnabled(false), isRamMode(true), rtc() {
+    romData = 0;
+    ramData = 0;
+  }
 
   MemoryBankController3(std::vector<uint8_t> *romPtr,
                         std::array<uint8_t, 0x20000> *ramPtr)
-      : romData(romPtr), ramData(ramPtr), romBank(1), ramBank(0),
-        isRamRtcEnabled(false), isRamMode(true), rtc() {
+      : romBank(1), ramBank(0), isRamRtcEnabled(false), isRamMode(true), rtc() {
+    romData = romPtr;
+    ramData = ramPtr;
     memset(&latchData, 0, sizeof(latchData));
   }
 
