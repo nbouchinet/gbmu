@@ -1,6 +1,6 @@
 TEST_CC			:= clang++
 TEST_CFLAGS		:=
-TEST_LFLAGS		:= -lgtest
+TEST_LFLAGS		:= -lgtest -pthread
 ifeq ($(shell uname -s), Darwin)
 	TEST_CFLAGS		+= -I ~/.brew/include
 	TEST_LFLAGS		+= -L ~/.brew/lib
@@ -10,8 +10,6 @@ COMPLINK		:= $(CC) $(TEST_CFLAGS) $(TEST_LFLAGS) -o
 CURR_DIR		:= tests
 ## Put all the tests here
 TEST_FILES		:= 	sample.cpp \
-				Operations_utils.cpp \
-				Core.cpp
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
 RUN_TEST_RULES	:= $(addprefix test_, $(TEST_FILES:.cpp=))
