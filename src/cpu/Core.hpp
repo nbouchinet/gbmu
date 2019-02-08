@@ -3,13 +3,13 @@
 #define CORE_HPP
 
 #include "src/Fwd.hpp"
-#include "utils/Operations_utils.hpp"
 #include "src/IReadWrite.hpp"
+#include "utils/Operations_utils.hpp"
 
+#include <array>
 #include <cstdint>
 #include <functional>
 #include <vector>
-#include <array>
 
 union Register {
   Word word = 0;
@@ -18,7 +18,7 @@ union Register {
   };
 };
 
-class Accessor; // Friend interface class for unit testing
+class Accessor;  // Friend interface class for unit testing
 
 class Core : public IReadWrite {
  public:
@@ -39,6 +39,7 @@ class Core : public IReadWrite {
   Word _clock = 0x00;
   bool _in_jump_state = false;
   std::array<Byte, StackSize> _stack;
+  bool _halt = false;
 
   ComponentsContainer& _components;
 
@@ -82,7 +83,7 @@ class Core : public IReadWrite {
   void instr_ccf();
   void instr_scf();
   void instr_nop() {}
-  void instr_halt() {}
+  void instr_halt();
   void instr_stop() {}
   void instr_di();
   void instr_ei();
@@ -134,6 +135,9 @@ class Core : public IReadWrite {
   using Iterator = std::vector<Byte>::const_iterator;
   void execute(Iterator it);
 
+  void notify_interrupt() {
+    if (_halt) _halt = false;
+  }
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
 };

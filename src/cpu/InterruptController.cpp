@@ -38,10 +38,12 @@ void InterruptController::ParseInterrupt() {
 
   rIF = _rIF;
   rIE = _rIE;
-  if (_IME && rIF) {
+  if (rIF) {
     for (Byte i = 0; i < 5; i--) {
       if ((rIF & 0x01) == (rIE & 0x01)) {
-        ExecuteInterrupt(i);
+        _components.core->notify_interrupt();
+        if (_IME)
+          ExecuteInterrupt(i);
       }
       rIF >>= rIF;
       rIE >>= rIE;

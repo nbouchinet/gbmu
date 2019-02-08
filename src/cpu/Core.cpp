@@ -129,6 +129,10 @@ void Core::instr_dec(Byte& b) {
   set_flag(Flags::Z, b == 0u);
 }
 
+// ----------------------------------------------------------------------------
+// Miscellaneous
+// ----------------------------------------------------------------------------
+
 void Core::instr_dec(Word& b) { --b; }
 
 /*
@@ -149,6 +153,10 @@ void Core::instr_daa() {
   (get_flag(Flags::N)) ? _af.high -= correction_mask
                        : _af.high += correction_mask;
   set_flag(Flags::Z, _af.high == 0);
+}
+
+void Core::instr_halt() {
+  _halt = true;
 }
 
 // ----------------------------------------------------------------------------
@@ -362,6 +370,8 @@ void Core::exec_instruction(std::function<void(Word&)> instr, Word addr,
 }
 
 void Core::execute(Core::Iterator it) {
+  if (_halt)
+    return;
   it += _pc.word;
   Iterator original_it = it;
   auto fetch_word = [&]() -> Word {
