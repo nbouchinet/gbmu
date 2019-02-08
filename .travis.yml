@@ -1,9 +1,21 @@
 language: c++
+# works on Precise and Trusty
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-9.0
+          packages:
+            - clang-9.0
+      env:
+        - MATRIX_EVAL="CC=clang-9.0 && CXX=clang++-9,0"
 
 before_install:
-  - sudo apt-get install -y clang
-  - test -n $CC  && unset CC
-  - test -n $CXX && unset CXX
+    - eval "${MATRIX_EVAL}"
+    - sudo apt-get install -y clang
+    - test -n $CC  && unset CC
+    - test -n $CXX && unset CXX
 
 install:
   - git clone https://github.com/google/googletest.git && pushd googletest && mkdir build && pushd build && cmake .. && make && sudo make install && popd && popd
