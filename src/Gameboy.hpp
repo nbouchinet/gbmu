@@ -4,6 +4,7 @@
 #include "AMemoryBankController.hpp"
 #include "cpu/Core.hpp"
 #include "src/Fwd.hpp"
+#include "src/Debugger.hpp"
 
 #include <memory>
 
@@ -30,6 +31,7 @@ private:
   Core::Iterator _begin;
   Core::Iterator _end;
   ComponentsContainer _components;
+  Debugger _debugger;
 
   friend class Accessor;
 

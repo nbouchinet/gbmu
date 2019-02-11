@@ -1,5 +1,6 @@
 #include "MemoryBus.hpp"
 
+#include "src/Gameboy.hpp"
 #include "src/Cartridge.hpp"
 #include "src/cpu/Core.hpp"
 #include "src/cpu/InterruptController.hpp"
