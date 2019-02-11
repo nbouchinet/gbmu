@@ -199,23 +199,27 @@ bool Core::can_jump(JumpCondition jc) {
 // ----------------------------------------------------------------------------
 
 void Core::instr_jp(JumpCondition jc, Word addr) {
-  if (can_jump(jc)) _pc.word = addr;
+  _in_jump_state = can_jump(jc);
+  if (_in_jump_state) _pc.word = addr;
 }
 
 void Core::instr_jr(JumpCondition jc, Byte rel) {
   int8_t signed_rel = rel;
-  if (can_jump(jc)) _pc.word += signed_rel;
+  _in_jump_state = can_jump(jc);
+  if (_in_jump_state) _pc.word += signed_rel;
 }
 
 void Core::instr_call(JumpCondition jc, Word addr) {
-  if (can_jump(jc)) {
+  _in_jump_state = can_jump(jc);
+  if (_in_jump_state) {
     instr_push(_pc.word + 3);
     _pc.word = addr;
   }
 }
 
 void Core::instr_ret(JumpCondition jc) {
-  if (can_jump(jc)) instr_pop(_pc.word);
+  _in_jump_state = can_jump(jc);
+  if (_in_jump_state) instr_pop(_pc.word);
 }
 
 // ----------------------------------------------------------------------------
@@ -361,8 +365,8 @@ void Core::execute(Core::Iterator it) {
   it += _pc.word;
   Iterator original_it = it;
   auto fetch_word = [&]() -> Word {
-    Word ret = *it++ << 8;
-    ret |= *it++;
+    Word ret = *it++;
+    ret |= *it++ << 8;
     return ret;
   };
   switch (*it++) {
@@ -370,7 +374,10 @@ void Core::execute(Core::Iterator it) {
     default:
       break;
   }
-  _pc.word += it - original_it;
+  if (_in_jump_state)
+    _in_jump_state = false;
+  else
+    _pc.word += it - original_it;
 }
 
 // ----------------------------------------------------------------------------

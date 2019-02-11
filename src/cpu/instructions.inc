@@ -244,6 +244,9 @@ break;
 case 0x2A:
 exec_instruction([&] () { instr_ldi(_af.high, _hl.word); }, 8);
 break;
+case 0xE0:
+exec_instruction([&] (Byte &v) { instr_ld(v, _af.high); }, 0xFF00 + *it++, 12);
+break;
 case 0xF0:
 exec_instruction([&] () { instr_ld(_af.high, _components.mem_bus->read<Byte>(0xFF00 + *it++)); }, 12);
 break;
