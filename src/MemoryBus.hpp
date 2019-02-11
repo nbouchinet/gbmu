@@ -23,7 +23,6 @@ public:
     T ret = 0;
     auto i = sizeof(T);
 
-    std::cout << "Read " << std::hex << addr << std::endl;
 
     for (const auto &range : _ranged_components) {
       if (addr >= range.begin and addr <= range.end) {
@@ -36,7 +35,6 @@ public:
   }
 
   template <typename T> void write(Word addr, T v) {
-    std::cout << "Write" << std::endl;
 
     auto i = sizeof(T);
 

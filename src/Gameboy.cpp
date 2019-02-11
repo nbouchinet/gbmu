@@ -28,7 +28,10 @@ Gameboy::Gameboy(const std::string &rom_path) : _components(rom_path) {
 }
 
 void Gameboy::step() {
-  std::cout << "pc: " << std::hex << _components.core->pc() << std::endl;
+  if (_debugger.is_enabled()) {
+    _debugger.get_instruction_set(_begin + _components.core->pc());
+    _debugger.wait_user_interaction();
+  }
   _components.core->execute(_begin);
   _components.interrupt_controller->ParseInterrupt();
   _components.timer->Update(_components.core->clock());
@@ -36,6 +39,7 @@ void Gameboy::step() {
 
 int Gameboy::run() {
 
+  system("sh -c clear");// for debug TODO: remove
   while (_begin + _components.core->pc() != _end) {
     step();
   }
