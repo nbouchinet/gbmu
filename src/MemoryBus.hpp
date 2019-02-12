@@ -2,6 +2,7 @@
 #ifndef MEMORYBUS_H
 #define MEMORYBUS_H
 
+#include "Gameboy.hpp"
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
 
@@ -9,18 +10,17 @@
 #include <vector>
 
 class MemoryBus {
- private:
+private:
   struct RangedComponent {
     Word begin, end;
     IReadWrite *component;
   };
   std::vector<RangedComponent> _ranged_components;
 
- public:
+public:
   MemoryBus(ComponentsContainer &components);
 
-  template <typename T>
-  T read(Word addr) {
+  template <typename T> T read(Word addr) {
     T ret = 0;
     auto i = sizeof(T);
 
@@ -36,11 +36,11 @@ class MemoryBus {
     return ret;
   }
 
-  template <typename T>
-  void write(Word addr, T v) {
+  template <typename T> void write(Word addr, T v) {
     std::cout << "Write" << std::endl;
 
     auto i = sizeof(T);
+
     for (const auto &range : _ranged_components) {
       if (addr >= range.begin and addr <= range.end) {
         range.component->write(addr + i, v >> (i * 8));
