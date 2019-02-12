@@ -5,6 +5,7 @@
 #include "src/cpu/InterruptController.hpp"
 #include "src/cpu/Timer.hpp"
 #include "src/LCDRegisters.hpp"
+#include "UnitWorkingRAM.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -16,6 +17,7 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
   core = std::make_unique<Core>(*this);
   timer = std::make_unique<Timer>(*this);
   lcd_registers = std::make_unique<LCDRegisters>();
+  unit_working_ram = std::make_unique<UnitWorkingRAM>();
   mem_bus = std::make_unique<MemoryBus>(*this);
 }
 

@@ -15,6 +15,7 @@ struct ComponentsContainer {
   std::unique_ptr<InterruptController> interrupt_controller;
   std::unique_ptr<Timer> timer;
   std::unique_ptr<LCDRegisters> lcd_registers;
+  std::unique_ptr<UnitWorkingRAM> unit_working_ram;
 
   ComponentsContainer(const std::string &);
   ~ComponentsContainer();
