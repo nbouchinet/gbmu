@@ -10,7 +10,7 @@ def getSize(line):
     return str(size)
 
 fileObj=open(sys.argv[1], "r")
-print('std::map<int, const char*> m = {', end = '')
+print('std::map<int, _instr_info> _instr_map = {', end = '')
 i = 0
 instr_cb = 0
 for line in fileObj.readlines():
@@ -21,10 +21,10 @@ for line in fileObj.readlines():
     instr = ' '.join(line[:-1].split()[:-2])
     if not instr_cb:
         size = getSize(line)
-        value = '{0x' + opcode + ', ' + '{\"' + instr + '\", ' + size + '}}, '
+        value = '{0x' + opcode + ', {\"' + instr + '\", ' + size + '}}, '
     else:
         size = getSize(line)
-        value = '{0xCB' + opcode + ', ' + '{\"' + instr + '\", ' + size + '}}, '
+        value = '{0xCB' + opcode + ', {\"' + instr + '\", ' + size + '}}, '
     if i % 4 == 0:
         print('')
     print(value, end = '')
