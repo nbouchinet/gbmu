@@ -1,6 +1,10 @@
 #include "Debugger.hpp"
 #include <iostream>
 #include <vector>
+#include <ctime>
+#include <chrono>
+#include <unistd.h>
+
 
 Debugger::_debug_info Debugger::gen_debug_info(uint16_t pc, uint16_t opcode, _instr_info map_info)
 {
@@ -40,6 +44,7 @@ void Debugger::get_instruction_set(const Core::Iterator &it, uint16_t pc)
 		}
 		i++;
 	}
+	system("sh -c clear");
 	for (auto && _debug_info : _instr_pool) {// TODO: debug, remove
 		printf("[0x%08x] 0x%04x %s\n", _debug_info.pc, _debug_info.opcode, _debug_info.instr);
 	}
@@ -48,11 +53,17 @@ void Debugger::get_instruction_set(const Core::Iterator &it, uint16_t pc)
 void Debugger::wait_user_interaction()
 {
 	char n;
+	static time_t totime = 0;
 
+	if (time(NULL) >= totime)
+		_wait_next = 1;
 	while (_wait_next) {
 		std::cout << "\nEnter a key" << std::endl;
 		n = getchar();
-		system("sh -c clear");
+		if (n == 's') {
+			totime = time(NULL) + 1;
+			_wait_next = 0;
+		}
 		break ;
 	}
 }
