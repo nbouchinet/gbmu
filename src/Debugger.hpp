@@ -20,15 +20,25 @@ class Debugger {
 		 *  - Reset all, reload the cartridge
 		 */
 
-		bool _enabled = 1;
-  		bool _wait_next = 1;
+		bool	 _enabled = 1;
+		bool	 _wait_next = 1;
+		int	_frame_size = 10;
 
-		struct instr_info {
+		struct _debug_info {
+			uint16_t pc;
+			uint16_t opcode;
 			const char * instr;
 			uint8_t size;
 		};
 
-		std::map<int, instr_info> m = {
+		struct _instr_info {
+			const char * instr;
+			uint8_t size;
+		};
+
+		std::vector<_debug_info> _instr_pool;
+
+		std::map<int, _instr_info> _instr_map = {
 			{0x06, {"ld B,n", 2}}, {0x0E, {"ld C,n", 2}}, {0x16, {"ld D,n", 2}}, {0x1E, {"ld E,n", 2}}, 
 			{0x26, {"ld H,n", 2}}, {0x2E, {"ld L,n", 2}}, {0x7F, {"ld A,A", 1}}, {0x78, {"ld A,B", 1}}, 
 			{0x79, {"ld A,C", 1}}, {0x7A, {"ld A,D", 1}}, {0x7B, {"ld A,E", 1}}, {0x7C, {"ld A,H", 1}}, 
@@ -116,10 +126,11 @@ class Debugger {
 		std::vector<Word> getRegisters(void);
 		std::vector<Word> dumpRom(void);
 
-		void get_instruction_set(const Core::Iterator &it);
+		void get_instruction_set(const Core::Iterator &it, uint16_t pc);
 		void wait_user_interaction();
 		bool is_enabled() const { return _enabled; }
 		void toggle() { _enabled = _enabled ? false : true; }
+		_debug_info gen_debug_info(uint16_t pc, uint16_t opcode, _instr_info map_info);
 
 };
 
