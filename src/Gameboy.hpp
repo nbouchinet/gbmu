@@ -13,6 +13,7 @@ struct ComponentsContainer {
   std::unique_ptr<Cartridge> cartridge;
   std::unique_ptr<InterruptController> interrupt_controller;
   std::unique_ptr<Timer> timer;
+  std::unique_ptr<LCDRegisters> lcd_registers;
 
   ComponentsContainer(const std::string &);
   ~ComponentsContainer();
