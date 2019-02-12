@@ -2,7 +2,6 @@
 #ifndef MEMORYBUS_H
 #define MEMORYBUS_H
 
-#include "Gameboy.hpp"
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
 
