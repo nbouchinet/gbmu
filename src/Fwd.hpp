@@ -13,6 +13,7 @@ class Core;
 class Cartridge;
 class InterruptController;
 class Timer;
+class LCDRegisters;
 class Gameboy;
 struct ComponentsContainer;
 
