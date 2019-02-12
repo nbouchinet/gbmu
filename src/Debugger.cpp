@@ -51,7 +51,7 @@ void Debugger::wait_user_interaction()
 
 	while (_wait_next) {
 		std::cout << "\nEnter a key" << std::endl;
-		std::cin >> n;
+		n = getchar();
 		system("sh -c clear");
 		break ;
 	}
