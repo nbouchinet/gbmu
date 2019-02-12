@@ -14,6 +14,7 @@ class Cartridge;
 class InterruptController;
 class Timer;
 class LCDRegisters;
+class UnitWorkingRAM;
 class Gameboy;
 struct ComponentsContainer;
 
