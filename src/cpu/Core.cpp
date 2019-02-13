@@ -239,8 +239,9 @@ void Core::instr_reti() {
 }
 
 void Core::instr_rst(Byte addr) {
-  instr_push(_pc.word + 2);
+  instr_push(_pc.word + 1);
   _pc.word = addr;
+  _in_jump_state = true;
 }
 
 // ----------------------------------------------------------------------------
