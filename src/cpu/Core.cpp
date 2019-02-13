@@ -213,8 +213,7 @@ void Core::instr_jp(JumpCondition jc, Word addr) {
 
 void Core::instr_jr(JumpCondition jc, Byte rel) {
   int8_t signed_rel = rel;
-  _in_jump_state = can_jump(jc);
-  if (_in_jump_state) _pc.word += signed_rel;
+  if (can_jump(jc)) _pc.word += signed_rel;
 }
 
 void Core::instr_call(JumpCondition jc, Word addr) {
