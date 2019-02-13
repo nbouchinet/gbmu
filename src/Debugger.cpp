@@ -13,7 +13,7 @@ Debugger::_debug_info Debugger::gen_debug_info(uint16_t pc, uint16_t opcode, _in
 	return debug;
 }
 
-void Debugger::get_instruction_set(const Core::Iterator &it, uint16_t pc)
+void Debugger::get_instruction_pool(const Core::Iterator &it, uint16_t pc)
 {
 	int		i = 0;
 	uint16_t	pc_swap;

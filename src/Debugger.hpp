@@ -126,7 +126,7 @@ class Debugger {
 		std::vector<Word> getRegisters(void);
 		std::vector<Word> dumpRom(void);
 
-		void get_instruction_set(const Core::Iterator &it, uint16_t pc);
+		void get_instruction_pool(const Core::Iterator &it, uint16_t pc);
 		void wait_user_interaction();
 		bool is_enabled() const { return _enabled; }
 		void toggle() { _enabled = _enabled ? false : true; }

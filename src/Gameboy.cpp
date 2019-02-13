@@ -32,7 +32,7 @@ Gameboy::Gameboy(const std::string &rom_path) : _components(rom_path) {
 
 void Gameboy::step() {
   if (_debugger.is_enabled()) {
-    _debugger.get_instruction_set(_begin + _components.core->pc(), _components.core->pc());
+    _debugger.get_instruction_pool(_begin + _components.core->pc(), _components.core->pc());
     _debugger.wait_user_interaction();
   }
   _components.core->execute(_begin);
