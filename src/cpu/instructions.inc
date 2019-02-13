@@ -650,7 +650,7 @@ case 0xDA:
 exec_instruction([&] () { instr_jp(JumpCondition::Carry, fetch_word()); }, 12);
 break;
 case 0xE9:
-exec_instruction([&] () { instr_jp(JumpCondition::None, _components.mem_bus->read<Byte>(_hl.word)); }, 4);
+exec_instruction([&] () { instr_jp(JumpCondition::None, _hl.word); }, 4);
 break;
 case 0x18:
 exec_instruction([&] () { instr_jr(JumpCondition::None, *it++); }, 8);

@@ -215,7 +215,7 @@ jp	c:NZ,nn	C2	12
 jp	c:Z,nn	CA	12
 jp	c:NC,nn	D2	12
 jp	c:C,nn	DA	12
-jp	c:-,(HL)	E9	4
+jp	c:-,HL	E9	4
 jr	c:-,n	18	8
 jr	c:NZ,n	20	8
 jr	c:Z,n	28	8
