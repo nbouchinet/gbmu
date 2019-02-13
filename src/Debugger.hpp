@@ -37,6 +37,7 @@ class Debugger {
 		};
 
 		std::vector<_debug_info> _instr_pool;
+		std::vector<uint16_t> _breakpoint_pool;
 
 		std::map<int, _instr_info> _instr_map = {
 			{0x06, {"ld B,n", 2}}, {0x0E, {"ld C,n", 2}}, {0x16, {"ld D,n", 2}}, {0x1E, {"ld E,n", 2}}, 
@@ -126,11 +127,19 @@ class Debugger {
 		std::vector<Word> getRegisters(void);
 		std::vector<Word> dumpRom(void);
 
-		void get_instruction_pool(const Core::Iterator &it, uint16_t pc);
-		void wait_user_interaction();
+		void set_frame_size(int size) {_frame_size = size;}
+		void add_breakpoint(uint16_t addr);
+		void remove_breakpoint(uint16_t addr);
+		const std::vector<uint16_t> & get_breakpoints() const {return _breakpoint_pool;}
+		const std::vector<_debug_info> & get_instruction_pool() const {return _instr_pool;}
+		void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
+		void wait_user_interaction(uint16_t pc);
 		bool is_enabled() const { return _enabled; }
 		void toggle() { _enabled = _enabled ? false : true; }
 		_debug_info gen_debug_info(uint16_t pc, uint16_t opcode, _instr_info map_info);
+
+		void print_instruction_pool();
+		void print_breakpoint_list();
 
 };
 
