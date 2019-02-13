@@ -123,6 +123,8 @@ class Debugger {
 			{0xCBC5, {"set L,b", 2}}, {0xCBC6, {"set (HL),b", 2}}, {0xCB87, {"res A,b", 2}}, {0xCB80, {"res B,b", 2}}, 
 			{0xCB81, {"res C,b", 2}}, {0xCB82, {"res D,b", 2}}, {0xCB83, {"res E,b", 2}}, {0xCB84, {"res H,b", 2}}, 
 			{0xCB85, {"res L,b", 2}}, {0xCB86, {"res (HL),b", 2}}, };
+
+		_debug_info gen_debug_info(uint16_t pc, uint16_t opcode, _instr_info map_info);
 	public:
 		std::vector<Word> getRegisters(void);
 		std::vector<Word> dumpRom(void);
@@ -136,11 +138,9 @@ class Debugger {
 		void wait_user_interaction(uint16_t pc);
 		bool is_enabled() const { return _enabled; }
 		void toggle() { _enabled = _enabled ? false : true; }
-		_debug_info gen_debug_info(uint16_t pc, uint16_t opcode, _instr_info map_info);
 
 		void print_instruction_pool();
 		void print_breakpoint_list();
-
 };
 
 #endif
