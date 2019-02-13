@@ -4,6 +4,7 @@
 #include <ctime>
 #include <chrono>
 #include <unistd.h>
+#include <algorithm>
 
 
 Debugger::_debug_info Debugger::gen_debug_info(uint16_t pc, uint16_t opcode, _instr_info map_info)
@@ -13,7 +14,7 @@ Debugger::_debug_info Debugger::gen_debug_info(uint16_t pc, uint16_t opcode, _in
 	return debug;
 }
 
-void Debugger::get_instruction_pool(const Core::Iterator &it, uint16_t pc)
+void Debugger::set_instruction_pool(const Core::Iterator &it, uint16_t pc)
 {
 	int		i = 0;
 	uint16_t	pc_swap;
@@ -44,25 +45,73 @@ void Debugger::get_instruction_pool(const Core::Iterator &it, uint16_t pc)
 		}
 		i++;
 	}
+	print_instruction_pool();
+}
+
+void Debugger::print_instruction_pool()
+{
 	system("sh -c clear");
-	for (auto && _debug_info : _instr_pool) {// TODO: debug, remove
+	for (auto && _debug_info : _instr_pool) {
 		printf("[0x%08x] 0x%04x %s\n", _debug_info.pc, _debug_info.opcode, _debug_info.instr);
 	}
 }
 
-void Debugger::wait_user_interaction()
+void Debugger::print_breakpoint_list()
+{
+	for (uint16_t addr : _breakpoint_pool) {
+		printf("0x%08x\n", addr);
+	}
+
+}
+
+void Debugger::add_breakpoint(uint16_t addr)
+{
+	if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr) == _breakpoint_pool.end()) {
+		_breakpoint_pool.push_back(addr);
+	}
+}
+
+void Debugger::remove_breakpoint(uint16_t addr)
+{
+	_breakpoint_pool.erase(std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr));
+}
+
+void Debugger::wait_user_interaction(uint16_t pc)
 {
 	char n;
 	static time_t totime = 0;
+	std::string input;
 
-	if (time(NULL) >= totime)
+	if ((totime != 0 && time(NULL) >= totime) || std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), pc) != _breakpoint_pool.end()) {
+		totime = 0;
 		_wait_next = 1;
+	}
 	while (_wait_next) {
-		std::cout << "\nEnter a key" << std::endl;
+		std::cout << "\n: ";
+start:
 		n = getchar();
+		if (n == '\n')
+			goto start;
 		if (n == 's') {
-			totime = time(NULL) + 1;
+			std::cin >> input;
+			totime = time(NULL) + stoi(input);
 			_wait_next = 0;
+		} else if (n == 'b') {
+			std::cin >> input;
+			if (input == "list") {
+				print_instruction_pool();
+				print_breakpoint_list();
+				continue ;
+			}
+			else {
+				add_breakpoint(stoi(input, 0, 16));
+			}
+		} else if (n == 'd') {
+			std::cin >> input;
+			remove_breakpoint(stoi(input, 0, 16));
+		} else if (n == 'c') {
+			_wait_next = 0;
+			break ;
 		}
 		break ;
 	}
