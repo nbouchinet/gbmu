@@ -19,7 +19,7 @@ private:
 public:
   MemoryBus(ComponentsContainer &components);
 
-  template <typename T> T read(Word addr) {
+  template <typename T> T read(Word addr) const {
     T ret = 0;
     auto i = sizeof(T);
 
