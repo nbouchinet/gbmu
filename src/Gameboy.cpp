@@ -6,6 +6,7 @@
 #include "src/UnitWorkingRAM.hpp"
 #include "src/cpu/Core.hpp"
 #include "src/cpu/InterruptController.hpp"
+#include "src/cpu/InputController.hpp"
 #include "src/cpu/Timer.hpp"
 
 #include <exception>
@@ -16,6 +17,7 @@
 ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
   cartridge = std::make_unique<Cartridge>(rom_path);
   interrupt_controller = std::make_unique<InterruptController>(*this);
+  input_controller = std::make_unique<InputController>(*this);
   core = std::make_unique<Core>(*this);
   timer = std::make_unique<Timer>(*this);
   lcd_registers = std::make_unique<LCDRegisters>();
@@ -33,6 +35,24 @@ Gameboy::Gameboy(const std::string &rom_path)
     : _components(rom_path), _debugger(_components) {
   _begin = _components.cartridge->get_begin();
   _end = _components.cartridge->get_end();
+}
+
+void Gameboy::notify_debugger(Debugger::e_dbg_state state){
+	switch (state) {
+		case Debugger::RUN_ONE_SEC:
+			_debugger.set_run_one_sec(true);
+			break;
+		case Debugger::RUN_ONE_FRAME:
+			_debugger.set_run_one_frame(true);
+			break;
+		case Debugger::RUN_ONE_STEP:
+			_debugger.set_run_one_step(true);
+			break;
+	}
+}
+
+void Gameboy::handle_input_wraper(Byte val){
+	_components.input_controller->handle_input(val);
 }
 
 void Gameboy::step() {

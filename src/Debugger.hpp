@@ -10,6 +10,7 @@
 #include <chrono>
 
 class Debugger {
+	
 	public:
 		Debugger(ComponentsContainer &components);
 		struct _instr_info {
@@ -214,6 +215,13 @@ class Debugger {
 		};
 
 	public:
+		typedef enum{
+			RUN_ONE_SEC,
+			RUN_ONE_FRAME,
+			RUN_ONE_STEP
+
+		}e_dbg_state;
+
 		//information fetch
 		//TODO: get_mem_dump();
 		void set_instruction_pool_size(int size) {_frame_size = size;}
@@ -231,6 +239,11 @@ class Debugger {
 
 		void fetch(const Core::Iterator &it, uint16_t pc);
 		bool is_enabled() const { return _enabled; }
+
+		//setters
+		void set_run_one_sec(bool val) { _run_one_sec = val; }
+		void set_run_one_frame(bool val) { _run_one_frame = val; }
+		void set_run_one_step(bool val) { _run_one_step = val; }
 	private:
 		bool is_step_passed();
 		bool is_sec_passed();
