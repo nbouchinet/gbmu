@@ -48,25 +48,44 @@ bool				PPU::isLCDEnabled()
 }
 
 //------------------------------------------------------------------------------
-void				PPU::setupTileData()
+void				PPU::setupSpriteAddressStart()
 {
-	if (testBit(lcdc, 4) == true)
-	{
-		tileDataStart = 0x8000;
-		unsignedTileValues = true;
-	}
-	else
-	{
-		tileDataStart = 0x8800;
-		unsignedTileValues = false;
-	}
+	_spriteDataStart = 0x8000;
+	_spriteSize = 8;
+	if (testBit(_lcdc, 2) == true)
+		_spriteSize = 16;
 }
 
 //------------------------------------------------------------------------------
-void				PPU::setupUsingWindow()
+void				PPU::setupWindow()
 {
-	if (testBit(lcdc, 5) == true && (windowY <= currentScanline))
-		usingWindow = true;	
+	if (testBit(_lcdc, 5) == true && (_windowY <= _currentScanline))
+		_windowingOn = true;
+
+	if (testBit(_lcdc, 6) == true)
+		_windowAttrStart = 0x9C00;
+	else
+		_windowAttrStart = 0x9800;
+}
+
+//------------------------------------------------------------------------------
+void				PPU::setupBackgroundMemoryStart()
+{
+	if (testBit(_lcdc, 4) == true)
+	{
+		_backgroundDataStart = 0x8000;
+		_unsignedTileValues = true;
+	}
+	else
+	{
+		_backgroundDataStart = 0x8800;
+		_unsignedTileValues = false;
+	}
+
+	if (testBit(_lcdc, 3) == true)
+		_backgroundAttrStart = 0x9C00;
+	else
+		_backgroundAttrStart = 0x9800;
 }
 
 //------------------------------------------------------------------------------
@@ -76,55 +95,34 @@ uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
 	uint8_t		tileMemorySize = 16;
 	uint16_t	tileDataAddress;
 
-	if (unsignedTileValues == true)
-		tileDataAddress = tileDataStart + (tileIdentifier * tileMemorySize);
+	if (_unsignedTileValues == true)
+		tileDataAddress = _backgroundDataStart + (tileIdentifier * tileMemorySize);
 	else
-		tileDataAddress = tileDataStart + ((tileIdentifier + offset) * tileMemorySize);
+		tileDataAddress = _backgroundDataStart + ((tileIdentifier + offset) * tileMemorySize);
 	return (tileDataAddress);
-}
-
-//------------------------------------------------------------------------------
-void				PPU::setupBackgroundMemory()
-{
-	uint8_t			lcdc = _components.mem_bus->read<Byte>(0xFF40);
-
-	if (usingWindow == true)
-	{
-		if (testBit(lcdc, 3) == true)
-			backgroundMemory = 0x9C00;
-		else
-			backgroundMemory = 0x9800;
-	}
-	else
-	{
-		if (testBit(lcdc, 6) == true)
-			backgroundMemory = 0x9C00;
-		else
-			backgroundMemory = 0x9800;
-	}
 }
 
 //------------------------------------------------------------------------------
 void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorValue)
 {
-	if (currentScanline < PPU_HEIGHT)
+	if (_currentScanline < LCD_HEIGHT && y < LCD_HEIGHT && x < LCD_WIDTH)
 	{
 		switch (colorValue) // only for DMG, will be different for CGB
 		{
 			case 3 :
 				// black
-				driverScreen.setRGBA(y, x, 0, 0, 0, 255);
+				_driverScreen.setRGBA(y, x, 0, 0, 0, 255);
 				break;
 			case 2 :
-				driverScreen.setRGBA(y, x, 119, 119, 119, 255);
+				_driverScreen.setRGBA(y, x, 119, 119, 119, 255);
 				// dark grey
 				break;
 			case 1 :
-				driverScreen.setRGBA(y, x, 204, 204, 204, 255);
+				_driverScreen.setRGBA(y, x, 204, 204, 204, 255);
 				// light grey
 				break;
 			case 0 :
-				driverScreen.setRGBA(y, x, 255, 255, 255, 255);
+				_driverScreen.setRGBA(y, x, 255, 255, 255, 255);
 				// transparent (white)
 				break;
 		}
@@ -132,83 +130,92 @@ void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorValue)
 }
 
 //------------------------------------------------------------------------------
-void				PPU::renderSprites()
+void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and loads attributes in _spritesLine tab for use later in renderSprites()
 {
-	uint8_t			ySize = 8;
-	uint8_t			spriteAttributesOffset; // offset from the start of the Table in bytes
-	uint16_t		spriteAttributesTableStart = 0xFE00;
+	uint16_t		spriteAttributesOffset; // offset from the start of the Table in bytes
+	uint16_t		spriteAttributesTableStart = 0xFE00; // start of OAM ram for sprites
+	uint8_t			yPosTmp;
+	uint8_t			xPosTmp;
 
-	if (testBit(lcdc, 2) == true)
-		ySize = 16; // extra thicc sprites
+	_nbSprites = 0;
 	for (int sprite = 0; sprite < 40; sprite++)
 	{
-		uint8_t		xPos = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset) - 8;
-		uint8_t		yPos = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 1) - 16;
-		uint8_t		tileNumber = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 2); // the number of the tile data we have to read<Byte> for pixel values
-		uint8_t		spriteAttributes = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 3); // for flips and other datas
+		spriteAttributesOffset = sprite * 4; // 4 bytes of attributes data per sprite;
+		yPosTmp = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset); // in screen !!
+		xPosTmp = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 1); // in screen !!
+		if (_currentScanline >= yPosTmp && (_currentScanline < (yPosTmp + _spriteSize)) && xPosTmp != 0) // IMPORTANT : _spriteSize here might be a flat 16 instead !
+		{
+			_spritesLine[_nbSprite].yPos = yPosTmp // -16 !!!!
+			_spritesLine[_nbSprite].xPos = xPosTmp // -8 !!!!
+			_spritesLine[_nbSprite].tileNumber = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 2); // the number of the tile data we have to read<Byte> for pixel values
+			_spritesLine[_nbSprite].flags = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 3); // for flips and other datas
+			_nbSprites++;
+		}
+		if (_nbSprites >= MAX_SPRITE_PER_LINE) // this allows to only take up to 10 sprites by default
+			return ;
+	}
+}
+
+//------------------------------------------------------------------------------
+void				PPU::renderSprites()
+{
+	for (int sprite = 0; sprite < _nbSprites; sprite++)
+	{
 		bool		xFlip = testBit(spriteAttributes, 5) == true ? true : false;
 		bool		yFlip = testBit(spriteAttributes, 6) == true ? true : false;
 
-		spriteAttributesOffset = sprite * 4; // 4 bytes of attributes data per sprite;
-		spriteAttributes = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset);
 
-		if (currentScanline >= yPos && (currentScanline < (yPos + ySize))) // does scanline intersects the sprite ?
+		int		spriteLine = _currentScanline - yPos; // which line of the sprite does the scanline go through ?
+		if (yFlip == true)
+			spriteLine = (spriteLine - ySize) * (-1);
+		uint16_t	tileLineDataAddress = (0x8000 + (tileNumber * 16)) + spriteLine;
+		for (int pixel = 0; pixel < 8; pixel++)
 		{
-			int		spriteLine = currentScanline - yPos; // which line of the sprite does the scanline go through ?
-			if (yFlip == true)
-				spriteLine = (spriteLine - ySize) * (-1);
-			uint16_t	tileLineDataAddress = (0x8000 + (tileNumber * 16)) + spriteLine;
-			for (int pixel = 0; pixel < 8; pixel++)
-			{
-				uint8_t		linePixel = pixel;
-				uint8_t		data1;
-				uint8_t		data2;
-				uint8_t		colorValue = 0;
+			uint8_t		linePixel = pixel;
+			uint8_t		data1;
+			uint8_t		data2;
+			uint8_t		colorValue = 0;
 
-				if (xFlip == true)
-					linePixel = (linePixel - 7) * (-1);
-				data1 = _components.mem_bus->read<Byte>(tileLineDataAddress);
-				data2 = _components.mem_bus->read<Byte>(tileLineDataAddress + 1);
-				if (testBit(data1, linePixel) == true)
-					colorValue += 2;
-				if (testBit(data2, linePixel) == true)
-					colorValue += 1;
-				setPixelDMG(xPos - scrollX + pixel, currentScanline, colorValue);
-			}
+			if (xFlip == true)
+				linePixel = (linePixel - 7) * (-1);
+			data1 = _components.mem_bus->read<Byte>(tileLineDataAddress);
+			data2 = _components.mem_bus->read<Byte>(tileLineDataAddress + 1);
+			if (testBit(data1, linePixel) == true)
+				colorValue += 2;
+			if (testBit(data2, linePixel) == true)
+				colorValue += 1;
+			setPixelDMG(_currentScanline, xPos - _scrollX + pixel, colorValue);
 		}
+	}
+}
+
+//------------------------------------------------------------------------------
+void				PPU::finishLineBackgroundAsWindow()
+{
+	for (int pix = _windowX; x < LCD_WIDTH; x++)
+	{
+		uint8_t		yPos = _currentScanline - _windowY;
+		
 	}
 }
 
 //------------------------------------------------------------------------------
 void				PPU::renderTiles()
 {
-	lcdc = _components.mem_bus->read<Byte>(0xFF40); // lcdc register
-	stat = _components.mem_bus->read<Byte>(0xFF41); // stat register
-	scrollX = _components.mem_bus->read<Byte>(0xFF42); // start position of the screen in the area (0-255)
-	scrollY = _components.mem_bus->read<Byte>(0xFF43); // same for Y (0-255)
-	currentScanline = _components.mem_bus->read<Byte>(0xFF44);
-	windowX = _components.mem_bus->read<Byte>(0xFF4A); // start position of the window in the screen (7-166)
-	windowY = _components.mem_bus->read<Byte>(0xFF4B) - 7; // same for Y (0-143)
-	// 10 lines of vertical blank
-
-
-	setupUsingWindow();
-	setupBackgroundMemory();
-	setupTileData();
-
-	uint8_t			yPos = 0;
-	uint8_t			xPos = 0;
+	uint8_t			yPos = _currentScanline + _scrollY;
+	uint8_t			xPos = _scrollX;
 	uint16_t		tileRow; // which row of pixels in the tile ? (8 rows of 8 pixels per tile)
 
-	if (!usingWindow)
-		yPos = scrollY + currentScanline;
-	else
-		yPos = currentScanline - windowY;
 
 	tileRow = (((uint8_t)(yPos / 8)) * 32); // add that to tiledata (0x9800 or 0x9C00) start address to get real memory address of first tile in the row
-	for (int i = 0; 
-			i < 160; i++)
+	for (int i = 0; i < 160; i++)
 	{
+		if (_windowingOn == true && i >= _windowX && _currentScanline >= windowY) // are we in the window and is it enabled ?
+		{
+			finishLineBackgroundAsWindow();
+			return ;
+		}
+
 		int16_t			tileNumber;
 		uint16_t		tileCol;
 		uint16_t		tileAddress;
@@ -218,14 +225,14 @@ void				PPU::renderTiles()
 		uint8_t			secondByte;
 		uint8_t			colorValue;
 
-		xPos = scrollX + i;
-		if (usingWindow && i >= windowX)
+		xPos = _scrollX + i;
+		if (_windowingOn && i >= _windowX)
 		{
-			xPos = i - windowX;
+			xPos = i - _windowX;
 		}
 		tileCol = xPos / 8;
-		tileAddress = backgroundMemory + tileRow + tileCol;
-		if (unsignedTileValues)
+		tileAddress = _backgroundDataStart + tileRow + tileCol;
+		if (_unsignedTileValues)
 			tileNumber = (uint8_t)_components.mem_bus->read<Byte>(tileAddress);
 		else
 			tileNumber = (int8_t)_components.mem_bus->read<Byte>(tileAddress);
@@ -241,18 +248,29 @@ void				PPU::renderTiles()
 		if (testBit(secondByte, xPos % 8) == true)
 			colorValue += 1;
 
-		setPixelDMG(i, currentScanline, colorValue);
+		setPixelDMG(_currentScanline, i, colorValue);
 	}
 }
 
 //------------------------------------------------------------------------------
 void				PPU::renderScanLine()
 {
-	lcdc = _components.mem_bus->read<Byte>(0xFF40);
+	_lcdc = _components.mem_bus->read<Byte>(0xFF40); // lcdc register
+	_stat = _components.mem_bus->read<Byte>(0xFF41); // stat register
+	_scrollX = _components.mem_bus->read<Byte>(0xFF42); // start position of the screen in the area (0-255)
+	_scrollY = _components.mem_bus->read<Byte>(0xFF43); // same for Y (0-255)
+	_currentScanline = _components.mem_bus->read<Byte>(0xFF44);
+	_windowX = _components.mem_bus->read<Byte>(0xFF4A); // start position of the window in the screen (7-166)
+	_windowY = _components.mem_bus->read<Byte>(0xFF4B) - 7; // same for Y (0-143)
 
-	if (testBit(lcdc, 0) == true)
+	// 10 lines of vertical blank
+	setupWindow();
+	setupBackgroundMemoryStart();
+	setupSpriteAddressStart();
+
+	if (testBit(_lcdc, 0) == true)
 		renderTiles();
-	if (testBit(lcdc, 1) == true)
+	if (testBit(_lcdc, 1) == true)
 		renderSprites();
 }
 

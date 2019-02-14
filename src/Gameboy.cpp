@@ -20,6 +20,7 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
   lcd_registers = std::make_unique<LCDRegisters>();
   unit_working_ram = std::make_unique<UnitWorkingRAM>();
   mem_bus = std::make_unique<MemoryBus>(*this);
+  ppu = std::make_unique<PPU>(*this);
 }
 
 // Dtor Implementation MUST be here where the types are complete
