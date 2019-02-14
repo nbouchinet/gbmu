@@ -22,8 +22,9 @@ struct ComponentsContainer {
 };
 
 class Accessor;
+class Debugger;
 
-class Gameboy {
+class Gameboy{
 private:
   struct GameSave {
     Byte ram[AMemoryBankController::RAMSize];

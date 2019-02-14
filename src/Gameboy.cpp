@@ -25,15 +25,14 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
 // Dtor Implementation MUST be here where the types are complete
 ComponentsContainer::~ComponentsContainer() {}
 
-Gameboy::Gameboy(const std::string &rom_path) : _components(rom_path) {
+Gameboy::Gameboy(const std::string &rom_path) : _components(rom_path), _debugger(_components) {
   _begin = _components.cartridge->get_begin();
   _end = _components.cartridge->get_end();
 }
 
 void Gameboy::step() {
   if (_debugger.is_enabled()) {
-    _debugger.set_instruction_pool(_begin + _components.core->pc(), _components.core->pc());
-    _debugger.wait_user_interaction(_components.core->pc());
+    _debugger.update(_begin + _components.core->pc(), _components.core->pc());
   }
   _components.core->execute(_begin);
   _components.interrupt_controller->ParseInterrupt();
