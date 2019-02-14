@@ -10,7 +10,7 @@
 class Accessor {
  public:
   ComponentsContainer container;
-  Core core;
+  Core &core;
   Register& getPc(void) { return core._pc; }
   Register& getSp(void) { return core._sp; }
   Register& getAf(void) { return core._af; }
@@ -18,7 +18,7 @@ class Accessor {
   Register& getDe(void) { return core._de; }
   Register& getHl(void) { return core._hl; }
 
-  Accessor() : container("tools/Tetris.gb"), core(container) {}
+  Accessor() : container("tools/Tetris.gb"), core(*container.core) {}
 };
 
 class TestCoreFixture : public ::testing::Test {
@@ -191,7 +191,7 @@ TEST_F(TestCoreFixture, daa) {
 TEST_F(TestCoreFixture, push) {
   Register& spSaved = accessor.getSp();
   Word addrSaved = spSaved.word;
-  Word value = 0x4242;
+  Word value = 0x4245;
 
   accessor.core.instr_push(value);
   Byte b1 = accessor.core.read(addrSaved - 1);

@@ -26,6 +26,7 @@ class Core : public IReadWrite {
   static constexpr std::size_t StackSize = 0x7F;
 
   Core(ComponentsContainer& components) : _components(components) {}
+  Core(const Core &) = delete;
 
   friend class Accessor;
 
