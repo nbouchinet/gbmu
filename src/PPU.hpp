@@ -41,6 +41,8 @@ public:
 	PPU(ComponentsContainer& components);
 	~PPU();
 
+	void					reset();
+
 	virtual Byte			read(Word addr) const;
 	virtual void			write(Word addr, Byte);
 
@@ -74,7 +76,6 @@ public:
 	static constexpr Word	OCPD = 0xFF6B;
 
 private:
-	void					init();
 	uint16_t				get_tile_data_address(uint8_t tile_identifier);
 	uint16_t				determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool boi_its_a_window);
 	uint8_t					read_mem_bank(uint8_t bank, uint16_t address);

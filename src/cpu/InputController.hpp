@@ -15,6 +15,7 @@ class InputController : public IReadWrite {
 		void handle_input(Byte val);
 
 		InputController(ComponentsContainer& components);
+		void reset();
 };
 
 #endif // INPUTCONTROLLER_H

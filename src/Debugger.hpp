@@ -600,6 +600,8 @@ public:
   bool get_run_step() const { return _run_one_step; }
   bool get_lock() const { return _lock.load(); }
 
+  void reset();
+
 private:
   void reset_flags();
   bool is_step_passed();

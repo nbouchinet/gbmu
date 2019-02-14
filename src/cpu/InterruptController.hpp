@@ -28,6 +28,8 @@ public:
 
   void set_IME(bool state) { _IME = state; }
   bool get_IME() const { return _IME; }
+
+  void reset();
 };
 
 #endif /* INTERRUPTCONTROLLER_H */

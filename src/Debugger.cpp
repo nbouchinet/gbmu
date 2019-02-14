@@ -15,6 +15,11 @@ Debugger::Debugger(ComponentsContainer &components)
   _register_pool = construct_register_pool();
 }
 
+void Debugger::reset()
+{
+	update_data(_components.cartridge->get_begin() + _components.core->pc(), _components.core->pc());
+}
+
 Debugger::_debug_info::_debug_info(uint16_t _pc,
                                    const Debugger::_instr_info &_map_info,
                                    std::array<int, 3> _value, uint8_t _size)

@@ -32,7 +32,7 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
 ComponentsContainer::~ComponentsContainer() {}
 
 Gameboy::Gameboy(const std::string &rom_path)
-    : _components(rom_path), _debugger(_components), _wait(false) {}
+    : _components(rom_path), _debugger(_components), _wait(false), _rom_path(rom_path) {}
 
 void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
   switch (state) {
@@ -49,6 +49,21 @@ void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
     _debugger.run_cpu_sec();
     break;
   }
+}
+
+void Gameboy::reset() {
+	_components.mem_bus->reset(_components);
+	_components.core->reset();
+	_components.cartridge->reset(_rom_path);
+	_components.interrupt_controller->reset();
+	_components.input_controller->reset();
+	_components.timer->reset();
+	_components.lcd_registers->reset();
+	_components.ppu->reset();
+	_begin = _components.cartridge->get_begin();
+	_end = _components.cartridge->get_end();
+	init();
+	_debugger.reset();
 }
 
 void Gameboy::handle_input_wraper(Byte val) {
