@@ -4,6 +4,7 @@
 #include "src/Cartridge.hpp"
 #include "src/cpu/Core.hpp"
 #include "src/cpu/InterruptController.hpp"
+#include "src/cpu/InputController.hpp"
 #include "src/cpu/Timer.hpp"
 #include "src/LCDRegisters.hpp"
 #include "src/UnitWorkingRAM.hpp"
@@ -24,4 +25,5 @@ MemoryBus::MemoryBus(ComponentsContainer &components) {
   push_component(0xFF70, 0xFF70, components.unit_working_ram.get());
   push_component(0xFF80, 0xFFFE, components.core.get());
   push_component(0xFFFF, 0xFFFF, components.interrupt_controller.get());
+  push_component(0xFF00, 0xFF00, components.input_controller.get());
 }
