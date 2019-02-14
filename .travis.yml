@@ -1,15 +1,57 @@
-language: c++
+sudo: required
+dist: trusty
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.6
+    packages:
+    # install toolchains
+    - gcc-5
+    - g++-5
+    - clang-3.6
 
-before_install:
-  - sudo apt-get install -y clang
-  - test -n $CC  && unset CC
-  - test -n $CXX && unset CXX
+  matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env: COMPILER=g++-4.9
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: COMPILER=g++-5
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+      env: COMPILER=clang++-3.6
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.7
+          packages:
+            - clang-3.7
+      env: COMPILER=clang++-3.7
 
 install:
   - git clone https://github.com/google/googletest.git && pushd googletest && mkdir build && pushd build && cmake .. && make && sudo make install && popd && popd
 
-compiler:
-  - clang
-
 script:
   - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "make test_all"; fi'
+
