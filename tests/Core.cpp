@@ -52,11 +52,12 @@ class TestCoreFixture : public ::testing::Test {
   void SetUp() override { reset_flags(); }
 };
 
-const std::tuple<Core::Flags, bool>& get_flag_tuple(Core::JumpCondition jc) {
-  static std::tuple<Core::Flags, bool> refs[4] = {{Core::Flags::Z, false},
-                                                  {Core::Flags::Z, true},
-                                                  {Core::Flags::C, false},
-                                                  {Core::Flags::C, true}};
+using Tuple = std::tuple<Core::Flags, bool>;
+const Tuple& get_flag_tuple(Core::JumpCondition jc) {
+  static Tuple refs[4] = {Tuple{Core::Flags::Z, false},
+                          Tuple{Core::Flags::Z, true},
+                          Tuple{Core::Flags::C, false},
+                          Tuple{Core::Flags::C, true}};
   assert(jc != Core::JumpCondition::None);
   return refs[static_cast<int>(jc) - 1];
 }
@@ -316,7 +317,7 @@ TEST_F(TestCoreFixture, ret_c) {
 }
 
 template <typename T>
-void test_add(Accessor &access, T loop_begin, T nibble_mask) {
+void test_add(Accessor& access, T loop_begin, T nibble_mask) {
   constexpr T max = std::numeric_limits<T>::max();
   for (T a = loop_begin; a < max; ++a) {
     for (T b = loop_begin; b < max; ++b) {
