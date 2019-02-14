@@ -55,6 +55,7 @@ private:
 	void					renderSprites(); // does the same with sprites, handle some merging too
 	void					getSpritesForLine();
 	void					sendPixelPipeline();
+	void					blendPixels(t_pixelSegment &holder, t_pixelSegment &contender);
 
 	ScreenOutput			_driverScreen;
 	ComponentsContainer&	_components;
@@ -68,7 +69,7 @@ private:
 	uint8_t					_windowX;				// Coordinates of the start of the window IN the screen (7-166)
 	uint8_t					_windowY;				// Same as above (0-143)
 	uint16_t				_backgroundDataStart;
-	uint16_t				_backgroudChrAttrStart;
+	uint16_t				_backgroundChrAttrStart;
 	uint16_t				_spriteDataStart;
 	uint16_t				_windowChrAttrStart;
 	uint8_t					_spriteSize;
