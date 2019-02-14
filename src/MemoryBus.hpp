@@ -23,7 +23,6 @@ public:
     T ret = 0;
     auto i = sizeof(T);
 
-
     for (const auto &range : _ranged_components) {
       if (addr >= range.begin and addr <= range.end) {
         while (i-- > 0) {
@@ -35,12 +34,13 @@ public:
   }
 
   template <typename T> void write(Word addr, T v) {
-
     auto i = sizeof(T);
 
     for (const auto &range : _ranged_components) {
       if (addr >= range.begin and addr <= range.end) {
-        range.component->write(addr + i, v >> (i * 8));
+        while (i-- > 0) {
+          range.component->write(addr + i, v >> (i * 8));
+        }
       }
     }
   }
