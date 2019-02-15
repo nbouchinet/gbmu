@@ -13,7 +13,6 @@ Debugger::Debugger(ComponentsContainer &components) : _components(components)
 	_register_pool = construct_register_pool();
 }
 
-
 Debugger::_debug_info::_debug_info(uint16_t _pc, const Debugger::_instr_info &_map_info, Core::Iterator _it, uint8_t _size) :
 	pc(_pc),
 	instr(_map_info.instr),
@@ -46,7 +45,7 @@ void Debugger::update(const Core::Iterator &it, uint16_t pc)
 	current = construct_register_pool();
 	diffs = get_differences(_register_pool.cbegin(), current.cbegin());
 	_register_pool = current;
-	//wait_user_interaction(pc);
+	wait_user_interaction(pc);
 }
 
 /**
@@ -80,16 +79,16 @@ void Debugger::set_instruction_pool(const Core::Iterator &it, uint16_t pc)
 			_instr_pool.emplace_back(pc + pc_add, bad_value, it + pc_add, 0);
 		}
 	}
-	//print_instruction_pool();
+	print_instruction_pool();
 }
 
 void Debugger::print_instruction_pool()
 {
-	system("sh -c clear");
+	system("clear");
 	for (Debugger::_debug_info d : _instr_pool) {
-		printf("[0x%08x] %s\t", d.pc, d.instr);
+		printf("[0x%08x] %-15s", d.pc, d.instr);
 		for (uint8_t i = 0; i < d.size; i++) {
-			printf("%x ", d.value[i]);
+			printf("%02x ", d.value[i]);
 		}
 		printf("\n");
 	}
@@ -113,6 +112,24 @@ void Debugger::add_breakpoint(uint16_t addr)
 void Debugger::remove_breakpoint(uint16_t addr)
 {
 	_breakpoint_pool.erase(std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr));
+}
+
+std::vector<uint8_t> Debugger::construct_rom_dump(uint16_t addr)
+{
+	std::vector<uint8_t> hpool(144);
+	std::vector<Byte>::const_iterator rbegin;
+	std::vector<Byte>::const_iterator rend;
+
+	addr = (addr & 0xFFF0);
+	rbegin = _components.cartridge->get_begin() + addr;
+	for (int i = 0; i < 144; i++) {
+		printf("%02x ", *(rbegin + i));
+		hpool.push_back(*(rbegin + i));
+		if (i % 16 == 0)
+			printf("\n");
+	}
+	sleep (1);
+	return hpool;
 }
 
 std::vector<uint16_t> Debugger::construct_register_pool()
@@ -171,28 +188,41 @@ void Debugger::wait_user_interaction(uint16_t pc)
 		std::cout << "\n: ";
 start:
 		n = getchar();
-		if (n == '\n')
-			goto start;
-		if (n == 's') {
-			std::cin >> input;
-			totime = time(NULL) + stoi(input);
-			_wait_next = 0;
-		} else if (n == 'b') {
-			std::cin >> input;
-			if (input == "list") {
-				print_instruction_pool();
-				print_breakpoint_list();
-				continue ;
-			}
-			else {
-				add_breakpoint(stoi(input, 0, 16));
-			}
-		} else if (n == 'd') {
-			std::cin >> input;
-			remove_breakpoint(stoi(input, 0, 16));
-		} else if (n == 'c') {
-			_wait_next = 0;
-			break ;
+		switch (n) {
+			case 'h':
+				std::cout << "\nDebugger commands:\n"
+					<< "h                   -- print this help" << std::endl
+					<< "s {count}           -- run program {count} second" << std::endl
+					<< "b {address/list}    -- respectively: breakpoint at {address} or print the list of breakpoints" << std::endl
+					<< "d {address}         -- remove {address} from breakpoints list" << std::endl
+					<< "r                   -- run program till next breakpoint, or never stop" << std::endl;
+			case '\n':
+				goto start;
+			case 's':
+				std::cin >> input;
+				totime = time(NULL) + stoi(input);
+				_wait_next = 0;
+				break ;
+			case 'b':
+				std::cin >> input;
+				if (input == "list") {
+					print_instruction_pool();
+					print_breakpoint_list();
+					continue ;
+				} else {
+					add_breakpoint(stoi(input, 0, 16));
+				}
+				break ;
+			case 'd':
+				std::cin >> input;
+				remove_breakpoint(stoi(input, 0, 16));
+				break ;
+			case 'r':
+				_wait_next = 0;
+				break ;
+			case 'p':
+				construct_rom_dump(0x0000);
+				break ;
 		}
 		break ;
 	}
