@@ -8,7 +8,6 @@
 #include "MemoryBankController2.hpp"
 #include "MemoryBankController3.hpp"
 #include "MemoryBankController5.hpp"
-#include <memory>
 
 Cartridge::Cartridge(const std::string &rom_path) : rom(0) {
   load_rom(rom_path);
