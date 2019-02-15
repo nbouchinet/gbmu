@@ -18,13 +18,6 @@ private:
   void disableRAM() { isRamEnabled = false; }
 
 public:
-  MemoryBankController1()
-      : ramBank(0), romBank(1), isRomBanking(true),
-        isRamEnabled(false) {
-    romData = 0;
-    ramData = 0;
-  }
-
   MemoryBankController1(std::vector<uint8_t> *romPtr,
                         std::array<uint8_t, 0x20000> *ramPtr)
       : ramBank(0), romBank(1),

@@ -12,7 +12,11 @@ CURR_DIR		:= tests
 TEST_FILES		:= 	sample.cpp \
 				Operations_utils.cpp \
 				Core.cpp \
-				Gameboy.cpp
+				Gameboy.cpp \
+				MemoryBankController1.cpp \
+				MemoryBankController2.cpp \
+				MemoryBankController3.cpp \
+				RealTimeClock.cpp
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
 RUN_TEST_RULES	:= $(addprefix test_, $(TEST_FILES:.cpp=))
