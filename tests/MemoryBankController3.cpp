@@ -7,7 +7,7 @@ protected:
   AMemoryBankController::RAMContainer ramData;
   MemoryBankController3 mbc;
 public:
-  mbc3_f() : mbc(&romData, &ramData) {}
+  mbc3_f() : mbc(romData, ramData) {}
 
   static constexpr auto RAMSize = AMemoryBankController::RAMSize;
 };

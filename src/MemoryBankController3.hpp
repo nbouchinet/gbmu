@@ -26,17 +26,10 @@ private:
   void disableRAM_RTC() { isRamRtcEnabled = false; };
 
 public:
-  MemoryBankController3()
-      : romBank(1), isRamRtcEnabled(false), isRamMode(true), rtc() {
-    romData = 0;
-    ramData = 0;
-  }
-
-  MemoryBankController3(std::vector<uint8_t> *romPtr,
-                        std::array<uint8_t, 0x20000> *ramPtr)
-      : romBank(1), ramBank(0), isRamRtcEnabled(false), isRamMode(true), rtc() {
-    romData = romPtr;
-    ramData = ramPtr;
+  MemoryBankController3(ROMContainer &rom, RAMContainer &ram)
+      : AMemoryBankController(rom, ram), romBank(1), ramBank(0),
+      isRamRtcEnabled(false), isRamMode(true), rtc()
+  {
     memset(&latchData, 0, sizeof(latchData));
   }
 
@@ -76,7 +69,7 @@ public:
       if (!isRamRtcEnabled)
         break;
       if (isRamMode)
-        (*ramData)[(addr - 0xA000) + ramBank * 0x2000] = value;
+        ramData[(addr - 0xA000) + ramBank * 0x2000] = value;
       else
         rtc.set(value);
       break;
@@ -91,14 +84,14 @@ public:
     switch (addr & 0xF000) {
     case 0x0000:
     case 0x3000:
-      return (*romData)[addr];
+      return romData[addr];
     case 0x4000:
     case 0x7000:
-      return (*romData)[(addr - 0x4000) + romBank * 0x4000];
+      return romData[(addr - 0x4000) + romBank * 0x4000];
     case 0xA000:
     case 0xB000:
       if (isRamMode)
-        return (*ramData)[(addr - 0xA000) + ramBank * 0x2000];
+        return ramData[(addr - 0xA000) + ramBank * 0x2000];
       else
         return rtc.get();
     }

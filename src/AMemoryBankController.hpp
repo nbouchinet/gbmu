@@ -13,10 +13,14 @@ public:
   typedef std::vector<Byte> ROMContainer;
 
 protected:
-  ROMContainer *romData;
-  RAMContainer *ramData;
+  ROMContainer &romData;
+  RAMContainer &ramData;
 
 public:
+  AMemoryBankController(ROMContainer &rom, RAMContainer &ram)
+	  : romData(rom), ramData(ram) {}
+  virtual ~AMemoryBankController() {};
+
   virtual void write(uint16_t addr, uint8_t value) = 0;
   virtual uint8_t read(uint16_t addr) const = 0;
 };
