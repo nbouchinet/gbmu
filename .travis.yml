@@ -53,5 +53,5 @@ install:
   - git clone https://github.com/google/googletest.git && pushd googletest && mkdir build && pushd build && cmake .. && make && sudo make install && popd && popd
 
 script:
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "make test_all"; fi'
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "script -qc \"make test_all\" out && grep KO out && exit 1 || exit 0"; fi'
 
