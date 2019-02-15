@@ -10,7 +10,7 @@ public:
   AMemoryBankController::RAMContainer ramData;
   MemoryBankController1 mbc;
 
-  mbc1_f() : mbc(&romData, &ramData) {}
+  mbc1_f() : mbc(romData, ramData) {}
 };
 
 TEST_F(mbc1_f, ram_enabled) {
