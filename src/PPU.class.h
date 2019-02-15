@@ -18,11 +18,17 @@ typedef struct		s_spriteInfo
 	uint8_t			flags;
 }					t_spriteInfo;
 
+typedef struct		s_palette
+{
+	uint8_t			dots[4][3];
+}					t_palette;
+
 typedef struct		s_pixelSegment
 {
 	uint8_t			value;
 	bool			isSprite;
-	t_spriteInfo	*spriteInfo;
+	t_spriteInfo	spriteInfo;
+// need to add stuff related to palette;
 }					t_pixelSegment;
 
 class PPU
@@ -45,10 +51,10 @@ private:
 	bool					isLCDEnabled();
 	void					renderScanLine();
 	void					setPixelDMG(uint8_t y, uint8_t x, uint8_t value);
-	void					finishLineBackgroundAsWindow();
-	void					renderTiles();
-	void					renderSprites();
+	void					renderTiles(); // put pixels in the pipeline from Tiles
+	void					renderSprites(); // does the same with sprites, handle some merging too
 	void					getSpritesForLine();
+	void					sendPixelPipeline();
 
 	ScreenOutput			_driverScreen;
 	ComponentsContainer&	_components;
@@ -62,11 +68,11 @@ private:
 	uint8_t					_windowX;				// Coordinates of the start of the window IN the screen (7-166)
 	uint8_t					_windowY;				// Same as above (0-143)
 	uint16_t				_backgroundDataStart;
-	uint16_t				_backgroundAttrStart;
+	uint16_t				_backgroudChrAttrStart;
 	uint16_t				_spriteDataStart;
-	uint16_t				_windowAttrStart;
+	uint16_t				_windowChrAttrStart;
 	uint8_t					_spriteSize;
-	bool					_unsignedTileValues;
+	bool					_unsignedTileNumbers;
 	bool					_windowingOn;
 
 	t_pixelSegment			_pixelPipeline[LCD_WIDTH];
