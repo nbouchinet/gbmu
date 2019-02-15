@@ -63,9 +63,9 @@ void				PPU::setupWindow()
 		_windowingOn = true;
 
 	if (testBit(_lcdc, 6) == true)
-		_windowAttrStart = 0x9C00;
+		_windowChrAttrStart = 0x9C00;
 	else
-		_windowAttrStart = 0x9800;
+		_windowChrAttrStart = 0x9800;
 }
 
 //------------------------------------------------------------------------------
@@ -74,18 +74,18 @@ void				PPU::setupBackgroundMemoryStart()
 	if (testBit(_lcdc, 4) == true)
 	{
 		_backgroundDataStart = 0x8000;
-		_unsignedTileValues = true;
+		_unsignedTileNumbers = true;
 	}
 	else
 	{
 		_backgroundDataStart = 0x8800;
-		_unsignedTileValues = false;
+		_unsignedTileNumbers = false;
 	}
 
 	if (testBit(_lcdc, 3) == true)
-		_backgroundAttrStart = 0x9C00;
+		_backgroudChrAttrStart = 0x9C00;
 	else
-		_backgroundAttrStart = 0x9800;
+		_backgroudChrAttrStart = 0x9800;
 }
 
 //------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
 	uint8_t		tileMemorySize = 16;
 	uint16_t	tileDataAddress;
 
-	if (_unsignedTileValues == true)
+	if (_unsignedTileNumbers == true)
 		tileDataAddress = _backgroundDataStart + (tileIdentifier * tileMemorySize);
 	else
 		tileDataAddress = _backgroundDataStart + ((tileIdentifier + offset) * tileMemorySize);
@@ -103,11 +103,11 @@ uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
 }
 
 //------------------------------------------------------------------------------
-void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorValue)
+void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorID)
 {
 	if (_currentScanline < LCD_HEIGHT && y < LCD_HEIGHT && x < LCD_WIDTH)
 	{
-		switch (colorValue) // only for DMG, will be different for CGB
+		switch (colorID) // only for DMG, will be different for CGB
 		{
 			case 3 :
 				// black
@@ -157,98 +157,130 @@ void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and 
 }
 
 //------------------------------------------------------------------------------
-void				PPU::renderSprites()
+void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 {
-	for (int sprite = 0; sprite < _nbSprites; sprite++)
-	{
-		bool		xFlip = testBit(spriteAttributes, 5) == true ? true : false;
-		bool		yFlip = testBit(spriteAttributes, 6) == true ? true : false;
-
-
-		int		spriteLine = _currentScanline - yPos; // which line of the sprite does the scanline go through ?
-		if (yFlip == true)
-			spriteLine = (spriteLine - ySize) * (-1);
-		uint16_t	tileLineDataAddress = (0x8000 + (tileNumber * 16)) + spriteLine;
-		for (int pixel = 0; pixel < 8; pixel++)
-		{
-			uint8_t		linePixel = pixel;
-			uint8_t		data1;
-			uint8_t		data2;
-			uint8_t		colorValue = 0;
-
-			if (xFlip == true)
-				linePixel = (linePixel - 7) * (-1);
-			data1 = _components.mem_bus->read<Byte>(tileLineDataAddress);
-			data2 = _components.mem_bus->read<Byte>(tileLineDataAddress + 1);
-			if (testBit(data1, linePixel) == true)
-				colorValue += 2;
-			if (testBit(data2, linePixel) == true)
-				colorValue += 1;
-			setPixelDMG(_currentScanline, xPos - _scrollX + pixel, colorValue);
-		}
-	}
+	
 }
 
 //------------------------------------------------------------------------------
-void				PPU::finishLineBackgroundAsWindow()
+void				PPU::renderSprites()
 {
-	for (int pix = _windowX; x < LCD_WIDTH; x++)
+	getSpritesForLine();
+	for (int sprite = _nbSprites - 1; sprite >= 0; sprite--) // up to 10 sprites on the line
 	{
-		uint8_t		yPos = _currentScanline - _windowY;
-		
+		bool		xFlip = testBit(_spritesLine[sprite].flags, 5) == true ? true : false;
+		bool		yFlip = testBit(_spritesLine[sprite].flags, 6) == true ? true : false;
+
+		int		spriteLine = _currentScanline - yPos; // which line of the sprite does the scanline go through ?
+		if (yFlip == true)
+			spriteLine = (spriteLine - _spriteSize) * (-1);
+		uint16_t	tileLineDataAddress = (_spriteDataStart + (tileNumber * 16)) + spriteLine;
+
+		uint8_t data1 = _components.mem_bus->read<Byte>(tileLineDataAddress);
+		uint8_t data2 = _components.mem_bus->read<Byte>(tileLineDataAddress + 1);
+
+		for (int pixel = 0; pixel < 8; pixel++)
+		{
+			uint8_t		linePixel = pixel;
+			uint8_t		data2;
+			uint8_t		colorID = 0;
+
+			if (xFlip == true)
+				linePixel = (linePixel - 7) * (-1);
+			if (testBit(data1, linePixel) == true)
+				colorID += 2;
+			if (testBit(data2, linePixel) == true)
+				colorID += 1;
+			
+			setPixelDMG(_currentScanline, xPos - _scrollX + pixel, colorID);
+		}
 	}
 }
 
 //------------------------------------------------------------------------------
 void				PPU::renderTiles()
 {
-	uint8_t			yPos = _currentScanline + _scrollY;
-	uint8_t			xPos = _scrollX;
-	uint16_t		tileRow; // which row of pixels in the tile ? (8 rows of 8 pixels per tile)
+	uint8_t			xPos;
+	uint8_t			yPos;
+	bool			boiItsaWindow = false;
 
-
-	tileRow = (((uint8_t)(yPos / 8)) * 32); // add that to tiledata (0x9800 or 0x9C00) start address to get real memory address of first tile in the row
 	for (int i = 0; i < 160; i++)
 	{
-		if (_windowingOn == true && i >= _windowX && _currentScanline >= windowY) // are we in the window and is it enabled ?
-		{
-			finishLineBackgroundAsWindow();
-			return ;
-		}
-
+		if (_windowingOn == true && i >= _windowX - 7 && _currentScanline >= windowY) // are we in the window and is it enabled ?
+			boiItsaWindow = true;
 		int16_t			tileNumber;
 		uint16_t		tileCol;
-		uint16_t		tileAddress;
+		uint16_t		tileRow; // which row of pixels in the tile ? (8 rows of 8 pixels per tile) position in the 256 * 256 area
+		uint16_t		tileLine;
+		uint16_t		tileNumberAddress;
 		uint16_t		tileLocation;
-		uint8_t			tileLine;
-		uint8_t			firstByte;
-		uint8_t			secondByte;
-		uint8_t			colorValue;
 
-		xPos = _scrollX + i;
-		if (_windowingOn && i >= _windowX)
+		if (boiItsaWindow == true)
 		{
-			xPos = i - _windowX;
+			xPos = i - _windowX - 7;
+			yPos = _currentScanline - windowY;
 		}
-		tileCol = xPos / 8;
-		tileAddress = _backgroundDataStart + tileRow + tileCol;
-		if (_unsignedTileValues)
-			tileNumber = (uint8_t)_components.mem_bus->read<Byte>(tileAddress);
 		else
-			tileNumber = (int8_t)_components.mem_bus->read<Byte>(tileAddress);
+		{
+			xPos = _scrollX + i;
+			yPos = _scrollY + _currentScanline;
+		}
+
+		tileRow = (((uint8_t)(yPos / 8)) * 32);								// (0-992) add that to tiledata (0x9800 or 0x9C00) start address to get real memory address of first tile in the row
+		tileCol = xPos / 8;													// (0-32) 
+
+		if (boiItsaWindow == true)
+			tileNumberAddress = _windowChrAttrStart + tileRow + tileCol;	// 1 byte per tileData, just the tile number
+		else
+			tileNumberAddress = _backgroundChrAttrStart + tileRow + tileCol;	// 1 byte per tileData, just the tile number
+
+		if (_unsignedTileNumbers)
+		{
+			tileNumber = (uint8_t)_components.mem_bus->read<Byte>(tileNumberAddress);
+			// in CBG probably get the ATTR stuff from bank 1;
+		}
+		else
+		{
+			tileNumber = (int8_t)_components.mem_bus->read<Byte>(tileNumberAddress);
+			// in CBG probably get the ATTR stuff from bank 1;
+		}
 
 		tileLocation = getTileDataAddress(tileNumber);
-		tileLine = ((yPos % 8) * 2); // 16 bits (2 bytes) per 8 pixels
-		firstByte = _components.mem_bus->read<Byte>(tileLocation + tileLine);
-		secondByte = _components.mem_bus->read<Byte>(tileLocation + tileLine + 1);
+		tileLine = ((yPos % 8) * 2);										// 16 bits (2 bytes) per 8 pixels
 
-		colorValue = 0;
+		uint8_t firstByte = _components.mem_bus->read<Byte>(tileLocation + tileLine);
+		uint8_t secondByte = _components.mem_bus->read<Byte>(tileLocation + tileLine + 1);
+
+		// some shenanigans for color palette here;
+
+		colorID = 0;
 		if (testBit(firstByte, xPos % 8) == true)
-			colorValue += 2;
+			colorID += 2;
 		if (testBit(secondByte, xPos % 8) == true)
-			colorValue += 1;
+			colorID += 1;
+		//put in pipeline
+		_pixelPipeline[i].value = colorID;
+		_pixelPipeline[i].isSprite = false;
+		setPixelDMG(_currentScanline, i, colorID);
+	}
+}
 
-		setPixelDMG(_currentScanline, i, colorValue);
+//------------------------------------------------------------------------------
+void				PPU::sendPixelPipeline()
+{
+	int mode = 0;
+
+	for (int i = 0; i < LCD_WIDTH; i++)
+	{
+		switch (mode /* DMG, CGB etc */)
+		{
+			case 0:
+				break ;
+			case 1:
+				break ;
+			case 2:
+				break ;
+		}
 	}
 }
 
@@ -263,7 +295,6 @@ void				PPU::renderScanLine()
 	_windowX = _components.mem_bus->read<Byte>(0xFF4A); // start position of the window in the screen (7-166)
 	_windowY = _components.mem_bus->read<Byte>(0xFF4B) - 7; // same for Y (0-143)
 
-	// 10 lines of vertical blank
 	setupWindow();
 	setupBackgroundMemoryStart();
 	setupSpriteAddressStart();
@@ -272,6 +303,7 @@ void				PPU::renderScanLine()
 		renderTiles();
 	if (testBit(_lcdc, 1) == true)
 		renderSprites();
+	sendPixelPipeline();
 }
 
 //==============================================================================
