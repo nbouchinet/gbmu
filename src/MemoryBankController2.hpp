@@ -16,12 +16,8 @@ private:
   void disableRAM() { isRamEnabled = false; }
 
 public:
-  MemoryBankController2(std::vector<uint8_t> *romPtr,
-                        std::array<uint8_t, 0x20000> *ramPtr)
-      : romBank(0), isRamEnabled(false) {
-    romData = romPtr;
-    ramData = ramPtr;
-  }
+  MemoryBankController2(ROMContainer &rom, RAMContainer &ram)
+      : AMemoryBankController(rom, ram), romBank(0), isRamEnabled(false) {}
 
   bool getRamEnabled() const { return isRamEnabled; }
   uint8_t getRomBank() const { return romBank; };
@@ -42,7 +38,7 @@ public:
       if (!isRamEnabled)
         break;
       if (addr < 0xA200)
-        (*ramData)[addr - 0xA000] = value & 0xF;
+        ramData[addr - 0xA000] = value & 0xF;
       break;
     default:
       break;
@@ -55,13 +51,13 @@ public:
     switch (addr & 0xF000) {
     case 0x0000:
     case 0x3000:
-      return (*romData)[addr];
+      return romData[addr];
     case 0x4000:
     case 0x7000:
-      return (*romData)[(addr - 0x4000) + romBank * 0x4000];
+      return romData[(addr - 0x4000) + romBank * 0x4000];
     case 0xA000:
       if (addr < 0xA200)
-        return (*ramData)[(addr - 0xA000)] & 0xF;
+        return ramData[(addr - 0xA000)] & 0xF;
     }
     return 0;
   }

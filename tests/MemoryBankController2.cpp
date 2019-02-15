@@ -11,7 +11,7 @@ protected:
   static constexpr auto RAMSize = AMemoryBankController::RAMSize;
 
 public:
-  mbc2_f() : mbc(&romData, &ramData) {}
+  mbc2_f() : mbc(romData, ramData) {}
 };
 
 TEST_F(mbc2_f, ram_enabled) {
