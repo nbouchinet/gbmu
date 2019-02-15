@@ -4,6 +4,7 @@
 #include "src/Fwd.hpp"
 #include "cpu/Core.hpp"
 #include "src/MemoryBus.hpp"
+#include "src/Cartridge.hpp"
 #include <vector>
 #include <map>
 
@@ -137,6 +138,7 @@ class Debugger {
 		std::vector<Word> dumpRom(void);
 
 		std::vector<uint16_t> construct_register_pool();
+		std::vector<uint8_t> construct_rom_dump(uint16_t addr);
 		void set_frame_size(int size) {_frame_size = size;}
 		void add_breakpoint(uint16_t addr);
 		void remove_breakpoint(uint16_t addr);
