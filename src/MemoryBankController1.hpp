@@ -7,8 +7,6 @@
 #include <type_traits>
 #include <vector>
 
-class Accessor;
-
 class MemoryBankController1 : public AMemoryBankController {
 private:
   uint8_t ramBank : 2;
@@ -27,8 +25,6 @@ public:
     romData = romPtr;
     ramData = ramPtr;
   }
-
-  friend class Accessor;
 
   bool getRamEnabled() const { return isRamEnabled; }
   uint8_t getRomBank() const { return romBank; };

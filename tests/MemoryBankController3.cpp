@@ -1,50 +1,44 @@
 #include <gtest/gtest.h>
 #include "src/MemoryBankController3.hpp"
 
-class Accessor {
-public:
+class mbc3_f : public ::testing::Test {
+protected:
   AMemoryBankController::ROMContainer romData;
   AMemoryBankController::RAMContainer ramData;
   MemoryBankController3 mbc;
-
 public:
-  Accessor() : romData(), ramData(), mbc(&romData, &ramData) {}
+  mbc3_f() : mbc(&romData, &ramData) {}
 
   static constexpr auto RAMSize = AMemoryBankController::RAMSize;
 };
 
-class mbc3_f : public ::testing::Test {
-public:
-  Accessor accessor;
-};
-
 TEST_F(mbc3_f, enable_ram) {
 
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 0);
-	accessor.mbc.write(0x0000, 0xA);
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 1);
+	ASSERT_EQ(mbc.getRamEnabled(), 0);
+	mbc.write(0x0000, 0xA);
+	ASSERT_EQ(mbc.getRamEnabled(), 1);
 }
 
 TEST_F(mbc3_f, disable_ram) {
 
-	accessor.mbc.write(0x0000, 0xA);
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 1);
-	accessor.mbc.write(0x0000, 0x42);
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 0);
+	mbc.write(0x0000, 0xA);
+	ASSERT_EQ(mbc.getRamEnabled(), 1);
+	mbc.write(0x0000, 0x42);
+	ASSERT_EQ(mbc.getRamEnabled(), 0);
 }
 
 TEST_F(mbc3_f, disable_disabled_ram) {
 
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 0);
-	accessor.mbc.write(0x0000, 0x42);
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 0);
+	ASSERT_EQ(mbc.getRamEnabled(), 0);
+	mbc.write(0x0000, 0x42);
+	ASSERT_EQ(mbc.getRamEnabled(), 0);
 }
 
 TEST_F(mbc3_f, enable_enabled_ram) {
 
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 0);
-	accessor.mbc.write(0x0000, 0xA);
-	ASSERT_EQ(accessor.mbc.getRamEnabled(), 1);
+	ASSERT_EQ(mbc.getRamEnabled(), 0);
+	mbc.write(0x0000, 0xA);
+	ASSERT_EQ(mbc.getRamEnabled(), 1);
 }
 
 int main(int ac, char* av[]) {
