@@ -8,6 +8,7 @@
 #include "MemoryBankController2.hpp"
 #include "MemoryBankController3.hpp"
 #include "MemoryBankController5.hpp"
+#include <memory>
 
 Cartridge::Cartridge(const std::string &rom_path) : rom(0) {
   load_rom(rom_path);
@@ -26,25 +27,25 @@ bool Cartridge::load_rom(const std::string &path) {
   return (0);
 }
 
-AMemoryBankController *Cartridge::get_mbc(Byte cartridge_type) {
+std::unique_ptr<AMemoryBankController> Cartridge::get_mbc(Byte cartridge_type) {
   switch (cartridge_type) {
   case 0x0:
   case 0x01:
   case 0x02:
   case 0x03:
     std::cout << "Detected MBC1" << std::endl;
-    return new MemoryBankController1(rom, ram);
+    return std::make_unique<MemoryBankController1>(rom, ram);
   case 0x05:
   case 0x06:
     std::cout << "Detected MBC2" << std::endl;
-    return new MemoryBankController2(rom, ram);
+    return std::make_unique<MemoryBankController2>(rom, ram);
   case 0x0F:
   case 0x10:
   case 0x11:
   case 0x12:
   case 0x13:
     std::cout << "Detected MBC3" << std::endl;
-    return new MemoryBankController3(rom, ram);
+    return std::make_unique<MemoryBankController3>(rom, ram);
   case 0x19:
   case 0x1A:
   case 0x1B:
@@ -52,7 +53,7 @@ AMemoryBankController *Cartridge::get_mbc(Byte cartridge_type) {
   case 0x1D:
   case 0x1E:
     std::cout << "Detected MBC5" << std::endl;
-    return new MemoryBankController5(rom, ram);
+    return std::make_unique<MemoryBankController5>(rom, ram);
   default:
     std::cout << static_cast<int>(rom[0x147]) << std::endl;
     return (0);
@@ -64,7 +65,8 @@ void Cartridge::save_ram_to_buffer(
   std::copy(ram.begin(), ram.end(), buffer.begin());
 }
 
-void Cartridge::set_ram_content(Byte (&buffer)[AMemoryBankController::RAMSize]) {
+void Cartridge::set_ram_content(
+    Byte (&buffer)[AMemoryBankController::RAMSize]) {
   for (unsigned int i = 0; i < ram.size(); i++) {
     ram[i] = buffer[i];
   }

@@ -4,12 +4,13 @@
 #include "MemoryBankController1.hpp"
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
+#include <memory>
 
 class Accessor;
 
 class Cartridge : public IReadWrite {
 private:
-  AMemoryBankController *mbc;
+  std::unique_ptr<AMemoryBankController> mbc;
   AMemoryBankController::RAMContainer ram;
   AMemoryBankController::ROMContainer rom;
 
@@ -37,7 +38,7 @@ public:
   }
 
   bool load_rom(const std::string &path);
-  AMemoryBankController *get_mbc(Byte cartridge_type);
+  std::unique_ptr<AMemoryBankController> get_mbc(Byte cartridge_type);
 };
 
 #endif
