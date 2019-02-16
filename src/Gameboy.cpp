@@ -1,12 +1,13 @@
 #include "Gameboy.hpp"
+#include "UnitWorkingRAM.hpp"
 #include "src/Cartridge.hpp"
+#include "src/LCDRegisters.hpp"
 #include "src/MemoryBus.hpp"
 #include "src/cpu/Core.hpp"
 #include "src/cpu/InterruptController.hpp"
 #include "src/cpu/Timer.hpp"
-#include "src/LCDRegisters.hpp"
-#include "UnitWorkingRAM.hpp"
 
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <ostream>
@@ -40,8 +41,12 @@ void Gameboy::step() {
 }
 
 int Gameboy::run() {
-
-  system("sh -c clear");// for debug TODO: remove
+  try {
+    do_checksum();
+  } catch (BadChecksum &e) {
+    throw;
+  }
+  system("sh -c clear"); // for debug TODO: remove
   while (_begin + _components.core->pc() != _end) {
     step();
   }
@@ -109,4 +114,17 @@ void Gameboy::load_save(std::string save_name) {
     in.read(reinterpret_cast<char *>(&gs), size);
     _components.cartridge->set_ram_content(gs.ram);
   }
+}
+
+void Gameboy::do_checksum() {
+  Byte sum = 0;
+
+  for (Word i = 0x0134; i <= 0x14C; i++) {
+    sum = sum - _components.mem_bus->read<Byte>(i) - 1;
+  }
+
+  Byte cartridge_sum = _components.mem_bus->read<Byte>(0x14D);
+
+  if (cartridge_sum != sum)
+    throw BadChecksum();
 }

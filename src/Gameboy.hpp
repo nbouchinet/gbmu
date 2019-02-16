@@ -3,8 +3,8 @@
 
 #include "AMemoryBankController.hpp"
 #include "cpu/Core.hpp"
-#include "src/Fwd.hpp"
 #include "src/Debugger.hpp"
+#include "src/Fwd.hpp"
 
 #include <memory>
 
@@ -36,6 +36,8 @@ private:
 
   friend class Accessor;
 
+  void do_checksum();
+
 public:
   Gameboy(const std::string &rom_path);
   Gameboy() = delete;
@@ -45,6 +47,10 @@ public:
   void init();
   void save(std::string save_name);
   void load_save(std::string save_name);
+
+  class BadChecksum : public std::exception {
+    const char *what() const noexcept { return "Invalid ROM checksum."; }
+  };
 };
 
 #endif
