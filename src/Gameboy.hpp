@@ -1,8 +1,8 @@
 #ifndef GAMEBOY_HPP
 #define GAMEBOY_HPP
 
-#include "AMemoryBankController.hpp"
 #include "cpu/Core.hpp"
+#include "src/AMemoryBankController.hpp"
 #include "src/Debugger.hpp"
 #include "src/Fwd.hpp"
 
