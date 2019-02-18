@@ -14,16 +14,19 @@ Cartridge::Cartridge(const std::string &rom_path) : rom(0) {
   mbc = get_mbc(rom[0x147]);
 }
 
-bool Cartridge::load_rom(const std::string &path) {
+void Cartridge::load_rom(const std::string &path) {
   std::ifstream file(path, std::ios::binary | std::ios::ate);
-  std::streamsize size = file.tellg();
-  file.seekg(0, std::ios::beg);
 
+  if (!file.is_open())
+    throw std::invalid_argument("Could not read ROM file");
+
+  file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+  std::streamsize size = file.tellg();
+
+  file.seekg(0, std::ios::beg);
   rom.resize(size);
-  if (file.read((char *)(rom.data()), size)) {
-    return (1);
-  }
-  return (0);
+  file.read((char *)(rom.data()), size);
 }
 
 std::unique_ptr<AMemoryBankController> Cartridge::get_mbc(Byte cartridge_type) {
