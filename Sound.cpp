@@ -1,4 +1,4 @@
-#include <bitset>
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <memory>
@@ -35,10 +35,6 @@ class SweepUnit : public IModulationUnit {
 
   Byte trigger_steps() const override { return 0x44; /* 00100010 */ }
 
-  Byte get_register() const {
-    return (_sweep_period << 5) | (_negate << 3) | _shift;
-  }
-
   bool call() override {
     if (_current_period-- != 0 or _sweep_period == 0) return true;
     _current_period = _sweep_period;
@@ -46,6 +42,16 @@ class SweepUnit : public IModulationUnit {
     if (new_freq > 0x7f) return false;
     _frequency = new_freq;
     return true;
+  }
+
+  Byte get_register() const {
+    return (_sweep_period << 5) | (_negate << 3) | _shift;
+  }
+
+  void set_register(Byte v) {
+    _sweep_period = v & 0x70;
+    _negate = v & 0x08;
+    _shift = v & 0x07;
   }
 };
 
@@ -55,9 +61,6 @@ class LengthUnit : public IModulationUnit {
   bool _enabled = false;
 
  public:
-  void set_length(Word l) { _length = l; }
-  void enable(bool enable = true) { _enabled = enable; }
-
   Byte trigger_steps() const override { return 0x55; /* 01010101 */ }
 
   bool call() override {
@@ -66,11 +69,14 @@ class LengthUnit : public IModulationUnit {
     --_length;
     return true;
   }
+
+  void set_length(Word l) { _length = l; }
+  void enable(bool enable = true) { _enabled = enable; }
 };
 
 class EnvelopeUnit : public IModulationUnit {
  private:
-  Byte _negate : 1;
+  bool _negate : 1;
   Byte _period : 3;
   bool _enabled = false;
   Byte _current_period = 0;
@@ -92,6 +98,12 @@ class EnvelopeUnit : public IModulationUnit {
       _volume += (_negate) ? -1 : 1;
     return true;
   }
+
+  void set_negate(bool v) { _negate = v; }
+  void set_period(Byte v) {
+    _period = v;
+    _current_period = v;
+  }
 };
 // -----------------------------------------------------------------------------
 
@@ -100,14 +112,13 @@ class SoundChannel {
   using ModUnitPtr = IModulationUnit*;
   std::vector<ModUnitPtr> _modulation_units;
 
-  virtual void do_update() = 0;
-
  protected:
   int p_output_volume = 0;
   bool p_muted = true;
   bool p_enabled = true;
 
   void bind_module(ModUnitPtr module) { _modulation_units.push_back(module); }
+  SoundChannel() = default;
 
  public:
   virtual ~SoundChannel() = default;
@@ -118,16 +129,17 @@ class SoundChannel {
       if (test_bit(modulation_unit_step, modulation_unit->trigger_steps()))
         if (not modulation_unit->call()) p_enabled = false;
     }
-    do_update();
   }
 
-  int get_output() const { return (p_muted) ? 0 : p_output_volume; }
+  int get_output() const {
+    return (p_muted or not p_enabled) ? 0 : p_output_volume;
+  }
 };
 
-class SquareChannel : public SoundChannel {
+class SquareUnit : public IModulationUnit {
  private:
-  static const std::array<Byte, 4> s_waveforms{
-      0x1,  /* 00000001 */
+  static constexpr std::array<Byte, 4> s_waveforms{
+      0x01, /* 00000001 */
       0x81, /* 10000001 */
       0x87, /* 10000111 */
       0x7E  /* 01111110 */
@@ -135,14 +147,18 @@ class SquareChannel : public SoundChannel {
   Byte _waveform_selected = 2;
   Byte _waveform_step = 0;
   Word _frequency = 0;
-  Word _timer = 0;
-  bool _init = false;
-  int _volume = 0;
 
-  SweepUnit _sweep;
-  // LengthUnit _length;
+  int& _volume;
+  int& _output_volume;
+  Word& _timer;
 
-  void do_update() override {
+ public:
+  SquareUnit() = delete;
+  SquareUnit(int& volume, int& out_volume, Word& timer)
+      : _volume(volume), _output_volume(out_volume), _timer(timer) {}
+
+  Byte trigger_steps() const override { return 0xff; }
+  bool call() override {
     if (_timer == 0) {
       assert(_frequency);
       _timer = (2048 - _frequency) *
@@ -151,14 +167,69 @@ class SquareChannel : public SoundChannel {
     if (++_waveform_step >= 8) _waveform_step = 0;
     Byte waveform = s_waveforms[_waveform_selected];
     if (test_bit(_waveform_step, waveform))
-      p_output_volume = _volume;
+      _output_volume = _volume;
     else
-      p_output_volume = 0;
+      _output_volume = 0;
     --_timer;
+    return true;
   }
 
+  void set_waveform_selected(Byte v) { _waveform_selected = v; }
+  auto &frequency() { return _frequency; }
+};
+
+class SquareChannel : public SoundChannel {
+ private:
+  int _volume = 0;
+  int _volume_load = 0;
+  Word _timer = 0;
+
+  SweepUnit _sweep;
+  SquareUnit _square;
+  LengthUnit _length;
+  EnvelopeUnit _envelope;
+
+  bool _sweep_enabled;
+
  public:
-  SquareChannel() : _sweep(_frequency) { bind_module(&_sweep); }
+  SquareChannel(bool sweep_enabled = true)
+      : _sweep(_timer),
+        _square(_volume, p_output_volume, _timer),
+        _envelope(_volume),
+        _sweep_enabled(sweep_enabled) {
+    if (sweep_enabled) bind_module(&_sweep);
+    bind_module(&_square);
+    bind_module(&_length);
+    bind_module(&_envelope);
+  }
+
+  void write(Word addr, Byte v) {
+    assert((addr & 0xfff0) == 0xff10);
+    switch ((addr & 0xf) % 5) {
+      case 0x0:
+        assert(_sweep_enabled);
+        _sweep.set_register(v);
+        break;
+      case 0x1:
+        _square.set_waveform_selected(v & 0xC0);
+        _length.set_length(v & 0x3f);
+        break;
+      case 0x2:
+        _volume = _volume_load = v & 0xf0;
+        _envelope.set_negate(~(v & 0x8));
+        _envelope.set_period(v & 0x7);
+        break;
+      case 0x3:
+        _square.frequency() = (static_cast<Word>(v) << 3) | (_square.frequency() & 0x7);
+        break;
+      case 0x4:
+        if (v & 0x80)
+          trigger_modules();
+        _length.enable(v & 0x40);
+        _square.frequency() &= v & 0x7;;
+        break;
+    }
+  }
 };
 
 // -----------------------------------------------------------------------------
@@ -166,7 +237,7 @@ class SquareChannel : public SoundChannel {
 class APU {
  private:
   std::vector<std::unique_ptr<SoundChannel>> _channels;
-  unsigned int _cpu_cycles = CPU_FREQ / 512;
+  int _cpu_cycles = CPU_FREQ / 512;
   unsigned int _modulation_units_steps = 0;
 
  public:
