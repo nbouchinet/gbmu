@@ -1,127 +1,160 @@
-#!/usr/bin/python3
-import argparse
-from enum import Enum
-from collections import namedtuple
+import json
 
-class Indexes(Enum):
-    NAME = 0
-    ARGS = 1
-    OPCODE = 2
-    CYCLES = 3
+FORMAT_NONE             = "exec_instruction([&] () {{ instr_{}(); }}, {})"
 
-Argument = namedtuple("Argument", ["is_deref_addr", "value"])
+FORMAT_SINGLE           = "exec_instruction([&] () {{ instr_{}({}); }}, {})"
+FORMAT_SINGLE_BYTE      = "exec_instruction([&] (Byte &v) {{ instr_{}({}); }}, {}, {})"
+FORMAT_SINGLE_WORD      = "exec_instruction([&] (Word &v) {{ instr_{}({}); }}, {}, {})"
 
-FORMAT_1 = "exec_instruction([&] () {{ instr_{}({}); }}, {});"
+FORMAT_DOUBLE           = "exec_instruction([&] () {{ instr_{}({}, {}); }}, {})"
+FORMAT_DOUBLE_BYTE      = "exec_instruction([&] (Byte &v) {{ instr_{}({}, {}); }}, {}, {})"
+FORMAT_DOUBLE_WORD      = "exec_instruction([&] (Word &v) {{ instr_{}({}, {}); }}, {}, {})"
 
-FORMAT_2 = "exec_instruction([&] ({} &v) {{ instr_{}(v{}); }}, {}, {});"
+def get_deref(mnemonic, operand1, operand2):
+    if "(" in operand1:
+        operand = operand1
+    elif "(" in operand2:
+        operand = operand2
+    else:
+        # Should not happen
+        abort()
+        return None
 
-REGISTERS = {"A": "_af.high", "F": "_af.low", "AF": "_af.word",
-             "B": "_bc.high", "C": "_bc.low", "BC": "_bc.word",
-             "D": "_de.high", "E": "_de.low", "DE": "_de.word",
-             "H": "_hl.high", "L": "_hl.low", "HL": "_hl.word",
-             "SP": "_sp.word"}
+    operand     = operand[1:-1]
+    registers   = {
+        "HL": "_hl.word", "DE": "_de.word",
+        "C": "_bc.low", "BC": "_bc.word",
+        "a16": "fetch_word()", "a8": "*it++",
+        "d8": "*it++", "d16": "fetch_word()"
+    }
+    return registers.get(operand)
 
-CONDITIONS = { "-": "None",
-               "NZ": "NonZero",
-               "Z": "Zero",
-               "NC": "NonCarry",
-               "C": "Carry"}
+def get_reg(mnemonic, operand):
+    registers = {
+        "AF": "_af.word", "BC": "_bc.word",
+        "DE": "_de.word", "HL": "_hl.word",
+        "A": "_af.high", "F": "_af.low",
+        "B": "_bc.high", "C": "_bc.low",
+        "D": "_de.high", "E": "_de.low",
+        "H": "_hl.high", "L": "_hl.low",
+        "SP": "_sp.word",
+        "d8": "*it++", "d16": "fetch_word()",
+        "r8": "*it++",
+        "SP+r8": "static_cast<Word>(_sp.word + *it++)"
+    }
 
-parser = argparse.ArgumentParser()
-parser.add_argument("file", help="the instruction table file")
-parser.add_argument("--debug", help="add debugs prints to std::cerr", action="store_true")
-params = parser.parse_args()
+    if mnemonic == "jr" or mnemonic == "jp" or mnemonic == "call" or mnemonic == "ret":
+        condprefix = "JumpCondition::"
+        conditionals = {
+            "C": "Carry", "NC": "NonCarry", "Z": "Zero", "NZ": "NonZero",
+        }
+        condreg = {
+            "r8": "*it++", "a16": "fetch_word()"
+        }
+        cond = conditionals.get(operand)
+        if cond is not None:
+            return condprefix + cond
+        return condreg.get(operand)
 
-def get_arg(arg):
-    fmt = "{}"
-    is_deref_addr = False
-    if arg[0] == "(":
-        arg = arg[1:len(arg)-1]
-        is_deref_addr = True
-    if arg[:6] == "$FF00+":
-        fmt = fmt.format("0xFF00 + {}")
-        arg = arg[6:]
-    if arg in ("n", "b"):
-        return Argument(is_deref_addr, fmt.format("*it++"))
-    if arg == "nn":
-        return Argument(is_deref_addr, fmt.format("fetch_word()"))
-    register = REGISTERS.get(arg)
-    if register != None:
-        return Argument(is_deref_addr, fmt.format(register))
-    if (arg[:2] == "c:"):
-        return Argument(False, "JumpCondition::" + CONDITIONS.get(arg[2:]))
-    return Argument(False, arg)
+    if mnemonic == "rst":
+        rst =  {
+            "00H": "0x00", "08H": "0x08",
+            "10H": "0x10", "18H": "0x18",
+            "20H": "0x20", "28H": "0x28",
+            "30H": "0x30", "38H": "0x38"
+        }
+        return rst.get(operand)
 
-def parse_args(args):
-    ret = list()
-    args = args.split(",")
-    for arg in args:
-        if arg != "-/-":
-            ret.append(get_arg(arg))
-    return ret
+    reg = registers.get(operand)
+    if reg is None:
+        return operand
+    return reg
 
-def print_debug(name, args):
-    fmt = 'std::cerr << std::hex << "{}(" << {} << ")" << std::endl;';
-    args_list = list()
-    args_len = len(args)
-    for e in args:
-        arg_str = '"'
-        if e.is_deref_addr:
-            arg_str += "&"
-        arg_str += e.value
-        if e.value.startswith("JumpCondition::"):
-            args_list.append(arg_str + '"')
-            continue
-        args_list.append(arg_str + '="')
-        arg_str = '+'
-        if e.is_deref_addr:
-            arg_str += "_components.mem_bus->read<Byte>("
-        if e.value == "fetch_word()":
-            arg_str += 'static_cast<Word>(*it << 8 | *(it + 1))'
-        elif e.value == "*it++":
-            arg_str += '*it'
+def gen_code(opcodes):
+    for key, opcode in opcodes.items():
+        current_format      = None
+        deref               = None
+        addr                = opcode["addr"]
+        mnemonic            = opcode["mnemonic"].lower()
+        operand1            = opcode.get("operand1")
+        operand2            = opcode.get("operand2")
+
+        cycles              = opcode.get("cycles")
+        if len(cycles) > 1:
+            cycles = str(cycles[0]) + ", " + str(cycles[1])
         else:
-            arg_str += e.value
-        if e.is_deref_addr:
-            arg_str += ")"
-        args_list.append(arg_str)
-    if len(args_list) != 0:
-        print(fmt.format(name, ' << " " << '.join(args_list)))
-    else:
-        print(fmt.format(name, '""'))
+            cycles = str(cycles[0])
 
+        exec_instruction    = None
 
-file = open(params.file, "r")
+        first_is_deref = False
+        if (operand1 and "(" in operand1) or (operand2 and ("(" in operand2)):
+            deref = get_deref(mnemonic, operand1, operand2)
+            if operand1 and "(" in operand1:
+                first_is_deref = True
 
-for line in file:
-    if line == "<CB>\n":
-       print("case 0xCB:\nswitch(*it++) {")
-    elif line == "</CB>\n":
-        print("}\nbreak;")
-    else:
-        line = line.split()
-        print("case 0x{}:".format(line[Indexes.OPCODE.value]))
-        name = line[Indexes.NAME.value]
-        args = parse_args(line[Indexes.ARGS.value])
-        cycles = line[Indexes.CYCLES.value]
-        if params.debug:
-            print_debug(name, args)
-        if len(args) != 0 and args[0].is_deref_addr:
-            if len(args) < 2:
-                print(FORMAT_2.format("Byte", name, "", args[0].value, cycles))
+        cpp_op1 = get_reg(mnemonic, operand1)
+        cpp_op2 = get_reg(mnemonic, operand2)
+
+        # Introducing annoying instruction #1: LDH
+        if mnemonic == "ldh":
+            if operand1 == "A":
+                exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic + "_a_v", "_af.high", "v", "0xFF00 + *it++", cycles)
             else:
-                if "word" in args[1].value:
-                    print(FORMAT_2.format("Word", name, ", " + args[1].value, args[0].value, cycles))
+                exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic + "_v_a", "v", "_af.high", "0xFF00 + *it++", cycles)
+        elif operand1 and operand2:
+            if operand2 == "SP":
+                if deref:
+                    exec_instruction = FORMAT_DOUBLE_WORD.format(
+                            mnemonic.lower(),
+                            "v" if first_is_deref else cpp_op1,
+                            "v" if not first_is_deref else cpp_op2,
+                            deref, cycles)
                 else:
-                    print(FORMAT_2.format("Byte", name, ", " + args[1].value, args[0].value, cycles))
+                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
+            else:
+                if deref:
+                    exec_instruction = FORMAT_DOUBLE_BYTE.format(
+                            mnemonic.lower(),
+                            "v" if first_is_deref else cpp_op1,
+                            "v" if not first_is_deref else cpp_op2,
+                            deref, cycles)
+                else:
+                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
+        elif operand1:
+            # Thanks to Alaric's handling of these instructions
+            if mnemonic == "sub" or mnemonic == "and" or mnemonic == "or" or mnemonic == "xor" or mnemonic == "cp":
+                cpp_op1 = "_af.high"
+                cpp_op2 = get_reg(mnemonic, operand1)
+                first_is_deref = False
+                if deref:
+                    exec_instruction = FORMAT_DOUBLE_BYTE.format(
+                            mnemonic.lower(),
+                            "v" if first_is_deref else cpp_op1,
+                            "v" if not first_is_deref else cpp_op2,
+                            deref, cycles)
+                else:
+                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
+            elif deref:
+                exec_instruction = FORMAT_SINGLE_BYTE.format(mnemonic, "v", deref, cycles)
+            else:
+                exec_instruction = FORMAT_SINGLE.format(mnemonic, cpp_op1, cycles)
         else:
-            str_args = ""
-            for e in args:
-                if e.is_deref_addr:
-                    str_args += "_components.mem_bus->read<Byte>(" + e.value +")"
-                else:
-                    str_args += e.value
-                str_args += ", "
-            print(FORMAT_1.format(name, str_args[:len(str_args) - 2], cycles))
-        print("break;")
-file.close()
+            exec_instruction = FORMAT_NONE.format(mnemonic, cycles)
+
+        # print(addr, mnemonic, operand1, operand2, cycles, "deref: " + str(deref), exec_instruction, sep="\t")
+        print("case " + addr + ":")
+        print("  " + exec_instruction + ";")
+        print("  break;")
+
+
+opcodes = open("opcodes.json", "r").read()
+opcodes = json.loads(opcodes)
+
+del opcodes["unprefixed"]["0xcb"]
+
+gen_code(opcodes.get("unprefixed"))
+print("  case 0xCB:")
+print("switch (*it++) {")
+gen_code(opcodes.get("cbprefixed"))
+print("}")
