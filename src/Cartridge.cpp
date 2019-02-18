@@ -32,29 +32,29 @@ std::unique_ptr<AMemoryBankController> Cartridge::get_mbc(Byte cartridge_type) {
   case 0x01:
   case 0x02:
   case 0x03:
-    std::cout << "Detected MBC1" << std::endl;
-    return std::make_unique<MemoryBankController1>(rom, ram);
+    //std::cout << "Detected MBC1" << std::endl;
+    return new MemoryBankController1(&rom, &ram);
   case 0x05:
   case 0x06:
-    std::cout << "Detected MBC2" << std::endl;
-    return std::make_unique<MemoryBankController2>(rom, ram);
+    //std::cout << "Detected MBC2" << std::endl;
+    return new MemoryBankController2(&rom, &ram);
   case 0x0F:
   case 0x10:
   case 0x11:
   case 0x12:
   case 0x13:
-    std::cout << "Detected MBC3" << std::endl;
-    return std::make_unique<MemoryBankController3>(rom, ram);
+    //std::cout << "Detected MBC3" << std::endl;
+    return new MemoryBankController3(&rom, &ram);
   case 0x19:
   case 0x1A:
   case 0x1B:
   case 0x1C:
   case 0x1D:
   case 0x1E:
-    std::cout << "Detected MBC5" << std::endl;
-    return std::make_unique<MemoryBankController5>(rom, ram);
+    //std::cout << "Detected MBC5" << std::endl;
+    return new MemoryBankController5(&rom, &ram);
   default:
-    std::cout << static_cast<int>(rom[0x147]) << std::endl;
+    //std::cout << static_cast<int>(rom[0x147]) << std::endl;
     return (0);
   }
 }
