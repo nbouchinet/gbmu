@@ -11,12 +11,12 @@
 // ld
 // ----------------------------------------------------------------------------
 
-void Core::instr_ldd(Byte& a, Byte b) {
+void Core::instr_ldd(Byte &a, Byte b) {
   a = b;
   --_hl.word;
 }
 
-void Core::instr_ldi(Byte& a, Byte b) {
+void Core::instr_ldi(Byte &a, Byte b) {
   a = b;
   ++_hl.word;
 }
@@ -38,6 +38,12 @@ void Core::instr_ldhl(Byte n) {
   set_flag(Flags::N, false);
 }
 
+// ldh A,(a8)
+void Core::instr_ldh_a_v(Byte, Byte &v) { _af.high = v; }
+
+// ldh (a8),A
+void Core::instr_ldh_v_a(Byte &v, Byte) { v = _af.high; }
+
 // ----------------------------------------------------------------------------
 // Push/pop
 // ----------------------------------------------------------------------------
@@ -47,7 +53,7 @@ void Core::instr_push(Word v) {
   _components.mem_bus->write(--_sp.word, static_cast<Byte>((v & 0x00FF)));
 }
 
-void Core::instr_pop(Word& dest) {
+void Core::instr_pop(Word &dest) {
   dest = _components.mem_bus->read<Byte>(_sp.word++);
   dest |= static_cast<Word>(_components.mem_bus->read<Byte>(_sp.word++)) << 8;
 }
@@ -56,14 +62,14 @@ void Core::instr_pop(Word& dest) {
 // Add/sub
 // ----------------------------------------------------------------------------
 
-void Core::instr_adc(Byte& a, Byte b) {
+void Core::instr_adc(Byte &a, Byte b) {
   instr_add<Byte, Byte>(a, get_flag(Flags::C));
   Byte saved_flags = _af.low;
   instr_add(a, b);
   _af.low |= (saved_flags & 0x30);
 }
 
-void Core::instr_sub(Byte& a, Byte b) {
+void Core::instr_sub(Byte &a, Byte b) {
   _af.low = 0x40u;
   Byte overflowing_nibbles = check_sub_overflows(a, b);
   set_flag(Flags::H, test_bit(4, overflowing_nibbles));
@@ -72,7 +78,7 @@ void Core::instr_sub(Byte& a, Byte b) {
   set_flag(Flags::Z, a == 0u);
 }
 
-void Core::instr_sbc(Byte& a, Byte b) {
+void Core::instr_sbc(Byte &a, Byte b) {
   bool c = get_flag(Flags::C);
   instr_sub(a, b);
   Byte saved_flags = _af.low;
@@ -84,25 +90,25 @@ void Core::instr_sbc(Byte& a, Byte b) {
 // Logical operations
 // ----------------------------------------------------------------------------
 
-void Core::instr_and(Byte& a, Byte b) {
+void Core::instr_and(Byte &a, Byte b) {
   a &= b;
   _af.low = 0x20u;
   set_flag(Flags::Z, a == 0u);
 }
 
-void Core::instr_or(Byte& a, Byte b) {
+void Core::instr_or(Byte &a, Byte b) {
   a |= b;
   _af.low = 0x0u;
   set_flag(Flags::Z, a == 0u);
 }
 
-void Core::instr_xor(Byte& a, Byte b) {
+void Core::instr_xor(Byte &a, Byte b) {
   a ^= b;
   _af.low = 0x0u;
   set_flag(Flags::Z, a == 0u);
 }
 
-void Core::instr_cp(Byte& a, Byte b) {
+void Core::instr_cp(Byte &a, Byte b) {
   Byte tmp = a;
   instr_sub(tmp, b);
 }
@@ -111,7 +117,7 @@ void Core::instr_cp(Byte& a, Byte b) {
 // Increment/decrement
 // ----------------------------------------------------------------------------
 
-void Core::instr_inc(Byte& b) {
+void Core::instr_inc(Byte &b) {
   set_flag(Flags::N, false);
   Byte overflowing_nibbles = check_add_overflows(b, Byte(1u));
   set_flag(Flags::H, test_bit(3, overflowing_nibbles));
@@ -119,9 +125,9 @@ void Core::instr_inc(Byte& b) {
   set_flag(Flags::Z, b == 0u);
 }
 
-void Core::instr_inc(Word& b) { ++b; }
+void Core::instr_inc(Word &b) { ++b; }
 
-void Core::instr_dec(Byte& b) {
+void Core::instr_dec(Byte &b) {
   set_flag(Flags::N, true);
   Byte overflowing_nibbles = check_sub_overflows(b, Byte(1u));
   set_flag(Flags::H, test_bit(4, overflowing_nibbles));
@@ -133,7 +139,7 @@ void Core::instr_dec(Byte& b) {
 // Miscellaneous
 // ----------------------------------------------------------------------------
 
-void Core::instr_dec(Word& b) { --b; }
+void Core::instr_dec(Word &b) { --b; }
 
 /*
  * Turn the content of A that has been affected by an 'add' or a 'sub' between
@@ -145,7 +151,8 @@ void Core::instr_dec(Word& b) { --b; }
 void Core::instr_daa() {
   Byte correction_mask = 0u;
 
-  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9)) correction_mask |= 0x6;
+  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9))
+    correction_mask |= 0x6;
   if (get_flag(Flags::C) || _af.high > 0x99) {
     correction_mask |= 0x60;
     set_flag(Flags::C, true);
@@ -155,9 +162,7 @@ void Core::instr_daa() {
   set_flag(Flags::Z, _af.high == 0);
 }
 
-void Core::instr_halt() {
-  _halt = true;
-}
+void Core::instr_halt() { _halt = true; }
 
 // ----------------------------------------------------------------------------
 // Flags manipulation
@@ -187,17 +192,17 @@ void Core::instr_ei() { _components.interrupt_controller->SetIME(1); }
 
 bool Core::can_jump(JumpCondition jc) {
   switch (jc) {
-    case JumpCondition::None:
-      return true;
-      break;
-    case JumpCondition::NonZero:
-      return !get_flag(Flags::Z);
-    case JumpCondition::Zero:
-      return get_flag(Flags::Z);
-    case JumpCondition::NonCarry:
-      return !get_flag(Flags::C);
-    case JumpCondition::Carry:
-      return get_flag(Flags::C);
+  case JumpCondition::None:
+    return true;
+    break;
+  case JumpCondition::NonZero:
+    return !get_flag(Flags::Z);
+  case JumpCondition::Zero:
+    return get_flag(Flags::Z);
+  case JumpCondition::NonCarry:
+    return !get_flag(Flags::C);
+  case JumpCondition::Carry:
+    return get_flag(Flags::C);
   }
   return false;
 }
@@ -208,12 +213,30 @@ bool Core::can_jump(JumpCondition jc) {
 
 void Core::instr_jp(JumpCondition jc, Word addr) {
   _in_jump_state = can_jump(jc);
-  if (_in_jump_state) _pc.word = addr;
+  if (_in_jump_state) {
+    _pc.word = addr;
+    _has_jumped = true;
+  }
+}
+
+void Core::instr_jp(Word addr) {
+  _in_jump_state = true;
+  _pc.word = addr;
+  _has_jumped = true;
 }
 
 void Core::instr_jr(JumpCondition jc, Byte rel) {
   int8_t signed_rel = rel;
-  if (can_jump(jc)) _pc.word += signed_rel;
+  if (can_jump(jc)) {
+    _pc.word += signed_rel;
+    _has_jumped = true;
+  }
+}
+
+void Core::instr_jr(Byte rel) {
+  int8_t signed_rel = rel;
+  _pc.word += signed_rel;
+  _has_jumped = true;
 }
 
 void Core::instr_call(JumpCondition jc, Word addr) {
@@ -221,12 +244,29 @@ void Core::instr_call(JumpCondition jc, Word addr) {
   if (_in_jump_state) {
     instr_push(_pc.word + 3);
     _pc.word = addr;
+    _has_jumped = true;
   }
+}
+
+void Core::instr_call(Word addr) {
+  _in_jump_state = true;
+  instr_push(_pc.word + 3);
+  _pc.word = addr;
+  _has_jumped = true;
 }
 
 void Core::instr_ret(JumpCondition jc) {
   _in_jump_state = can_jump(jc);
-  if (_in_jump_state) instr_pop(_pc.word);
+  if (_in_jump_state) {
+    instr_pop(_pc.word);
+    _has_jumped = true;
+  }
+}
+
+void Core::instr_ret() {
+  _in_jump_state = true;
+  instr_pop(_pc.word);
+  _has_jumped = true;
 }
 
 // ----------------------------------------------------------------------------
@@ -248,16 +288,16 @@ void Core::instr_rst(Byte addr) {
 // Byte shift and rotations
 // ----------------------------------------------------------------------------
 
-void Core::flag_handle(std::function<void(Byte&)> action, Byte& reg) {
+void Core::flag_handle(std::function<void(Byte &)> action, Byte &reg) {
   set_flag(Flags::N, false);
   set_flag(Flags::H, false);
   action(reg);
   set_flag(Flags::Z, reg == 0);
 }
 
-void Core::instr_rlc(Byte& reg) {
+void Core::instr_rlc(Byte &reg) {
   flag_handle(
-      [this](Byte& reg) {
+      [this](Byte &reg) {
         bool bit7 = test_bit(7, reg);
         set_flag(Flags::C, bit7);
         reg <<= 1;
@@ -266,9 +306,9 @@ void Core::instr_rlc(Byte& reg) {
       reg);
 }
 
-void Core::instr_rl(Byte& reg) {
+void Core::instr_rl(Byte &reg) {
   flag_handle(
-      [this](Byte& reg) {
+      [this](Byte &reg) {
         bool bit7 = test_bit(7, reg);
         reg <<= 1;
         reg |= get_flag(Flags::C);
@@ -277,9 +317,9 @@ void Core::instr_rl(Byte& reg) {
       reg);
 }
 
-void Core::instr_rrc(Byte& reg) {
+void Core::instr_rrc(Byte &reg) {
   flag_handle(
-      [this](Byte& reg) {
+      [this](Byte &reg) {
         bool bit0 = test_bit(0, reg);
         set_flag(Flags::C, bit0);
         reg >>= 1;
@@ -288,9 +328,9 @@ void Core::instr_rrc(Byte& reg) {
       reg);
 }
 
-void Core::instr_rr(Byte& reg) {
+void Core::instr_rr(Byte &reg) {
   flag_handle(
-      [this](Byte& reg) {
+      [this](Byte &reg) {
         bool bit0 = test_bit(0, reg);
         reg >>= 1;
         reg |= get_flag(Flags::C) << 7;
@@ -299,27 +339,27 @@ void Core::instr_rr(Byte& reg) {
       reg);
 }
 
-void Core::instr_sla(Byte& reg) {
+void Core::instr_sla(Byte &reg) {
   flag_handle(
-      [this](Byte& reg) {
+      [this](Byte &reg) {
         set_flag(Flags::C, test_bit(7, reg));
         reg <<= 1;
       },
       reg);
 }
 
-void Core::instr_sra(Byte& reg) {
+void Core::instr_sra(Byte &reg) {
   flag_handle(
-      [this](Byte& reg) {
+      [this](Byte &reg) {
         set_flag(Flags::C, test_bit(0, reg));
         reg >>= 1;
       },
       reg);
 }
 
-void Core::instr_srl(Byte& reg) {
+void Core::instr_srl(Byte &reg) {
   flag_handle(
-      [this](Byte& reg) {
+      [this](Byte &reg) {
         set_flag(Flags::C, test_bit(0, reg));
         reg >>= 1;
         reset_bit(7, reg);
@@ -327,25 +367,48 @@ void Core::instr_srl(Byte& reg) {
       reg);
 }
 
-void Core::instr_swap(Byte& reg) { reg = (reg >> 4) | (reg << 4); }
+void Core::instr_swap(Byte &reg) { reg = (reg >> 4) | (reg << 4); }
 
 // ----------------------------------------------------------------------------
 // Bitwise operations
 // ----------------------------------------------------------------------------
 
-void Core::instr_bit(Byte reg, Byte bit) {
+void Core::instr_bit(Byte bit, Byte &reg) {
   set_flag(Flags::Z, test_bit(bit, reg));
   set_flag(Flags::N, false);
   set_flag(Flags::H, true);
 }
 
-void Core::instr_set(Byte& reg, Byte bit) { set_bit(bit, reg); }
+void Core::instr_set(Byte bit, Byte &reg) { set_bit(bit, reg); }
 
-void Core::instr_res(Byte& reg, Byte bit) { reset_bit(bit, reg); }
+void Core::instr_res(Byte bit, Byte &reg) { reset_bit(bit, reg); }
 
 // ----------------------------------------------------------------------------
 // Core exec utilities
 // ----------------------------------------------------------------------------
+
+void Core::exec_instruction(std::function<void(void)> instr, Byte clock_cycles1,
+                            Byte clock_cycles2) {
+  instr();
+  if (_has_jumped)
+    _clock += clock_cycles1;
+  else
+    _clock += clock_cycles2;
+  _has_jumped = false;
+}
+
+void Core::exec_instruction(std::function<void(Byte &)> instr, Word addr,
+                            Byte clock_cycles1, Byte clock_cycles2) {
+  Byte b = _components.mem_bus->read<Byte>(addr);
+  instr(b);
+  if (_has_jumped) {
+    _clock += clock_cycles1;
+  } else {
+    _clock += clock_cycles2;
+  }
+  _components.mem_bus->write<Byte>(addr, b);
+  _has_jumped = false;
+}
 
 void Core::exec_instruction(std::function<void(void)> instr,
                             Byte clock_cycles) {
@@ -353,7 +416,7 @@ void Core::exec_instruction(std::function<void(void)> instr,
   _clock += clock_cycles;
 }
 
-void Core::exec_instruction(std::function<void(Byte&)> instr, Word addr,
+void Core::exec_instruction(std::function<void(Byte &)> instr, Word addr,
                             Byte clock_cycles) {
   Byte b = _components.mem_bus->read<Byte>(addr);
   instr(b);
@@ -361,7 +424,7 @@ void Core::exec_instruction(std::function<void(Byte&)> instr, Word addr,
   _clock += clock_cycles;
 }
 
-void Core::exec_instruction(std::function<void(Word&)> instr, Word addr,
+void Core::exec_instruction(std::function<void(Word &)> instr, Word addr,
                             Byte clock_cycles) {
   Word b = _components.mem_bus->read<Word>(addr);
   instr(b);
@@ -381,8 +444,8 @@ void Core::execute(Core::Iterator it) {
   };
   switch (*it++) {
 #include "instructions.inc"
-    default:
-      break;
+  default:
+    break;
   }
   if (_in_jump_state)
     _in_jump_state = false;
