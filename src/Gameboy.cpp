@@ -45,7 +45,7 @@ int Gameboy::run() {
   } catch (BadChecksum &e) {
     throw;
   }
-  system("sh -c clear"); // for debug TODO: remove
+  //system("sh -c clear");// for debug TODO: remove
   while (_begin + _components.core->pc() != _end) {
     step();
   }
