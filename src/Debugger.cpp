@@ -45,7 +45,7 @@ void Debugger::update(const Core::Iterator &it, uint16_t pc)
 	current = construct_register_pool();
 	diffs = get_differences(_register_pool.cbegin(), current.cbegin());
 	_register_pool = current;
-	wait_user_interaction(pc);
+	//wait_user_interaction(pc);
 }
 
 /**
@@ -79,7 +79,7 @@ void Debugger::set_instruction_pool(const Core::Iterator &it, uint16_t pc)
 			_instr_pool.emplace_back(pc + pc_add, bad_value, it + pc_add, 0);
 		}
 	}
-	print_instruction_pool();
+	//print_instruction_pool();
 }
 
 void Debugger::print_instruction_pool()
@@ -123,12 +123,12 @@ std::vector<uint8_t> Debugger::construct_rom_dump(uint16_t addr)
 	addr = (addr & 0xFFF0);
 	rbegin = _components.cartridge->get_begin() + addr;
 	for (int i = 0; i < 144; i++) {
-		printf("%02x ", *(rbegin + i));
+	//	printf("%02x ", *(rbegin + i));
 		hpool.push_back(*(rbegin + i));
-		if (i % 16 == 0)
-			printf("\n");
+	//	if (i % 16 == 0)
+	//		printf("\n");
 	}
-	sleep (1);
+	//sleep (1);
 	return hpool;
 }
 
@@ -206,7 +206,7 @@ start:
 			case 'b':
 				std::cin >> input;
 				if (input == "list") {
-					print_instruction_pool();
+					//print_instruction_pool();
 					print_breakpoint_list();
 					continue ;
 				} else {
