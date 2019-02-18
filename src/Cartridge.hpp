@@ -5,6 +5,7 @@
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
 #include <memory>
+#include <sstream>
 
 class Accessor;
 
@@ -37,8 +38,13 @@ public:
     }
   }
 
-  bool load_rom(const std::string &path);
+  void load_rom(const std::string &path);
   std::unique_ptr<AMemoryBankController> get_mbc(Byte cartridge_type);
+
+  class UnsupportedCartridge : public std::exception {
+  public:
+    const char *what() const noexcept { return "Unsupported cartridge type."; }
+  };
 };
 
 #endif
