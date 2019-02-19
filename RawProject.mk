@@ -2,7 +2,8 @@
 #
 .SUFFIXES:
 CC 		:= clang++
-CFLAGS		:= -I. -Wall -Wextra -Werror -g -std='c++14' -pthread
+CFLAGS		:= -I.  -I ~/.brew/include -Wall -Wextra -Werror -g -std='c++14'
+LFLAGS		:= -L ~/.brew/lib -lportaudiocpp -lportaudio
 RM		:= rm -f
 OBJECT_DIR	:= obj
 COMP		:= $(CC) $(CFLAGS) -c -o
@@ -16,7 +17,7 @@ endif
 ## Sources directories
 #
 TEST_DIRS	:= tests
-SRC_DIRS	:= src src/cpu utils
+SRC_DIRS	:= src src/cpu utils src/sound
 #
 
 ## Colors

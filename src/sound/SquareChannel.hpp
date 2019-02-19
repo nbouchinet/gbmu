@@ -10,12 +10,7 @@ namespace sound {
 
 class SquareUnit : public IModulationUnit {
  private:
-  static constexpr std::array<Byte, 4> s_waveforms{
-      0x01, /* 00000001 */
-      0x81, /* 10000001 */
-      0x87, /* 10000111 */
-      0x7E  /* 01111110 */
-  };
+  static const std::array<Byte, 4> s_waveforms;
   Byte _waveform_selected = 2;
   Byte _waveform_step = 0;
   Word _frequency = 0;

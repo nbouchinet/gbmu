@@ -3,8 +3,15 @@
 #include "utils/Operations_utils.hpp"
 
 #include <cassert>
+#include <iostream>
 
 namespace sound {
+const std::array<Byte, 4> SquareUnit::s_waveforms{{
+    0x01, /* 00000001 */
+    0x81, /* 10000001 */
+    0x87, /* 10000111 */
+    0x7E  /* 01111110 */
+}};
 
 bool SquareUnit::call() {
   if (_timer == 0) {
@@ -14,8 +21,9 @@ bool SquareUnit::call() {
   }
   if (++_waveform_step >= 8) _waveform_step = 0;
   Byte waveform = s_waveforms[_waveform_selected];
-  if (test_bit(_waveform_step, waveform))
+  if (test_bit(_waveform_step, waveform)) {
     _output_volume = _volume;
+  }
   else
     _output_volume = 0;
   --_timer;
@@ -30,12 +38,12 @@ void SquareChannel::write(Word addr, Byte v) {
       _sweep.set_register(v);
       break;
     case 0x1:
-      _square.set_waveform_selected(v & 0xC0);
+      _square.set_waveform_selected((v & 0xC0) >> 6);
       _length.set_length(v & 0x3f);
       break;
     case 0x2:
-      _volume = _volume_load = v & 0xf0;
-      _envelope.set_negate(~(v & 0x8));
+      _volume = _volume_load = (v & 0xf0) >> 4;
+      _envelope.set_negate(-((v & 0x8) >> 3));
       _envelope.set_period(v & 0x7);
       break;
     case 0x3:
@@ -44,8 +52,8 @@ void SquareChannel::write(Word addr, Byte v) {
       break;
     case 0x4:
       if (v & 0x80) trigger();
-      _length.enable(v & 0x40);
-      _square.frequency() &= v & 0x7;
+      _length.enable((v & 0x40) >> 6);
+      _square.frequency() |= v & 0x7;
       break;
   }
 }
