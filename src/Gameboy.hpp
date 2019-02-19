@@ -6,6 +6,7 @@
 #include "src/Debugger.hpp"
 #include "src/Fwd.hpp"
 #include "PPU.class.h"
+#include "ScreenOutput.class.h"
 
 #include <memory>
 
@@ -18,6 +19,7 @@ struct ComponentsContainer {
   std::unique_ptr<LCDRegisters> lcd_registers;
   std::unique_ptr<UnitWorkingRAM> unit_working_ram;
   std::unique_ptr<PPU> ppu;
+  std::unique_ptr<ScreenOutput> driverScreen;
 
   ComponentsContainer(const std::string &);
   ~ComponentsContainer();

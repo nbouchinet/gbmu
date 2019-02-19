@@ -6,7 +6,7 @@
 PPU::PPU(ComponentsContainer& components) : _components(components)
 {
 	if (_debug_PPU == true)
-		std::cout << "[PPU default constructor called]" << std::endl;
+		std::cerr << "[PPU default constructor called]" << std::endl;
 	PPU::_nb_PPU++;
 	return;
 }
@@ -15,34 +15,225 @@ PPU::PPU(ComponentsContainer& components) : _components(components)
 PPU::~PPU()
 {
 	if (_debug_PPU == true)
-		std::cout << "[PPU destructor called]" << std::endl;
+		std::cerr << "[PPU destructor called]" << std::endl;
 	PPU::_nb_PPU--;
 	return;
 }
 
 //==============================================================================
-bool				PPU::testBit(uint8_t byte, uint8_t bit_number)
+bool				PPU::testBit(uint32_t byte, uint8_t bit_number)
 {
 	if (_debug_PPU == true)
-		std::cout << "testBit " << static_cast<unsigned int>(byte)
+		std::cerr << "testBit " << static_cast<unsigned int>(byte)
 			<< " at bit " << static_cast<unsigned int>(bit_number)
 			<< " will return";
 
 	if ((byte) & (1 << (bit_number)))
 	{
 		if (_debug_PPU == true)
-			std::cout << " true" << std::endl;
+			std::cerr << " true" << std::endl;
 		return (true);
 	}
 	if (_debug_PPU == true)
-		std::cout << " false" << std::endl;
+		std::cerr << " false" << std::endl;
 	return (false);
+}
+
+//------------------------------------------------------------------------------
+uint16_t				PPU::colorPaletteAddressWrapper(uint8_t specifier)
+{
+	uint8_t				paletteNumber;
+	uint8_t				paletteDataNumber;
+	uint8_t				highLowByte;
+	uint16_t			ret;
+
+	paletteNumber = extractValue(specifier, 3, 5);
+	paletteDataNumber = extractValue(specifier, 1, 2);
+	highLowByte = extractValue(specifier, 0, 0);
+
+	ret = 0; /* start address of sprites palettes */
+	ret	+= (paletteNumber * 8) + (paletteDataNumber * 2);
+	if (highLowByte == 0)
+		ret += 1;
+
+	return (ret);
+}
+
+//------------------------------------------------------------------------------
+void				PPU::write(Word address, Byte value)
+{
+	switch (address)
+	{
+		case 0xFF40:
+			_lcdc = value;
+			break;
+		case 0xFF41:
+			_stat = value;
+			break;
+		case 0xFF42:
+			_scy = value;
+			break;
+		case 0xFF43:
+			_scx = value;
+			break;
+		case 0xFF44:
+			_ly = value;
+			break;
+		case 0xFF45:
+			_lyc = value;
+			break;
+		case 0xFF46:
+			_dma = value;
+			break;
+		case 0xFF47:
+			_bgp = value;
+			break;
+		case 0xFF48:
+			_obp0 = value;
+			break;
+		case 0xFF49:
+			_obp1 = value;
+			break;
+		case 0xFF4A:
+			_wy = value;
+			break;
+		case 0xFF4B:
+			_wx = value;
+			break;
+		case 0xFF51:
+			_hdma1 = value;
+			break;
+		case 0xFF52:
+			_hdma2 = value;
+			break;
+		case 0xFF53:
+			_hdma3 = value;
+			break;
+		case 0xFF54:
+			_hdma4 = value;
+			break;
+		case 0xFF55:
+			_hdma5 = value;
+			break;
+		case 0xFF68:
+			_bcps = value;
+			break;
+		case 0xFF69:
+			_bcpd = value;
+			break;
+		case 0xFF6A:
+			_ocps = value;
+			break;
+		case 0xFF6B:
+			_ocpd = value;
+			break;
+	}
+}
+
+//------------------------------------------------------------------------------
+Byte				PPU::read(Word address)
+{
+	Byte			ret;
+
+	switch (address)
+	{
+		case 0xFF40:
+			ret = _lcdc;
+			break;
+		case 0xFF41:
+			ret = _stat;
+			break;
+		case 0xFF42:
+			ret = _scy;
+			break;
+		case 0xFF43:
+			ret = _scx;
+			break;
+		case 0xFF44:
+			ret = _ly;
+			break;
+		case 0xFF45:
+			ret = _lyc;
+			break;
+		case 0xFF46:
+			ret = _dma;
+			break;
+		case 0xFF47:
+			ret = _bgp;
+			break;
+		case 0xFF48:
+			ret = _obp0;
+			break;
+		case 0xFF49:
+			ret = _obp1;
+			break;
+		case 0xFF4A:
+			ret = _wy;
+			break;
+		case 0xFF4B:
+			ret = _wx;
+			break;
+		case 0xFF51:
+			ret = _hdma1;
+			break;
+		case 0xFF52:
+			ret = _hdma2;
+			break;
+		case 0xFF53:
+			ret = _hdma3;
+			break;
+		case 0xFF54:
+			ret = _hdma4;
+			break;
+		case 0xFF55:
+			ret = _hdma5;
+			break;
+		case 0xFF68:
+			ret = _bcps;
+			break;
+		case 0xFF69:
+			ret = _bcpd;
+			break;
+		case 0xFF6A:
+			ret = _ocps;
+			break;
+		case 0xFF6B:
+			ret = _ocpd;
+			break;
+	}
+	return (ret);
+}
+
+//------------------------------------------------------------------------------
+uint8_t				PPU::readMemBank(uint8_t bank, uint16_t address)
+{
+	uint8_t			ret;
+
+	if (bank == 0)
+	{
+		_components.mem_bus->write(0xFF4F, 0);
+		ret = _components.mem_bus->read<Byte>(address); // in screen !!
+	}
+	else if (bank == 1)
+	{
+		_components.mem_bus->write(0xFF4F, 1);
+		ret = _components.mem_bus->read<Byte>(address); // in screen !!
+	}
+	return (ret);
 }
 
 //------------------------------------------------------------------------------
 bool				PPU::isLCDEnabled()
 {
 	if (testBit(_components.mem_bus->read<Byte>(0xFF40), 7))
+		return (true);
+	return (false);
+}
+
+//------------------------------------------------------------------------------
+bool				PPU::isScreenFilled()
+{
+	if (_ly >= LCD_HEIGHT)
 		return (true);
 	return (false);
 }
@@ -59,7 +250,7 @@ void				PPU::setupSpriteAddressStart()
 //------------------------------------------------------------------------------
 void				PPU::setupWindow()
 {
-	if (testBit(_lcdc, 5) == true && (_windowY <= _currentScanline))
+	if (testBit(_lcdc, 5) == true && (_wy <= _ly))
 		_windowingOn = true;
 
 	if (testBit(_lcdc, 6) == true)
@@ -105,24 +296,24 @@ uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
 //------------------------------------------------------------------------------
 void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorID)
 {
-	if (_currentScanline < LCD_HEIGHT && y < LCD_HEIGHT && x < LCD_WIDTH)
+	if (_ly < LCD_HEIGHT && y < LCD_HEIGHT && x < LCD_WIDTH)
 	{
 		switch (colorID) // only for DMG, will be different for CGB
 		{
 			case 3 :
 				// black
-				_driverScreen.setRGBA(y, x, 0, 0, 0, 255);
+				_components.driverScreen.setRGBA(y, x, 0, 0, 0, 255);
 				break;
 			case 2 :
-				_driverScreen.setRGBA(y, x, 119, 119, 119, 255);
+				_components.driverScreen.setRGBA(y, x, 119, 119, 119, 255);
 				// dark grey
 				break;
 			case 1 :
-				_driverScreen.setRGBA(y, x, 204, 204, 204, 255);
+				_components.driverScreen.setRGBA(y, x, 204, 204, 204, 255);
 				// light grey
 				break;
 			case 0 :
-				_driverScreen.setRGBA(y, x, 255, 255, 255, 255);
+				_components.driverScreen.setRGBA(y, x, 255, 255, 255, 255);
 				// transparent (white)
 				break;
 		}
@@ -132,7 +323,6 @@ void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorID)
 //------------------------------------------------------------------------------
 void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and loads attributes in _spritesLine tab for use later in renderSprites()
 {
-std::cout << ">>getSpritesForLine called\n" << std::endl;
 	uint16_t		spriteAttributesOffset; // offset from the start of the Table in bytes
 	uint16_t		spriteAttributesTableStart = 0xFE00; // start of OAM ram for sprites
 	uint8_t			yPosTmp;
@@ -144,7 +334,7 @@ std::cout << ">>getSpritesForLine called\n" << std::endl;
 		spriteAttributesOffset = sprite * 4; // 4 bytes of attributes data per sprite;
 		yPosTmp = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset); // in screen !!
 		xPosTmp = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 1); // in screen !!
-		if (_currentScanline >= yPosTmp && (_currentScanline < (yPosTmp + _spriteSize)) && xPosTmp != 0) // IMPORTANT : _spriteSize here might be a flat 16 instead !
+		if (_ly >= yPosTmp && (_ly < (yPosTmp + _spriteSize)) && xPosTmp != 0) // IMPORTANT : _spriteSize here might be a flat 16 instead !
 		{
 			_spritesLine[_nbSprites].yPos = yPosTmp; // -16 !!!!
 			_spritesLine[_nbSprites].xPos = xPosTmp; // -8 !!!!
@@ -160,24 +350,42 @@ std::cout << ">>getSpritesForLine called\n" << std::endl;
 //------------------------------------------------------------------------------
 void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 {
-	t_pixelSegment	*pix;
-	t_pixelSegment	*pox;
+	if (1 /* IS_DMG */)
+	{
+		if (holder.isSprite == false)
+		{
+			if ()
+			{
+				
+			}
+			if ())
+			{
+				
+			}
+		}
+		else if (holder.isSprite == true)
+		{
+			
+		}
+	}
 
-	pix = &holder;
-	pox = &contender;
+
+	else if (0 /* IS_CGB */)
+	{
+		
+	}
 }
 
 //------------------------------------------------------------------------------
 void				PPU::renderSprites()
 {
-std::cout << ">>renderSprites called\n" << std::endl;
 	getSpritesForLine();
 	for (int sprite = _nbSprites - 1; sprite >= 0; sprite--) // up to 10 sprites on the line
 	{
 		bool		xFlip = testBit(_spritesLine[sprite].flags, 5) == true ? true : false;
 		bool		yFlip = testBit(_spritesLine[sprite].flags, 6) == true ? true : false;
 
-		int		spriteLine = _currentScanline - _spritesLine[sprite].yPos; // which line of the sprite does the scanline go through ?
+		int		spriteLine = _ly - _spritesLine[sprite].yPos; // which line of the sprite does the scanline go through ?
 		if (yFlip == true)
 			spriteLine = (spriteLine - _spriteSize) * (-1);
 		uint16_t	tileLineDataAddress = (_spriteDataStart + (_spritesLine[sprite].tileNumber * 16)) + spriteLine;
@@ -197,7 +405,7 @@ std::cout << ">>renderSprites called\n" << std::endl;
 			if (testBit(data2, linePixel) == true)
 				colorID += 1;
 			
-			setPixelDMG(_currentScanline, _spritesLine[sprite].xPos - _scrollX + pixel, colorID);
+			setPixelDMG(_ly, _spritesLine[sprite].xPos - _scx + pixel, colorID);
 		}
 	}
 }
@@ -205,14 +413,13 @@ std::cout << ">>renderSprites called\n" << std::endl;
 //------------------------------------------------------------------------------
 void				PPU::renderTiles()
 {
-std::cout << ">>renderTiles called\n" << std::endl;
 	uint8_t			xPos;
 	uint8_t			yPos;
 	bool			boiItsaWindow = false;
 
 	for (int i = 0; i < 160; i++)
 	{
-		if (_windowingOn == true && i >= _windowX - 7 && _currentScanline >= _windowY) // are we in the window and is it enabled ?
+		if (_windowingOn == true && i >= _wx - 7 && _ly >= _wy) // are we in the window and is it enabled ?
 			boiItsaWindow = true;
 
 		int16_t			tileNumber;
@@ -224,13 +431,13 @@ std::cout << ">>renderTiles called\n" << std::endl;
 
 		if (boiItsaWindow == true)
 		{
-			xPos = i - _windowX - 7;
-			yPos = _currentScanline - _windowY;
+			xPos = i - _wx - 7;
+			yPos = _ly - _wy;
 		}
 		else
 		{
-			xPos = _scrollX + i;
-			yPos = _scrollY + _currentScanline;
+			xPos = _scx + i;
+			yPos = _scy + _ly;
 		}
 
 		tileRow = (((uint8_t)(yPos / 8)) * 32);								// (0-992) add that to tiledata (0x9800 or 0x9C00) start address to get real memory address of first tile in the row
@@ -267,7 +474,7 @@ std::cout << ">>renderTiles called\n" << std::endl;
 		//put in pipeline
 		_pixelPipeline[i].value = colorID;
 		_pixelPipeline[i].isSprite = false;
-		setPixelDMG(_currentScanline, i, colorID);
+		setPixelDMG(_ly, i, colorID);
 	}
 }
 
@@ -287,22 +494,13 @@ void				PPU::sendPixelPipeline()
 			case 2:
 				break ;
 		}
-//		setPixelDMG(_currentScanline, i, colorValue);
+//		setPixelDMG(_ly, i, colorValue);
 	}
 }
 
 //------------------------------------------------------------------------------
 void				PPU::renderScanLine()
 {
-std::cout << ">>renderScanLine called\n" << std::endl;
-	_lcdc = _components.mem_bus->read<Byte>(0xFF40); // lcdc register
-	_stat = _components.mem_bus->read<Byte>(0xFF41); // stat register
-	_scrollX = _components.mem_bus->read<Byte>(0xFF42); // start position of the screen in the area (0-255)
-	_scrollY = _components.mem_bus->read<Byte>(0xFF43); // same for Y (0-255)
-	_currentScanline = _components.mem_bus->read<Byte>(0xFF44);
-	_windowX = _components.mem_bus->read<Byte>(0xFF4A); // start position of the window in the screen (7-166)
-	_windowY = _components.mem_bus->read<Byte>(0xFF4B) - 7; // same for Y (0-143)
-
 	setupWindow();
 	setupBackgroundMemoryStart();
 	setupSpriteAddressStart();
@@ -312,6 +510,84 @@ std::cout << ">>renderScanLine called\n" << std::endl;
 	if (testBit(_lcdc, 1) == true)
 		renderSprites();
 	sendPixelPipeline();
+}
+
+//------------------------------------------------------------------------------
+uint8_t					PPU::extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end)
+{
+	uint8_t				weight = 1;
+	uint8_t				ret = 0;
+
+	while (bit_start <= bit_end)
+	{
+		if (testBit(val, bit_start) == true)
+			ret += weight;
+		bit_start++;
+		weight *= 2;
+	} 
+	return (ret);
+}
+
+//------------------------------------------------------------------------------
+uint32_t				PPU::translateCGBColorValue(uint16_t value)
+{
+	uint32_t			ret = 0;
+	uint32_t			extracc;
+
+	extracc = extractValue(value, 0, 4) * 8; // extract red
+	ret += extracc;
+	ret << 8;
+	extracc = extractValue(value, 5, 9) * 8; // extract green
+	ret += extracc;
+	ret << 8;
+	extracc = extractValue(value, 10, 14) * 8; // extact blue
+	ret += extracc;
+	ret << 8;
+	ret += 255; // alpha value, default 255;
+	return (ret);
+}
+
+//------------------------------------------------------------------------------
+uint32_t				PPU::translateDMGColorValue(uint8_t value)
+{
+	uint32_t			ret = 0;
+	uint32_t			reversedValue = 255 - (85 * value);
+
+	ret += reversedValue;
+	ret << 8;
+	ret += reversedValue;
+	ret << 8;
+	ret += reversedValue;
+	ret << 8;
+	ret += 255; // we set alpha value to 255 by default
+	return (ret);
+}
+
+//------------------------------------------------------------------------------
+void					PPU::translatePalettes();
+{
+	if (1 /* IS_DMG */)
+	{
+		_backgroundPalette.data[0] = translateDMGColorValue(extractValue(_bgp, 0, 1));
+		_backgroundPalette.data[1] = translateDMGColorValue(extractValue(_bgp, 2, 3));
+		_backgroundPalette.data[2] = translateDMGColorValue(extractValue(_bgp, 4, 5));
+		_backgroundPalette.data[3] = translateDMGColorValue(extractValue(_bgp, 6, 7));
+	
+		_spritePalette[0].data[0] = translateDMGColorValue(extractValue(_obp0, 0, 1));
+		_spritePalette[0].data[1] = translateDMGColorValue(extractValue(_obp0, 2, 3));
+		_spritePalette[0].data[2] = translateDMGColorValue(extractValue(_obp0, 4, 5));
+		_spritePalette[0].data[3] = translateDMGColorValue(extractValue(_obp0, 6, 7));
+
+		_spritePalette[1].data[0] = translateDMGColorValue(extractValue(_obp1, 0, 1));
+		_spritePalette[1].data[1] = translateDMGColorValue(extractValue(_obp1, 2, 3));
+		_spritePalette[1].data[2] = translateDMGColorValue(extractValue(_obp1, 4, 5));
+		_spritePalette[1].data[3] = translateDMGColorValue(extractValue(_obp1, 6, 7));
+	}
+
+	if (2 /* IS_CGB */)
+	{
+		
+	}
 }
 
 //==============================================================================
