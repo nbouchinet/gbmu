@@ -24,6 +24,7 @@ public:
 	uint8_t				getA(uint8_t y, uint8_t x);
 
 	void				setRGBA(uint8_t y, uint8_t x, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
+	void				setRGBA(uint8_t y, uint8_t x, uint32_t rgba);
 	uint32_t			getRGBA(uint8_t y, uint8_t x);
 
 private:
