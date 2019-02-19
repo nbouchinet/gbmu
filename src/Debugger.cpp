@@ -145,6 +145,9 @@ void Debugger::trigger_data_sending(uint16_t pc)
 	if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), pc) != _breakpoint_pool.end()) {
 		_send_update = 1;
 	}
+//	if (curr_time >= to_time) {
+//		_send_update = 1;
+//	}
 }
 
 void Debugger::fetch(const Core::Iterator &it, uint16_t pc)

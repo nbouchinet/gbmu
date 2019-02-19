@@ -1,34 +1,32 @@
 import sys
+import json
+import urllib.request
 
-def getSize(line):
-    size = 1
-    line = line.split()[1:2]
-    if "CB" in line:
-        size += 1
-    size += str(line).count('n')
-    size += str(line).count('b')
-    return str(size)
+with urllib.request.urlopen('https://raw.githubusercontent.com/lmmendes/game-boy-opcodes/master/opcodes.json') as url:
+    s = url.read()
+jsontable = json.loads(s)
 
-fileObj=open(sys.argv[1], "r")
-print('std::map<int, _instr_info> _instr_map = {', end = '')
-i = 0
-instr_cb = 0
-for line in fileObj.readlines():
-    if "CB" in line:
-        instr_cb = 1
-        continue
-    opcode = ''.join(line[:-1].split()[len(line[:-1].split()) - 2])
-    instr = ' '.join(line[:-1].split()[:-2])
-    if not instr_cb:
-        size = getSize(line)
-        value = '{0x' + opcode + ', {\"' + instr + '\", ' + size + '}}, '
+i = 1
+for key,value in jsontable['unprefixed'].items():
+    if 'operand2' in value:
+        print ('{0x' + value['addr'].upper()[2:] + ', {"' + value['mnemonic'] + " " + value['operand1'] + ' ' + value['operand2'] + '", ' + str(value['length']) + '}}, ', end="")
+    elif 'operand1' in value:
+        print ('{0x' + value['addr'].upper()[2:] + ', {"' + value['mnemonic'] + " " + value['operand1'] + '", ' + str(value['length']) + '}}, ', end="")
     else:
-        size = getSize(line)
-        value = '{0xCB' + opcode + ', {\"' + instr + '\", ' + size + '}}, '
-    if i % 4 == 0:
-        print('')
-    print(value, end = '')
+        print ('{0x' + value['addr'].upper()[2:] + ', {"' + value['mnemonic'] + '", ' + str(value['length']) + '}}, ', end="")
+    if i % 3 == 0:
+        print()
     i += 1
 
-print('};')
-fileObj.close()
+for key,value in jsontable['cbprefixed'].items():
+    if 'operand2' in value:
+        print ('{0xCB' + value['addr'].upper()[2:] + ', {"' + value['mnemonic'] + " " + value['operand1'] + ', ' + value['operand2'] + '", ' + str(value['length']) + '}}, ', end="")
+    elif 'operand1' in value:
+        print ('{0xCB' + value['addr'].upper()[2:] + ', {"' + value['mnemonic'] + " " + value['operand1'] + '", ' + str(value['length']) + '}}, ', end="")
+    else:
+        print ('{0xCB' + value['addr'].upper()[2:] + ', {"' + value['mnemonic'] + '", ' + str(value['length']) + '}}, ', end="")
+    if i % 3 == 0:
+        print()
+    i += 1
+
+#print()
