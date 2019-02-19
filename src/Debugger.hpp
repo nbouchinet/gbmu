@@ -40,8 +40,9 @@ class Debugger {
 		 */
 
 		ComponentsContainer &_components;
-		bool	 _enabled = 1;
-		bool	 _send_update = 0;
+		bool	_enabled = 1;
+		bool	_send_update = 0;
+		bool	_lock = 1;
 		int		_frame_size = 10;
 
 		std::vector<_debug_info> _instr_pool;
@@ -236,6 +237,7 @@ class Debugger {
 		void fetch(const Core::Iterator &it, uint16_t pc);
 		void trigger_data_sending(uint16_t pc);
 		bool is_enabled() const { return _enabled; }
+		bool on_breakpoint(uint16_t pc);
 		void toggle() { _enabled = _enabled ? false : true; }
 		using it = std::vector<uint16_t>::const_iterator;
 		const std::vector<std::pair<int, uint16_t>> get_differences(it prev_begin, it current_begin);

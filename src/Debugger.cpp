@@ -140,24 +140,36 @@ void Debugger::send_data()
 {
 }
 
-void Debugger::trigger_data_sending(uint16_t pc)
+bool Debugger::on_breakpoint(uint16_t pc)
 {
 	if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), pc) != _breakpoint_pool.end()) {
-		_send_update = 1;
+		return 1;
 	}
-//	if (curr_time >= to_time) {
-//		_send_update = 1;
-//	}
+	return 0;
+}
+
+void Debugger::trigger_data_sending(uint16_t pc)
+{
+	if (on_breakpoint(pc)
+			// TODO: Implement the two conditions
+			//|| curr_time >= _to_time
+			//|| _components.PPU->isScreenFilled()
+			) {
+		_send_update = 1;
+		_lock = 1;
+	}
 }
 
 void Debugger::fetch(const Core::Iterator &it, uint16_t pc)
 {
 	update_data(it, pc);
-	trigger_data_sending(pc);
-	if (_send_update) {
-		send_data();
-		_register_diffs.clear();
-		_send_update = 0;
+	while (_lock) {
+		trigger_data_sending(pc);
+		if (_send_update) {
+			send_data();
+			_register_diffs.clear();
+			_send_update = 0;
+		}
 	}
 }
 
