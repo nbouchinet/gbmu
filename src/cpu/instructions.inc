@@ -919,76 +919,580 @@ case 0x3E:
 exec_instruction([&] (Byte &v) { instr_srl(v); }, _hl.word, 16);
 break;
 case 0x47:
-exec_instruction([&] () { instr_bit(*it++, _af.high); }, 8);
+exec_instruction([&] () { instr_bit(_af.high, 0); }, 8);
+break;
+case 0x4F:
+exec_instruction([&] () { instr_bit(_af.high, 1); }, 8);
+break;
+case 0x57:
+exec_instruction([&] () { instr_bit(2, _af.high); }, 8);
+break;
+case 0x5F:
+exec_instruction([&] () { instr_bit(_af.high, 3); }, 8);
+break;
+case 0x67:
+exec_instruction([&] () { instr_bit(_af.high, 4); }, 8);
+break;
+case 0x6F:
+exec_instruction([&] () { instr_bit(_af.high, 5); }, 8);
+break;
+case 0x77:
+exec_instruction([&] () { instr_bit(_af.high, 6); }, 8);
+break;
+case 0x7F:
+exec_instruction([&] () { instr_bit(_af.high, 7); }, 8);
 break;
 case 0x40:
-exec_instruction([&] () { instr_bit(*it++, _bc.high); }, 8);
+exec_instruction([&] () { instr_bit(_bc.high, 0); }, 8);
+break;
+case 0x48:
+exec_instruction([&] () { instr_bit(_bc.high, 1); }, 8);
+break;
+case 0x50:
+exec_instruction([&] () { instr_bit(_bc.high, 2); }, 8);
+break;
+case 0x58:
+exec_instruction([&] () { instr_bit(_bc.high, 3); }, 8);
+break;
+case 0x60:
+exec_instruction([&] () { instr_bit(_bc.high, 4); }, 8);
+break;
+case 0x68:
+exec_instruction([&] () { instr_bit(_bc.high, 5); }, 8);
+break;
+case 0x70:
+exec_instruction([&] () { instr_bit(_bc.high, 6); }, 8);
+break;
+case 0x78:
+exec_instruction([&] () { instr_bit(_bc.high, 7); }, 8);
 break;
 case 0x41:
-exec_instruction([&] () { instr_bit(*it++, _bc.low); }, 8);
+exec_instruction([&] () { instr_bit(_bc.low, 0); }, 8);
+break;
+case 0x49:
+exec_instruction([&] () { instr_bit(_bc.low, 1); }, 8);
+break;
+case 0x51:
+exec_instruction([&] () { instr_bit(_bc.low, 2); }, 8);
+break;
+case 0x59:
+exec_instruction([&] () { instr_bit(_bc.low, 3); }, 8);
+break;
+case 0x61:
+exec_instruction([&] () { instr_bit(_bc.low, 4); }, 8);
+break;
+case 0x69:
+exec_instruction([&] () { instr_bit(_bc.low, 5); }, 8);
+break;
+case 0x71:
+exec_instruction([&] () { instr_bit(_bc.low, 6); }, 8);
+break;
+case 0x79:
+exec_instruction([&] () { instr_bit(_bc.low, 7); }, 8);
 break;
 case 0x42:
-exec_instruction([&] () { instr_bit(*it++, _de.high); }, 8);
+exec_instruction([&] () { instr_bit(_de.high, 0); }, 8);
+break;
+case 0x4A:
+exec_instruction([&] () { instr_bit(_de.high, 1); }, 8);
+break;
+case 0x52:
+exec_instruction([&] () { instr_bit(_de.high, 2); }, 8);
+break;
+case 0x5A:
+exec_instruction([&] () { instr_bit(_de.high, 3); }, 8);
+break;
+case 0x62:
+exec_instruction([&] () { instr_bit(_de.high, 4); }, 8);
+break;
+case 0x6A:
+exec_instruction([&] () { instr_bit(_de.high, 5); }, 8);
+break;
+case 0x72:
+exec_instruction([&] () { instr_bit(_de.high, 6); }, 8);
+break;
+case 0x7A:
+exec_instruction([&] () { instr_bit(_de.high, 7); }, 8);
 break;
 case 0x43:
-exec_instruction([&] () { instr_bit(*it++, _de.low); }, 8);
+exec_instruction([&] () { instr_bit(_de.low, 0); }, 8);
+break;
+case 0x4B:
+exec_instruction([&] () { instr_bit(_de.low, 1); }, 8);
+break;
+case 0x53:
+exec_instruction([&] () { instr_bit(_de.low, 2); }, 8);
+break;
+case 0x5B:
+exec_instruction([&] () { instr_bit(_de.low, 3); }, 8);
+break;
+case 0x63:
+exec_instruction([&] () { instr_bit(_de.low, 4); }, 8);
+break;
+case 0x6B:
+exec_instruction([&] () { instr_bit(_de.low, 5); }, 8);
+break;
+case 0x73:
+exec_instruction([&] () { instr_bit(_de.low, 6); }, 8);
+break;
+case 0x7B:
+exec_instruction([&] () { instr_bit(_de.low, 7); }, 8);
 break;
 case 0x44:
-exec_instruction([&] () { instr_bit(*it++, _hl.high); }, 8);
+exec_instruction([&] () { instr_bit(_hl.high, 0); }, 8);
+break;
+case 0x4C:
+exec_instruction([&] () { instr_bit(_hl.high, 1); }, 8);
+break;
+case 0x54:
+exec_instruction([&] () { instr_bit(_hl.high, 2); }, 8);
+break;
+case 0x5C:
+exec_instruction([&] () { instr_bit(_hl.high, 3); }, 8);
+break;
+case 0x64:
+exec_instruction([&] () { instr_bit(_hl.high, 4); }, 8);
+break;
+case 0x6C:
+exec_instruction([&] () { instr_bit(_hl.high, 5); }, 8);
+break;
+case 0x74:
+exec_instruction([&] () { instr_bit(_hl.high, 6); }, 8);
+break;
+case 0x7C:
+exec_instruction([&] () { instr_bit(_hl.high, 7); }, 8);
 break;
 case 0x45:
-exec_instruction([&] () { instr_bit(*it++, _hl.low); }, 8);
+exec_instruction([&] () { instr_bit(_hl.low, 0); }, 8);
+break;
+case 0x4D:
+exec_instruction([&] () { instr_bit(_hl.low, 1); }, 8);
+break;
+case 0x55:
+exec_instruction([&] () { instr_bit(_hl.low, 2); }, 8);
+break;
+case 0x5D:
+exec_instruction([&] () { instr_bit(_hl.low, 3); }, 8);
+break;
+case 0x65:
+exec_instruction([&] () { instr_bit(_hl.low, 4); }, 8);
+break;
+case 0x6D:
+exec_instruction([&] () { instr_bit(_hl.low, 5); }, 8);
+break;
+case 0x75:
+exec_instruction([&] () { instr_bit(_hl.low, 6); }, 8);
+break;
+case 0x7D:
+exec_instruction([&] () { instr_bit(_hl.low, 7); }, 8);
 break;
 case 0x46:
-exec_instruction([&] () { instr_bit(*it++, _components.mem_bus->read<Byte>(_hl.word)); }, 16);
+exec_instruction([&] (Byte &v) { instr_bit(v, 0); }, _hl.word, 16);
 break;
-case 0xC7:
-exec_instruction([&] () { instr_set(_af.high, *it++); }, 8);
+case 0x4E:
+exec_instruction([&] (Byte &v) { instr_bit(v, 1); }, _hl.word, 16);
 break;
-case 0xC0:
-exec_instruction([&] () { instr_set(_bc.high, *it++); }, 8);
+case 0x56:
+exec_instruction([&] (Byte &v) { instr_bit(v, 2); }, _hl.word, 16);
 break;
-case 0xC1:
-exec_instruction([&] () { instr_set(_bc.low, *it++); }, 8);
+case 0x5E:
+exec_instruction([&] (Byte &v) { instr_bit(v, 3); }, _hl.word, 16);
 break;
-case 0xC2:
-exec_instruction([&] () { instr_set(_de.high, *it++); }, 8);
+case 0x66:
+exec_instruction([&] (Byte &v) { instr_bit(v, 4); }, _hl.word, 16);
 break;
-case 0xC3:
-exec_instruction([&] () { instr_set(_de.low, *it++); }, 8);
+case 0x6E:
+exec_instruction([&] (Byte &v) { instr_bit(v, 5); }, _hl.word, 16);
 break;
-case 0xC4:
-exec_instruction([&] () { instr_set(_hl.high, *it++); }, 8);
+case 0x76:
+exec_instruction([&] (Byte &v) { instr_bit(v, 6); }, _hl.word, 16);
 break;
-case 0xC5:
-exec_instruction([&] () { instr_set(_hl.low, *it++); }, 8);
-break;
-case 0xC6:
-exec_instruction([&] (Byte &v) { instr_set(v, *it++); }, _hl.word, 16);
-break;
-case 0x87:
-exec_instruction([&] () { instr_res(_af.high, *it++); }, 8);
+case 0x7E:
+exec_instruction([&] (Byte &v) { instr_bit(v, 7); }, _hl.word, 16);
 break;
 case 0x80:
-exec_instruction([&] () { instr_res(_bc.high, *it++); }, 8);
+exec_instruction([&] () { instr_res(_bc.high, 0); }, 8);
 break;
 case 0x81:
-exec_instruction([&] () { instr_res(_bc.low, *it++); }, 8);
+exec_instruction([&] () { instr_res(_bc.low, 0); }, 8);
 break;
 case 0x82:
-exec_instruction([&] () { instr_res(_de.high, *it++); }, 8);
+exec_instruction([&] () { instr_res(_de.high, 0); }, 8);
 break;
 case 0x83:
-exec_instruction([&] () { instr_res(_de.low, *it++); }, 8);
+exec_instruction([&] () { instr_res(_de.low, 0); }, 8);
 break;
 case 0x84:
-exec_instruction([&] () { instr_res(_hl.high, *it++); }, 8);
+exec_instruction([&] () { instr_res(_hl.high, 0); }, 8);
 break;
 case 0x85:
-exec_instruction([&] () { instr_res(_hl.low, *it++); }, 8);
+exec_instruction([&] () { instr_res(_hl.low, 0); }, 8);
 break;
 case 0x86:
-exec_instruction([&] (Byte &v) { instr_res(v, *it++); }, _hl.word, 16);
+exec_instruction([&] (Byte &v) { instr_res(v, 0); }, _hl.word, 16);
+break;
+case 0x87:
+exec_instruction([&] () { instr_res(_af.high, 0); }, 8);
+break;
+case 0x88:
+exec_instruction([&] () { instr_res(_bc.high, 1); }, 8);
+break;
+case 0x89:
+exec_instruction([&] () { instr_res(_bc.low, 1); }, 8);
+break;
+case 0x8A:
+exec_instruction([&] () { instr_res(_de.high, 1); }, 8);
+break;
+case 0x8B:
+exec_instruction([&] () { instr_res(_de.low, 1); }, 8);
+break;
+case 0x8C:
+exec_instruction([&] () { instr_res(_hl.high, 1); }, 8);
+break;
+case 0x8D:
+exec_instruction([&] () { instr_res(_hl.low, 1); }, 8);
+break;
+case 0x8E:
+exec_instruction([&] (Byte &v) { instr_res(v, 1); }, _hl.word, 16);
+break;
+case 0x8F:
+exec_instruction([&] () { instr_res(_af.high, 1); }, 8);
+break;
+case 0x90:
+exec_instruction([&] () { instr_res(_bc.high, 2); }, 8);
+break;
+case 0x91:
+exec_instruction([&] () { instr_res(_bc.low, 2); }, 8);
+break;
+case 0x92:
+exec_instruction([&] () { instr_res(_de.high, 2); }, 8);
+break;
+case 0x93:
+exec_instruction([&] () { instr_res(_de.low, 2); }, 8);
+break;
+case 0x94:
+exec_instruction([&] () { instr_res(_hl.high, 2); }, 8);
+break;
+case 0x95:
+exec_instruction([&] () { instr_res(_hl.low, 2); }, 8);
+break;
+case 0x96:
+exec_instruction([&] (Byte &v) { instr_res(v, 2); }, _hl.word, 16);
+break;
+case 0x97:
+exec_instruction([&] () { instr_res(_af.high, 2); }, 8);
+break;
+case 0x98:
+exec_instruction([&] () { instr_res(_bc.high, 3); }, 8);
+break;
+case 0x99:
+exec_instruction([&] () { instr_res(_bc.low, 3); }, 8);
+break;
+case 0x9A:
+exec_instruction([&] () { instr_res(_de.high, 3); }, 8);
+break;
+case 0x9B:
+exec_instruction([&] () { instr_res(_de.low, 3); }, 8);
+break;
+case 0x9C:
+exec_instruction([&] () { instr_res(_hl.high, 3); }, 8);
+break;
+case 0x9D:
+exec_instruction([&] () { instr_res(_hl.low, 3); }, 8);
+break;
+case 0x9E:
+exec_instruction([&] (Byte &v) { instr_res(v, 3); }, _hl.word, 16);
+break;
+case 0x9F:
+exec_instruction([&] () { instr_res(_af.high, 3); }, 8);
+break;
+case 0xA0:
+exec_instruction([&] () { instr_res(_bc.high, 4); }, 8);
+break;
+case 0xA1:
+exec_instruction([&] () { instr_res(_bc.low, 4); }, 8);
+break;
+case 0xA2:
+exec_instruction([&] () { instr_res(_de.high, 4); }, 8);
+break;
+case 0xA3:
+exec_instruction([&] () { instr_res(_de.low, 4); }, 8);
+break;
+case 0xA4:
+exec_instruction([&] () { instr_res(_hl.high, 4); }, 8);
+break;
+case 0xA5:
+exec_instruction([&] () { instr_res(_hl.low, 4); }, 8);
+break;
+case 0xA6:
+exec_instruction([&] (Byte &v) { instr_res(v, 4); }, _hl.word, 16);
+break;
+case 0xA7:
+exec_instruction([&] () { instr_res(_af.high, 4); }, 8);
+break;
+case 0xA8:
+exec_instruction([&] () { instr_res(_bc.high, 5); }, 8);
+break;
+case 0xA9:
+exec_instruction([&] () { instr_res(_bc.low, 5); }, 8);
+break;
+case 0xAA:
+exec_instruction([&] () { instr_res(_de.high, 5); }, 8);
+break;
+case 0xAB:
+exec_instruction([&] () { instr_res(_de.low, 5); }, 8);
+break;
+case 0xAC:
+exec_instruction([&] () { instr_res(_hl.high, 5); }, 8);
+break;
+case 0xAD:
+exec_instruction([&] () { instr_res(_hl.low, 5); }, 8);
+break;
+case 0xAE:
+exec_instruction([&] (Byte &v) { instr_res(v, 5); }, _hl.word, 16);
+break;
+case 0xAF:
+exec_instruction([&] () { instr_res(_af.high, 5); }, 8);
+break;
+case 0xB0:
+exec_instruction([&] () { instr_res(_bc.high, 6); }, 8);
+break;
+case 0xB1:
+exec_instruction([&] () { instr_res(_bc.low, 6); }, 8);
+break;
+case 0xB2:
+exec_instruction([&] () { instr_res(_de.high, 6); }, 8);
+break;
+case 0xB3:
+exec_instruction([&] () { instr_res(_de.low, 6); }, 8);
+break;
+case 0xB4:
+exec_instruction([&] () { instr_res(_hl.high, 6); }, 8);
+break;
+case 0xB5:
+exec_instruction([&] () { instr_res(_hl.low, 6); }, 8);
+break;
+case 0xB6:
+exec_instruction([&] (Byte &v) { instr_res(v, 6); }, _hl.word, 16);
+break;
+case 0xB7:
+exec_instruction([&] () { instr_res(_af.high, 6); }, 8);
+break;
+case 0xB8:
+exec_instruction([&] () { instr_res(_bc.high, 7); }, 8);
+break;
+case 0xB9:
+exec_instruction([&] () { instr_res(_bc.low, 7); }, 8);
+break;
+case 0xBA:
+exec_instruction([&] () { instr_res(_de.high, 7); }, 8);
+break;
+case 0xBB:
+exec_instruction([&] () { instr_res(_de.low, 7); }, 8);
+break;
+case 0xBC:
+exec_instruction([&] () { instr_res(_hl.high, 7); }, 8);
+break;
+case 0xBD:
+exec_instruction([&] () { instr_res(_hl.low, 7); }, 8);
+break;
+case 0xBE:
+exec_instruction([&] (Byte &v) { instr_res(v, 7); }, _hl.word, 16);
+break;
+case 0xBF:
+exec_instruction([&] () { instr_res(_af.high, 7); }, 8);
+break;
+case 0xC0:
+exec_instruction([&] () { instr_set(_bc.high, 0); }, 8);
+break;
+case 0xC1:
+exec_instruction([&] () { instr_set(_bc.low, 0); }, 8);
+break;
+case 0xC2:
+exec_instruction([&] () { instr_set(_de.high, 0); }, 8);
+break;
+case 0xC3:
+exec_instruction([&] () { instr_set(_de.low, 0); }, 8);
+break;
+case 0xC4:
+exec_instruction([&] () { instr_set(_hl.high, 0); }, 8);
+break;
+case 0xC5:
+exec_instruction([&] () { instr_set(_hl.low, 0); }, 8);
+break;
+case 0xC6:
+exec_instruction([&] (Byte &v) { instr_set(v, 0); }, _hl.word, 16);
+break;
+case 0xC7:
+exec_instruction([&] () { instr_set(_af.high, 0); }, 8);
+break;
+case 0xC8:
+exec_instruction([&] () { instr_set(_bc.high, 1); }, 8);
+break;
+case 0xC9:
+exec_instruction([&] () { instr_set(_bc.low, 1); }, 8);
+break;
+case 0xCA:
+exec_instruction([&] () { instr_set(_de.high, 1); }, 8);
+break;
+case 0xCB:
+exec_instruction([&] () { instr_set(_de.low, 1); }, 8);
+break;
+case 0xCC:
+exec_instruction([&] () { instr_set(_hl.high, 1); }, 8);
+break;
+case 0xCD:
+exec_instruction([&] () { instr_set(_hl.low, 1); }, 8);
+break;
+case 0xCE:
+exec_instruction([&] (Byte &v) { instr_set(v, 1); }, _hl.word, 16);
+break;
+case 0xCF:
+exec_instruction([&] () { instr_set(_af.high, 1); }, 8);
+break;
+case 0xD0:
+exec_instruction([&] () { instr_set(_bc.high, 2); }, 8);
+break;
+case 0xD1:
+exec_instruction([&] () { instr_set(_bc.low, 2); }, 8);
+break;
+case 0xD2:
+exec_instruction([&] () { instr_set(_de.high, 2); }, 8);
+break;
+case 0xD3:
+exec_instruction([&] () { instr_set(_de.low, 2); }, 8);
+break;
+case 0xD4:
+exec_instruction([&] () { instr_set(_hl.high, 2); }, 8);
+break;
+case 0xD5:
+exec_instruction([&] () { instr_set(_hl.low, 2); }, 8);
+break;
+case 0xD6:
+exec_instruction([&] (Byte &v) { instr_set(v, 2); }, _hl.word, 16);
+break;
+case 0xD7:
+exec_instruction([&] () { instr_set(_af.high, 2); }, 8);
+break;
+case 0xD8:
+exec_instruction([&] () { instr_set(_bc.high, 3); }, 8);
+break;
+case 0xD9:
+exec_instruction([&] () { instr_set(_bc.low, 3); }, 8);
+break;
+case 0xDA:
+exec_instruction([&] () { instr_set(_de.high, 3); }, 8);
+break;
+case 0xDB:
+exec_instruction([&] () { instr_set(_de.low, 3); }, 8);
+break;
+case 0xDC:
+exec_instruction([&] () { instr_set(_hl.high, 3); }, 8);
+break;
+case 0xDD:
+exec_instruction([&] () { instr_set(_hl.low, 3); }, 8);
+break;
+case 0xDE:
+exec_instruction([&] (Byte &v) { instr_set(v, 3); }, _hl.word, 16);
+break;
+case 0xDF:
+exec_instruction([&] () { instr_set(_af.high, 3); }, 8);
+break;
+case 0xE0:
+exec_instruction([&] () { instr_set(_bc.high, 4); }, 8);
+break;
+case 0xE1:
+exec_instruction([&] () { instr_set(_bc.low, 4); }, 8);
+break;
+case 0xE2:
+exec_instruction([&] () { instr_set(_de.high, 4); }, 8);
+break;
+case 0xE3:
+exec_instruction([&] () { instr_set(_de.low, 4); }, 8);
+break;
+case 0xE4:
+exec_instruction([&] () { instr_set(_hl.high, 4); }, 8);
+break;
+case 0xE5:
+exec_instruction([&] () { instr_set(_hl.low, 4); }, 8);
+break;
+case 0xE6:
+exec_instruction([&] (Byte &v) { instr_set(v, 4); }, _hl.word, 16);
+break;
+case 0xE7:
+exec_instruction([&] () { instr_set(_af.high, 4); }, 8);
+break;
+case 0xE8:
+exec_instruction([&] () { instr_set(_bc.high, 5); }, 8);
+break;
+case 0xE9:
+exec_instruction([&] () { instr_set(_bc.low, 5); }, 8);
+break;
+case 0xEA:
+exec_instruction([&] () { instr_set(_de.high, 5); }, 8);
+break;
+case 0xEB:
+exec_instruction([&] () { instr_set(_de.low, 5); }, 8);
+break;
+case 0xEC:
+exec_instruction([&] () { instr_set(_hl.high, 5); }, 8);
+break;
+case 0xED:
+exec_instruction([&] () { instr_set(_hl.low, 5); }, 8);
+break;
+case 0xEE:
+exec_instruction([&] (Byte &v) { instr_set(v, 5); }, _hl.word, 16);
+break;
+case 0xEF:
+exec_instruction([&] () { instr_set(_af.high, 5); }, 8);
+break;
+case 0xF0:
+exec_instruction([&] () { instr_set(_bc.high, 6); }, 8);
+break;
+case 0xF1:
+exec_instruction([&] () { instr_set(_bc.low, 6); }, 8);
+break;
+case 0xF2:
+exec_instruction([&] () { instr_set(_de.high, 6); }, 8);
+break;
+case 0xF3:
+exec_instruction([&] () { instr_set(_de.low, 6); }, 8);
+break;
+case 0xF4:
+exec_instruction([&] () { instr_set(_hl.high, 6); }, 8);
+break;
+case 0xF5:
+exec_instruction([&] () { instr_set(_hl.low, 6); }, 8);
+break;
+case 0xF6:
+exec_instruction([&] (Byte &v) { instr_set(v, 6); }, _hl.word, 16);
+break;
+case 0xF7:
+exec_instruction([&] () { instr_set(_af.high, 6); }, 8);
+break;
+case 0xF8:
+exec_instruction([&] () { instr_set(_bc.high, 7); }, 8);
+break;
+case 0xF9:
+exec_instruction([&] () { instr_set(_bc.low, 7); }, 8);
+break;
+case 0xFA:
+exec_instruction([&] () { instr_set(_de.high, 7); }, 8);
+break;
+case 0xFB:
+exec_instruction([&] () { instr_set(_de.low, 7); }, 8);
+break;
+case 0xFC:
+exec_instruction([&] () { instr_set(_hl.high, 7); }, 8);
+break;
+case 0xFD:
+exec_instruction([&] () { instr_set(_hl.low, 7); }, 8);
+break;
+case 0xFE:
+exec_instruction([&] (Byte &v) { instr_set(v, 7); }, _hl.word, 16);
+break;
+case 0xFF:
+exec_instruction([&] () { instr_set(_af.high, 7); }, 8);
 break;
 }
 break;
