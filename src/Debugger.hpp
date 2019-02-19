@@ -41,12 +41,13 @@ class Debugger {
 
 		ComponentsContainer &_components;
 		bool	 _enabled = 1;
-		bool	 _wait_next = 1;
+		bool	 _send_update= 0;
 		int		_frame_size = 10;
 
 		std::vector<_debug_info> _instr_pool;
 		std::vector<uint16_t> _breakpoint_pool;
 		std::vector<uint16_t> _register_pool;
+		std::vector<std::pair<int, uint16_t>> _register_diffs;
 
 		std::map<int, _instr_info> _instr_map = {
 			{0x06, {"ld B,n", 2}}, {0x0E, {"ld C,n", 2}}, {0x16, {"ld D,n", 2}}, {0x1E, {"ld E,n", 2}}, 
@@ -184,18 +185,17 @@ class Debugger {
 		void set_frame_size(int size) {_frame_size = size;}
 		void add_breakpoint(uint16_t addr);
 		void remove_breakpoint(uint16_t addr);
+		void send_data();
 		const std::vector<uint16_t> & get_breakpoints() const {return _breakpoint_pool;}
 		const std::vector<_debug_info> & get_instruction_pool() const {return _instr_pool;}
 		void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
-		void wait_user_interaction(uint16_t pc);
-		void update(const Core::Iterator &it, uint16_t pc);
+		void update_data(const Core::Iterator &it, uint16_t pc);
+		void fetch(const Core::Iterator &it, uint16_t pc);
+		void trigger_data_sending(uint16_t pc);
 		bool is_enabled() const { return _enabled; }
 		void toggle() { _enabled = _enabled ? false : true; }
 		using it = std::vector<uint16_t>::const_iterator;
 		const std::vector<std::pair<int, uint16_t>> get_differences(it prev_begin, it current_begin);
-		//Debugger debug functions
-		void print_instruction_pool();
-		void print_breakpoint_list();
 };
 
 #endif
