@@ -62,6 +62,8 @@ uint16_t				PPU::colorPaletteAddressWrapper(uint8_t specifier)
 //------------------------------------------------------------------------------
 void				PPU::write(Word address, Byte value)
 {
+	Byte			*paletteAddr;
+
 	switch (address)
 	{
 		case 0xFF40:
@@ -120,12 +122,16 @@ void				PPU::write(Word address, Byte value)
 			break;
 		case 0xFF69:
 			_bcpd = value;
+			paletteAddr = _backgroundColorPalette + colorPaletteAddressWrapper(_bcps);
+			*paletteAddr = value;
 			break;
 		case 0xFF6A:
 			_ocps = value;
 			break;
 		case 0xFF6B:
 			_ocpd = value;
+			paletteAddr = _spriteColorPalette + colorPaletteAddressWrapper(_ocps);
+			*paletteAddr = value;
 			break;
 	}
 }
@@ -134,6 +140,7 @@ void				PPU::write(Word address, Byte value)
 Byte				PPU::read(Word address)
 {
 	Byte			ret;
+	Byte			*paletteAddr;
 
 	switch (address)
 	{
@@ -192,12 +199,14 @@ Byte				PPU::read(Word address)
 			ret = _bcps;
 			break;
 		case 0xFF69:
+			bpcd = _backgroundColorPalette + colorPaletteAddressWrapper(_bcps);
 			ret = _bcpd;
 			break;
 		case 0xFF6A:
 			ret = _ocps;
 			break;
 		case 0xFF6B:
+			opcd = _backgroundColorPalette + colorPaletteAddressWrapper(_ocps);
 			ret = _ocpd;
 			break;
 	}
