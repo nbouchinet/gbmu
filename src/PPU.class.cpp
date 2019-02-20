@@ -40,6 +40,20 @@ bool				PPU::testBit(uint32_t byte, uint8_t bit_number)
 }
 
 //------------------------------------------------------------------------------
+uint8_t					PPU::setBit(uint8_t src, uint8_t bit_number)
+{
+	src |= 1UL << bit_number;
+	return (src);
+}
+
+//------------------------------------------------------------------------------
+uint8_t					PPU::unsetBit(uint8_t src, uint8_t bit_number)
+{
+	src &= ~(1UL << bit_number);
+	return (src);
+}
+
+//------------------------------------------------------------------------------
 uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier)
 {
 	uint8_t				paletteNumber;
@@ -613,6 +627,102 @@ void					PPU::translatePalettes()
 	if (2 /* IS_CGB */)
 	{
 		
+	}
+}
+
+//------------------------------------------------------------------------------
+void					PPU::setLCDstatus()
+{
+	uint8_t				statusTmp;
+
+	statusTmp = read(0xFF41);
+	if (isLCDEnabled == false)
+	{
+		_scanlineCounter = 456;
+		write(0xFF44, 0);
+		statusTmp &= 252;
+		statusTmp = setBit(statusTmp, 0);
+		write(0xFF41, statusTmp);
+		return ;
+	}
+
+	uint8_t				currentMode = statusTmp & 0x3;
+	uint8_t				mode = 0;
+	bool				requestInterruptFlag = false;
+
+	if (read(0xFF44) >= 144)
+	{
+		mode = 1;
+		statusTmp = setBit(statusTmp, 0);
+		statusTmp = unsetBit(statusTmp, 1);
+		requestInterruptFlag == testBit(statusTmp, 4);
+	}
+	else
+	{
+		uint32_t mode2Bounds = 456 - 80;
+		uint32_t mode3Bounds = mode2Bounds - 172;
+	
+		if (_scanlineCounter >= mode2Bounds())
+		{
+			mode = 2;
+			statusTmp = setBit(statusTmp, 1);
+			statusTmp = unsetBit(statusTmp, 0);
+			requestInterruptFlag = testBit(statusTmp, 5);
+		}
+		else if (_scanlineCounter >= mode3Bounds)
+		{
+			mode = 3;
+			statusTmp = setBit(statusTmp, 1);
+			statusTmp = setBit(statusTmp, 0);
+		}
+		else
+		{
+			mode = 0;
+			statusTmp = unsetBit(statusTmp, 1);
+			statusTmp = unsetBit(statusTmp, 0);
+			requestInterruptFlag = testBit(statusTmp, 3);
+		}
+	}
+
+	if (requestInterruptFlag == true && mode != currentMode)
+		requestInterrupt(0x0048);
+
+	if (read(0xFF45))
+	{
+		statusTmp = setBit(statusTmp, 2);
+		if (testBit(statusTmp, 6))
+			requestInterrupt(0x0048);
+	}
+	else
+	{
+		statusTmp = unsetBit(statusTmp, 2);
+	}
+	write(0xFF41, statusTmp);
+}
+
+//------------------------------------------------------------------------------
+void					PPU::updateGraphics(Word cycles)
+{
+	uint8_t				currentScanline;
+
+	setLCDstatus();
+	if (isLCDEnabled)
+		_scanlineCounter -= cycles;
+	else
+		return ;
+
+	if (_scanlineCounter <= 0)
+	{
+		currentScanline = read(0xFF44);
+		currentScanline++;
+		write(0xFF44, currentScanline);
+		_scanlineCounter = 456;
+		if (currentScanline == 144)
+			requestInterrupt(0x0040);
+		if (currentScanline > 153)
+			write(0xFF44, 0);
+		else if (currentScanline < 144)
+			renderScanLine();
 	}
 }
 
