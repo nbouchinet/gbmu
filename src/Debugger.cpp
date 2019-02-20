@@ -148,11 +148,17 @@ bool Debugger::on_breakpoint(uint16_t pc)
 	return 0;
 }
 
+void Debugger::wait_one_sec()
+{
+	_to_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() + 1);
+}
+
 void Debugger::trigger_data_sending(uint16_t pc)
 {
+	auto current = std::chrono::high_resolution_clock::now();
+
 	if (on_breakpoint(pc)
-			// TODO: Implement the two conditions
-			//|| curr_time >= _to_time
+			|| current >= _to_time
 			//|| _components.PPU->isScreenFilled()
 			) {
 		_send_update = 1;

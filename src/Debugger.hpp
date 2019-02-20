@@ -44,6 +44,7 @@ class Debugger {
 		bool	_send_update = 0;
 		bool	_lock = 1;
 		int		_frame_size = 10;
+		auto	_to_time;
 
 		std::vector<_debug_info> _instr_pool;
 		std::vector<uint16_t> _breakpoint_pool;
@@ -224,6 +225,7 @@ class Debugger {
 		std::vector<Word> getRegisters(void);
 		std::vector<Word> dumpRom(void);
 
+		void wait_one_sec();
 		std::vector<uint16_t> construct_register_pool();
 		std::vector<uint8_t> construct_rom_dump(uint16_t addr);
 		void set_frame_size(int size) {_frame_size = size;}

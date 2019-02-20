@@ -32,7 +32,7 @@ Gameboy::Gameboy(const std::string &rom_path) : _components(rom_path), _debugger
 
 void Gameboy::step() {
   if (_debugger.is_enabled()) {
-    _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
+    _debugger.update(_begin + _components.core->pc(), _components.core->pc());
   }
   _components.core->execute(_begin);
   _components.interrupt_controller->ParseInterrupt();
@@ -47,6 +47,7 @@ int Gameboy::run() {
   }
   //system("sh -c clear");// for debug TODO: remove
   while (_begin + _components.core->pc() != _end) {
+	  std::cout << std::chrono::high_resolution_clock::now() << std::endl;
     step();
   }
   return (0);
