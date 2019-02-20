@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <array>
 #include "ScreenOutput.class.h"
 #include "Fwd.hpp"
 #include "IReadWrite.hpp"
@@ -41,17 +42,18 @@ public:
 	PPU(ComponentsContainer& components);
 	~PPU();
 
-	virtual Byte			read(Word addr);
+	virtual Byte			read(Word addr) const;
 	virtual void			write(Word addr, Byte);
 
 	static int				getPPUNumber(void);
 	static void				switchPPUDebug(bool status);
 	bool					isScreenFilled(); // pr toi nico :3
-	bool					testBit(uint8_t byte, uint8_t bit_number);
+	bool					testBit(uint32_t byte, uint8_t bit_number);
 
 private:
 	uint16_t				getTileDataAddress(uint8_t tileIdentifier);
 	uint8_t					readMemBank(uint8_t bank, uint16_t address);
+	uint8_t					extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end);
 	void					setupWindow();
 	void					setupBackgroundMemoryStart();
 	void					setupSpriteAddressStart();
@@ -64,6 +66,9 @@ private:
 	void					sendPixelPipeline();
 	void					blendPixels(t_pixelSegment &holder, t_pixelSegment &contender);
 	void					translatePalettes();
+	uint32_t				translateCGBColorValue(uint16_t value);
+	uint32_t				translateDMGColorValue(uint8_t value);
+	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier);
 
 	ComponentsContainer&	_components;
 
@@ -98,10 +103,13 @@ private:
 	bool					_unsignedTileNumbers;
 	bool					_windowingOn;
 
-	// fate of CGB palettes position unknown
+//	uint32_t				_backgroundColorPalettes_translated[8][4];
+//	uint32_t				_spriteColorPalettes_translated[8][4];
+//	uint16_t				_backgroundColorPalettes[8][4];
+//	uint16_t				_spriteColorPalettes[8][4];
 
-	uint16_t				_backgroundColorPalettes[8][4];
-	uint16_t				_spriteColorPalettes[8][4];
+	uint32_t				_backgroundDMGPalette_translated[4];
+	uint32_t				_spritesDMGPalettes_translated[2][4];
 
 	t_pixelSegment			_pixelPipeline[LCD_WIDTH];
 	t_spriteInfo			_spritesLine[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line

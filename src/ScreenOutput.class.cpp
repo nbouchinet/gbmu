@@ -86,13 +86,13 @@ uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x)
 }
 
 //------------------------------------------------------------------------------
-uint32_t				ScreenOutput::getRGBA(uint8_t y, uint8_t x)
+uint32_t &				ScreenOutput::getRGBA(uint8_t y, uint8_t x)
 {
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return (0) ;
+		return (screen[0][0]) ;
 	}
 	return (screen[y][x]);
 }
