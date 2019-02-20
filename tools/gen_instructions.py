@@ -4,7 +4,6 @@ FORMAT_NONE             = "exec_instruction([&] () {{ instr_{}(); }}, {})"
 
 FORMAT_SINGLE           = "exec_instruction([&] () {{ instr_{}({}); }}, {})"
 FORMAT_SINGLE_BYTE      = "exec_instruction([&] (Byte &v) {{ instr_{}({}); }}, {}, {})"
-FORMAT_SINGLE_WORD      = "exec_instruction([&] (Word &v) {{ instr_{}({}); }}, {}, {})"
 
 FORMAT_DOUBLE           = "exec_instruction([&] () {{ instr_{}({}, {}); }}, {})"
 FORMAT_DOUBLE_BYTE      = "exec_instruction([&] (Byte &v) {{ instr_{}({}, {}); }}, {}, {})"
@@ -72,12 +71,13 @@ def get_reg(mnemonic, operand):
 
 def gen_code(opcodes):
     for key, opcode in opcodes.items():
-        current_format      = None
         deref               = None
         addr                = opcode["addr"]
         mnemonic            = opcode["mnemonic"].lower()
         operand1            = opcode.get("operand1")
         operand2            = opcode.get("operand2")
+        exec_instruction    = None
+        first_is_deref      = False
 
         cycles              = opcode.get("cycles")
         if len(cycles) > 1:
@@ -85,10 +85,7 @@ def gen_code(opcodes):
         else:
             cycles = str(cycles[0])
 
-        exec_instruction    = None
-
-        first_is_deref = False
-        if (operand1 and "(" in operand1) or (operand2 and ("(" in operand2)):
+        if (operand1 and "(" in operand1) or (operand2 and "(" in operand2):
             deref = get_deref(mnemonic, operand1, operand2)
             if operand1 and "(" in operand1:
                 first_is_deref = True
@@ -102,59 +99,49 @@ def gen_code(opcodes):
                 exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic + "_a_v", "_af.high", "v", "0xFF00 + *it++", cycles)
             else:
                 exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic + "_v_a", "v", "_af.high", "0xFF00 + *it++", cycles)
-        elif operand1 and operand2:
-            if operand2 == "SP":
-                if deref:
-                    exec_instruction = FORMAT_DOUBLE_WORD.format(
-                            mnemonic.lower(),
-                            "v" if first_is_deref else cpp_op1,
-                            "v" if not first_is_deref else cpp_op2,
-                            deref, cycles)
-                else:
-                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
+        # Annoying instruction #2 #3 #4 #5 #6
+        # Thanks to Alaric's way of handling these instructions the following elif is necessary
+        elif mnemonic == "sub" or mnemonic == "and" or mnemonic == "or" or mnemonic == "xor" or mnemonic == "cp":
+            cpp_op1 = "_af.high"
+            cpp_op2 = get_reg(mnemonic, operand1)
+            first_is_deref = False
+            if deref:
+                cpp_op1 = "v" if first_is_deref else cpp_op1
+                cpp_op2 = "v" if not first_is_deref else cpp_op2
+                exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic.lower(), cpp_op1, cpp_op2, deref, cycles)
             else:
-                if deref:
-                    exec_instruction = FORMAT_DOUBLE_BYTE.format(
-                            mnemonic.lower(),
-                            "v" if first_is_deref else cpp_op1,
-                            "v" if not first_is_deref else cpp_op2,
-                            deref, cycles)
+                exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
+        elif operand1 and operand2:
+            _format = None
+            if deref:
+                if operand2 == "SP":
+                    _format = FORMAT_DOUBLE_WORD
                 else:
-                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
+                    _format = FORMAT_DOUBLE_BYTE
+                cpp_op1 = "v" if first_is_deref else cpp_op1
+                cpp_op2 = "v" if not first_is_deref else cpp_op2
+                exec_instruction = _format.format( mnemonic.lower(), cpp_op1, cpp_op2, deref, cycles)
+            else:
+                exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
         elif operand1:
-            # Thanks to Alaric's handling of these instructions
-            if mnemonic == "sub" or mnemonic == "and" or mnemonic == "or" or mnemonic == "xor" or mnemonic == "cp":
-                cpp_op1 = "_af.high"
-                cpp_op2 = get_reg(mnemonic, operand1)
-                first_is_deref = False
-                if deref:
-                    exec_instruction = FORMAT_DOUBLE_BYTE.format(
-                            mnemonic.lower(),
-                            "v" if first_is_deref else cpp_op1,
-                            "v" if not first_is_deref else cpp_op2,
-                            deref, cycles)
-                else:
-                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
-            elif deref:
+            if deref:
                 exec_instruction = FORMAT_SINGLE_BYTE.format(mnemonic, "v", deref, cycles)
             else:
                 exec_instruction = FORMAT_SINGLE.format(mnemonic, cpp_op1, cycles)
         else:
             exec_instruction = FORMAT_NONE.format(mnemonic, cycles)
-
-        # print(addr, mnemonic, operand1, operand2, cycles, "deref: " + str(deref), exec_instruction, sep="\t")
         print("case " + addr + ":")
         print("  " + exec_instruction + ";")
         print("  break;")
 
+def main():
+    opcodes = json.loads(open("opcodes.json", "r").read())
+    del opcodes["unprefixed"]["0xcb"]
+    gen_code(opcodes.get("unprefixed"))
+    print("  case 0xCB:")
+    print("switch (*it++) {")
+    gen_code(opcodes.get("cbprefixed"))
+    print("}")
 
-opcodes = open("opcodes.json", "r").read()
-opcodes = json.loads(opcodes)
-
-del opcodes["unprefixed"]["0xcb"]
-
-gen_code(opcodes.get("unprefixed"))
-print("  case 0xCB:")
-print("switch (*it++) {")
-gen_code(opcodes.get("cbprefixed"))
-print("}")
+if __name__ == "__main__":
+    main()
