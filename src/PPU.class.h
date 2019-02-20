@@ -49,6 +49,8 @@ public:
 	static void				switchPPUDebug(bool status);
 	bool					isScreenFilled(); // pr toi nico :3
 	bool					testBit(uint32_t byte, uint8_t bit_number);
+	uint8_t					setBit(uint8_t src, uint8_t bit_number);
+	uint8_t					unsetBit(uint8_t src, uint8_t bit_number);
 
 private:
 	uint16_t				getTileDataAddress(uint8_t tileIdentifier);
@@ -69,6 +71,8 @@ private:
 	uint32_t				translateCGBColorValue(uint16_t value);
 	uint32_t				translateDMGColorValue(uint8_t value);
 	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier);
+	void					setLCDstatus();
+	void					updateGraphics(Word cycles);
 
 	ComponentsContainer&	_components;
 
@@ -95,6 +99,7 @@ private:
 	uint8_t					_ocpd;					// (0xFF6B)
 
 
+	uint32_t				_scanlineCounter;
 	uint16_t				_backgroundDataStart;
 	uint16_t				_backgroundChrAttrStart;
 	uint16_t				_spriteDataStart;
