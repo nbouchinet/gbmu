@@ -5,6 +5,7 @@
 #include <chrono>
 #include <unistd.h>
 #include <algorithm>
+#include <ratio>
 #include "src/Gameboy.hpp"
 #include "src/cpu/InterruptController.hpp"
 
@@ -150,15 +151,16 @@ bool Debugger::on_breakpoint(uint16_t pc)
 
 void Debugger::wait_one_sec()
 {
-	_to_time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now() + 1);
+	_past = std::chrono::high_resolution_clock::now();
 }
 
 void Debugger::trigger_data_sending(uint16_t pc)
 {
-	auto current = std::chrono::high_resolution_clock::now();
+	std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> elapsed_seconds = _past - current;
 
 	if (on_breakpoint(pc)
-			|| current >= _to_time
+			|| elapsed_seconds.count() >= 1
 			//|| _components.PPU->isScreenFilled()
 			) {
 		_send_update = 1;
