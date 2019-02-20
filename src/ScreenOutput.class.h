@@ -2,6 +2,8 @@
 # define SCREENOUTPUT_CLASS_H
 
 #include <iostream>
+#include <array>
+
 #define LCD_HEIGHT 144
 #define LCD_WIDTH 160
 
@@ -25,10 +27,11 @@ public:
 
 	void				setRGBA(uint8_t y, uint8_t x, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
 	void				setRGBA(uint8_t y, uint8_t x, uint32_t rgba);
-	uint32_t			getRGBA(uint8_t y, uint8_t x);
+	uint32_t &			getRGBA(uint8_t y, uint8_t x);
+	std::array<std::array<uint32_t, LCD_HEIGHT>, LCD_WIDTH> 		getScreen() { return screen; }
 
 private:
-	uint32_t			screen[LCD_HEIGHT][LCD_WIDTH];
+	std::array<std::array<uint32_t, LCD_HEIGHT>, LCD_WIDTH>			screen;
 
 	static bool			_debug_ScreenOutput;
 };
