@@ -28,8 +28,8 @@ class Debugger {
 
 	private:
 
-		/*
-		 * 
+		/**
+		 *
 		 *  - Debugger on a besoin de quoi getter pour avoir les valeurs des registres: [pc(); sp(); ...]
 		 *  - Lire la rom (Cartridge.hpp) donc faire un getter de std::vector<Byte> rom naviguer dans la rom avec un user input;
 		 *  - Afficher la memoire de la rom pointer par le program counter 
@@ -40,11 +40,11 @@ class Debugger {
 		 */
 
 		ComponentsContainer &_components;
-		bool	_enabled = 1;
+		bool	_enabled = 0;
 		bool	_send_update = 0;
 		bool	_lock = 1;
 		int		_frame_size = 10;
-		auto	_to_time;
+		std::chrono::time_point<std::chrono::high_resolution_clock> _past;
 
 		std::vector<_debug_info> _instr_pool;
 		std::vector<uint16_t> _breakpoint_pool;
