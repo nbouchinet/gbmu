@@ -40,21 +40,17 @@ bool				PPU::testBit(uint32_t byte, uint8_t bit_number)
 }
 
 //------------------------------------------------------------------------------
-uint16_t				PPU::colorPaletteAddressWrapper(uint8_t specifier)
+uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier)
 {
 	uint8_t				paletteNumber;
 	uint8_t				paletteDataNumber;
-	uint8_t				highLowByte;
 	uint16_t			ret;
 
 	paletteNumber = extractValue(specifier, 3, 5);
 	paletteDataNumber = extractValue(specifier, 1, 2);
-	highLowByte = extractValue(specifier, 0, 0);
 
 	ret = 0; /* start address of sprites palettes */
-	ret	+= (paletteNumber * 8) + (paletteDataNumber * 2);
-	if (highLowByte == 0)
-		ret += 1;
+	ret	+= (paletteNumber * 4) + (paletteDataNumber);
 
 	return (ret);
 }
@@ -63,6 +59,12 @@ uint16_t				PPU::colorPaletteAddressWrapper(uint8_t specifier)
 void				PPU::write(Word address, Byte value)
 {
 	Byte			*paletteAddr;
+	uint8_t			array_case;
+	uint8_t			hilo;
+
+	paletteAddr = 0;
+	array_case = 0;
+	hilo = 0;
 
 	switch (address)
 	{
@@ -122,25 +124,35 @@ void				PPU::write(Word address, Byte value)
 			break;
 		case 0xFF69:
 			_bcpd = value;
-			paletteAddr = _backgroundColorPalette + colorPaletteAddressWrapper(_bcps);
-			*paletteAddr = value;
+//			array_case = colorPaletteArrayCaseWrapper(_bcps);
+//			hilo = array_case % 2;
+//			array_case -= hilo;
+//			paletteAddr = (_backgroundColorPalette[array_case / 8][array_case % 4]) + hilo;
+//			*paletteAddr = value;
+//			_backgroundColorPalette_translated[array_case / 8][array_case % 4] = translateCGBColorValue(_backgroundColorPalette[array_case / 8][array_case % 4]);
 			break;
 		case 0xFF6A:
 			_ocps = value;
 			break;
 		case 0xFF6B:
 			_ocpd = value;
-			paletteAddr = _spriteColorPalette + colorPaletteAddressWrapper(_ocps);
-			*paletteAddr = value;
+//			array_case = colorPaletteArrayCaseWrapper(_ocps);
+//			hilo = array_case % 2;
+//			array_case -= hilo;
+//			paletteAddr = (_spriteColorPalette[array_case / 8][array_case % 4]) + hilo;
+//			*paletteAddr = value;
+//			_spriteColorPalette_translated[array_case / 8][array_case % 4] = translateCGBColorValue(_spriteColorPalette[array_case / 8][array_case % 4]);
 			break;
 	}
 }
 
 //------------------------------------------------------------------------------
-Byte				PPU::read(Word address)
+Byte				PPU::read(Word address) const
 {
 	Byte			ret;
 	Byte			*paletteAddr;
+
+	paletteAddr = 0;
 
 	switch (address)
 	{
@@ -199,14 +211,14 @@ Byte				PPU::read(Word address)
 			ret = _bcps;
 			break;
 		case 0xFF69:
-			bpcd = _backgroundColorPalette + colorPaletteAddressWrapper(_bcps);
+//			_bcpd = _backgroundColorPalette + colorPaletteArrayCaseWrapper(_bcps);
 			ret = _bcpd;
 			break;
 		case 0xFF6A:
 			ret = _ocps;
 			break;
 		case 0xFF6B:
-			opcd = _backgroundColorPalette + colorPaletteAddressWrapper(_ocps);
+//			_ocpd = _backgroundColorPalette + colorPaletteArrayCaseWrapper(_ocps);
 			ret = _ocpd;
 			break;
 	}
@@ -216,7 +228,7 @@ Byte				PPU::read(Word address)
 //------------------------------------------------------------------------------
 uint8_t				PPU::readMemBank(uint8_t bank, uint16_t address)
 {
-	uint8_t			ret;
+	uint8_t			ret = 0;
 
 	if (bank == 0)
 	{
@@ -311,18 +323,18 @@ void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorID)
 		{
 			case 3 :
 				// black
-				_components.driverScreen.setRGBA(y, x, 0, 0, 0, 255);
+				_components.driverScreen->setRGBA(y, x, 0, 0, 0, 255);
 				break;
 			case 2 :
-				_components.driverScreen.setRGBA(y, x, 119, 119, 119, 255);
+				_components.driverScreen->setRGBA(y, x, 119, 119, 119, 255);
 				// dark grey
 				break;
 			case 1 :
-				_components.driverScreen.setRGBA(y, x, 204, 204, 204, 255);
+				_components.driverScreen->setRGBA(y, x, 204, 204, 204, 255);
 				// light grey
 				break;
 			case 0 :
-				_components.driverScreen.setRGBA(y, x, 255, 255, 255, 255);
+				_components.driverScreen->setRGBA(y, x, 255, 255, 255, 255);
 				// transparent (white)
 				break;
 		}
@@ -359,15 +371,21 @@ void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and 
 //------------------------------------------------------------------------------
 void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 {
+	t_pixelSegment t1;
+	t_pixelSegment t2;
+
+	t1 = holder;
+	t2 = contender;
+
 	if (1 /* IS_DMG */)
 	{
 		if (holder.isSprite == false)
 		{
-			if ()
+			if (1)
 			{
 				
 			}
-			if ())
+			if (2)
 			{
 				
 			}
@@ -378,8 +396,7 @@ void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 		}
 	}
 
-
-	else if (0 /* IS_CGB */)
+	else if (2 /* IS_CGB */)
 	{
 		
 	}
@@ -545,13 +562,13 @@ uint32_t				PPU::translateCGBColorValue(uint16_t value)
 
 	extracc = extractValue(value, 0, 4) * 8; // extract red
 	ret += extracc;
-	ret << 8;
+	ret = ret << 8;
 	extracc = extractValue(value, 5, 9) * 8; // extract green
 	ret += extracc;
-	ret << 8;
+	ret = ret << 8;
 	extracc = extractValue(value, 10, 14) * 8; // extact blue
 	ret += extracc;
-	ret << 8;
+	ret = ret << 8;
 	ret += 255; // alpha value, default 255;
 	return (ret);
 }
@@ -563,34 +580,34 @@ uint32_t				PPU::translateDMGColorValue(uint8_t value)
 	uint32_t			reversedValue = 255 - (85 * value);
 
 	ret += reversedValue;
-	ret << 8;
+	ret = ret << 8;
 	ret += reversedValue;
-	ret << 8;
+	ret = ret << 8;
 	ret += reversedValue;
-	ret << 8;
+	ret = ret << 8;
 	ret += 255; // we set alpha value to 255 by default
 	return (ret);
 }
 
 //------------------------------------------------------------------------------
-void					PPU::translatePalettes();
+void					PPU::translatePalettes()
 {
 	if (1 /* IS_DMG */)
 	{
-		_backgroundPalette.data[0] = translateDMGColorValue(extractValue(_bgp, 0, 1));
-		_backgroundPalette.data[1] = translateDMGColorValue(extractValue(_bgp, 2, 3));
-		_backgroundPalette.data[2] = translateDMGColorValue(extractValue(_bgp, 4, 5));
-		_backgroundPalette.data[3] = translateDMGColorValue(extractValue(_bgp, 6, 7));
-	
-		_spritePalette[0].data[0] = translateDMGColorValue(extractValue(_obp0, 0, 1));
-		_spritePalette[0].data[1] = translateDMGColorValue(extractValue(_obp0, 2, 3));
-		_spritePalette[0].data[2] = translateDMGColorValue(extractValue(_obp0, 4, 5));
-		_spritePalette[0].data[3] = translateDMGColorValue(extractValue(_obp0, 6, 7));
+		_backgroundDMGPalette_translated[0] = translateDMGColorValue(extractValue(_bgp, 0, 1));
+		_backgroundDMGPalette_translated[1] = translateDMGColorValue(extractValue(_bgp, 2, 3));
+		_backgroundDMGPalette_translated[2] = translateDMGColorValue(extractValue(_bgp, 4, 5));
+		_backgroundDMGPalette_translated[3] = translateDMGColorValue(extractValue(_bgp, 6, 7));
 
-		_spritePalette[1].data[0] = translateDMGColorValue(extractValue(_obp1, 0, 1));
-		_spritePalette[1].data[1] = translateDMGColorValue(extractValue(_obp1, 2, 3));
-		_spritePalette[1].data[2] = translateDMGColorValue(extractValue(_obp1, 4, 5));
-		_spritePalette[1].data[3] = translateDMGColorValue(extractValue(_obp1, 6, 7));
+		_spritesDMGPalettes_translated[0][0] = translateDMGColorValue(extractValue(_obp0, 0, 1));
+		_spritesDMGPalettes_translated[0][1] = translateDMGColorValue(extractValue(_obp0, 2, 3));
+		_spritesDMGPalettes_translated[0][2] = translateDMGColorValue(extractValue(_obp0, 4, 5));
+		_spritesDMGPalettes_translated[0][3] = translateDMGColorValue(extractValue(_obp0, 6, 7));
+
+		_spritesDMGPalettes_translated[1][0] = translateDMGColorValue(extractValue(_obp1, 0, 1));
+		_spritesDMGPalettes_translated[1][1] = translateDMGColorValue(extractValue(_obp1, 2, 3));
+		_spritesDMGPalettes_translated[1][2] = translateDMGColorValue(extractValue(_obp1, 4, 5));
+		_spritesDMGPalettes_translated[1][3] = translateDMGColorValue(extractValue(_obp1, 6, 7));
 	}
 
 	if (2 /* IS_CGB */)
