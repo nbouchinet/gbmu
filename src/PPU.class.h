@@ -22,15 +22,15 @@
 
 typedef struct		s_spriteInfo
 {
-	uint8_t			yPos; // in screen (0-143)
-	uint8_t			xPos; // in screen (0-159)
+	uint8_t			yPos;
+	uint8_t			xPos;
 	uint8_t			tileNumber;
 	uint8_t			flags;
 }					t_spriteInfo;
 
 typedef struct		s_pixelSegment
 {
-	uint8_t			value; // Color ID
+	uint8_t			value;
 	bool			isSprite;
 	t_spriteInfo	spriteInfo;
 // need to add stuff related to palette // actually maybe not
@@ -61,7 +61,7 @@ private:
 	void					setupSpriteAddressStart();
 	bool					isLCDEnabled();
 	void					renderScanLine();
-	void					setPixel(uint8_t y, uint8_t x, uint32_t value);
+	void					setPixelDMG(uint8_t y, uint8_t x, uint8_t value);
 	void					renderTiles(); // put pixels in the pipeline from Tiles
 	void					renderSprites(); // does the same with sprites, handle some merging too
 	void					getSpritesForLine();
