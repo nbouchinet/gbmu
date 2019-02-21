@@ -42,8 +42,8 @@ class Debugger {
 
 		ComponentsContainer &_components;
 		bool	_enabled = 0;
-		bool	_send_update = 0;
 		bool	_lock = 1;
+		bool	_run_one_frame = false;
 		int		_frame_size = 10;
 		std::chrono::time_point<std::chrono::high_resolution_clock> _past;
 
@@ -223,27 +223,32 @@ class Debugger {
 		};
 
 	public:
-		std::vector<Word> getRegisters(void);
-		std::vector<Word> dumpRom(void);
+		//information fetch
+		//TODO: get_mem_dump();
+		void set_instruction_pool_size(int size) {_frame_size = size;}
+		const std::vector<std::pair<int, uint16_t>> get_register_diffs();
+		const std::vector<_debug_info> & get_instruction_pool() const {return _instr_pool;}
+		const std::vector<uint16_t> & get_breakpoints() const {return _breakpoint_pool;}
 
-		void wait_one_sec();
-		std::vector<uint16_t> construct_register_pool();
-		std::vector<uint8_t> construct_rom_dump(uint16_t addr);
-		void set_frame_size(int size) {_frame_size = size;}
+		//event trigger
 		void add_breakpoint(uint16_t addr);
 		void remove_breakpoint(uint16_t addr);
-		void send_data();
-		const std::vector<uint16_t> & get_breakpoints() const {return _breakpoint_pool;}
-		const std::vector<_debug_info> & get_instruction_pool() const {return _instr_pool;}
+		void toggle() { _enabled = _enabled ? false : true; }
+		void run_one_sec();
+		void run_one_frame();
+
+	private:
+		bool isFramePassed();
+		std::vector<uint16_t> construct_register_pool();
+		std::vector<uint8_t> construct_rom_dump(uint16_t addr);
 		void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
 		void update_data(const Core::Iterator &it, uint16_t pc);
 		void fetch(const Core::Iterator &it, uint16_t pc);
-		void trigger_data_sending(uint16_t pc);
+		void lock_game(uint16_t pc);
 		bool is_enabled() const { return _enabled; }
 		bool on_breakpoint(uint16_t pc);
-		void toggle() { _enabled = _enabled ? false : true; }
 		using it = std::vector<uint16_t>::const_iterator;
-		const std::vector<std::pair<int, uint16_t>> get_differences(it prev_begin, it current_begin);
+		const std::vector<std::pair<int, uint16_t>> rdiff(it prev_begin, it current_begin);
 };
 
 #endif
