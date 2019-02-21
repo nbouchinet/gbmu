@@ -108,16 +108,21 @@ private:
 	bool					_unsignedTileNumbers;
 	bool					_windowingOn;
 
-//	uint32_t				_backgroundColorPalettes_translated[8][4];
-//	uint32_t				_spriteColorPalettes_translated[8][4];
-//	uint16_t				_backgroundColorPalettes[8][4];
-//	uint16_t				_spriteColorPalettes[8][4];
+	uint32_t				_backgroundColorPalettes_translated[8][4];
+	uint32_t				_spriteColorPalettes_translated[8][4];
+	uint16_t				_backgroundColorPalettes[8][4];
+	uint16_t				_spriteColorPalettes[8][4];
 
 	uint32_t				_backgroundDMGPalette_translated[4];
 	uint32_t				_spritesDMGPalettes_translated[2][4];
 
 	t_pixelSegment			_pixelPipeline[LCD_WIDTH];
 	t_spriteInfo			_spritesLine[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
+
+	std::array<Byte, 8192>		_lcdMemoryBank_0;
+	std::array<Byte, 8192>		_lcdMemoryBank_1;
+	std::array<Byte, 160>		_lcdOamRam;
+
 	uint8_t					_nbSprites;
 
 
