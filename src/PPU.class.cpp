@@ -1,7 +1,6 @@
 #include "PPU.class.h"
 #include "Gameboy.hpp"
 #include "MemoryBus.hpp"
-#include "cpu/InterruptController.hpp"
 
 //------------------------------------------------------------------------------
 PPU::PPU(ComponentsContainer& components) : _components(components)
@@ -22,7 +21,7 @@ PPU::~PPU()
 }
 
 //==============================================================================
-bool				PPU::testBit(uint32_t byte, uint8_t bit_number) const
+bool				PPU::testBit(uint32_t byte, uint8_t bit_number)
 {
 	if (_debug_PPU == true)
 		std::cerr << "testBit " << static_cast<unsigned int>(byte)
@@ -41,29 +40,16 @@ bool				PPU::testBit(uint32_t byte, uint8_t bit_number) const
 }
 
 //------------------------------------------------------------------------------
-uint8_t					PPU::setBit(uint8_t src, uint8_t bit_number)
-{
-	src |= 1UL << bit_number;
-	return (src);
-}
-
-//------------------------------------------------------------------------------
-uint8_t					PPU::unsetBit(uint8_t src, uint8_t bit_number)
-{
-	src &= ~(1UL << bit_number);
-	return (src);
-}
-
-//------------------------------------------------------------------------------
-uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier) const
+uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier)
 {
 	uint8_t				paletteNumber;
 	uint8_t				paletteDataNumber;
-	uint16_t			ret = 0;
+	uint16_t			ret;
 
 	paletteNumber = extractValue(specifier, 3, 5);
 	paletteDataNumber = extractValue(specifier, 1, 2);
 
+	ret = 0; /* start address of sprites palettes */
 	ret	+= (paletteNumber * 4) + (paletteDataNumber);
 
 	return (ret);
@@ -72,27 +58,13 @@ uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier) const
 //------------------------------------------------------------------------------
 void				PPU::write(Word address, Byte value)
 {
-	uint16_t		paletteTmpValue = 0;
-	uint8_t			array_case = 0;
+	Byte			*paletteAddr;
+	uint8_t			array_case;
+	uint8_t			hilo;
 
-	if (address >= 0x8000 && address < 0xA000)
-	{
-//		if (VEBEKA == 1)
-//		{
-//			_lcdMemoryBank_1[address - 0x8000] = value;
-//			return ;
-//		}
-//		else
-//		{
-			_lcdMemoryBank_0[address - 0x8000] = value;
-			return ;
-//		}
-	}
-	if (address >= 0xFE00 && address < 0xFEA0)
-	{
-		_lcdOamRam[address - 0xFE00] = value;
-		return ;
-	}
+	paletteAddr = 0;
+	array_case = 0;
+	hilo = 0;
 
 	switch (address)
 	{
@@ -152,45 +124,24 @@ void				PPU::write(Word address, Byte value)
 			break;
 		case 0xFF69:
 			_bcpd = value;
-			array_case = colorPaletteArrayCaseWrapper(_bcps);
-			if (testBit(_bcps, 7) == true)
-				array_case += 1;
-			if (testBit(_bcps, 0) == true) // high byte
-			{
-				paletteTmpValue = value;
-				paletteTmpValue = paletteTmpValue << 8;
-				paletteTmpValue += _backgroundColorPalettes[array_case / 4][array_case % 4] & 0x00FF;
-			}
-			else // low byte
-			{
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue += value;
-			}
-			_backgroundColorPalettes[array_case / 4][array_case % 4] = paletteTmpValue;
-			_backgroundColorPalettes_translated[array_case / 4][array_case % 4] = translateCGBColorValue(_backgroundColorPalettes[array_case / 4][array_case % 4]);
+//			array_case = colorPaletteArrayCaseWrapper(_bcps);
+//			hilo = array_case % 2;
+//			array_case -= hilo;
+//			paletteAddr = (_backgroundColorPalette[array_case / 8][array_case % 4]) + hilo;
+//			*paletteAddr = value;
+//			_backgroundColorPalette_translated[array_case / 8][array_case % 4] = translateCGBColorValue(_backgroundColorPalette[array_case / 8][array_case % 4]);
 			break;
 		case 0xFF6A:
 			_ocps = value;
 			break;
 		case 0xFF6B:
 			_ocpd = value;
-			array_case = colorPaletteArrayCaseWrapper(_ocps);
-			if (testBit(_ocps, 7) == true)
-				array_case += 1;
-			if (testBit(_ocps, 0) == true) // high byte
-			{
-				paletteTmpValue = value;
-				paletteTmpValue = paletteTmpValue << 8;
-				paletteTmpValue += _spriteColorPalettes[array_case / 4][array_case % 4] & 0x00FF;
-			}
-			else // low byte
-			{
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue += value;
-			}
-			_spriteColorPalettes[array_case / 4][array_case % 4] = paletteTmpValue;
-			_spriteColorPalettes_translated[array_case / 4][array_case % 4] = translateCGBColorValue(_spriteColorPalettes[array_case / 4][array_case % 4]);
-			
+//			array_case = colorPaletteArrayCaseWrapper(_ocps);
+//			hilo = array_case % 2;
+//			array_case -= hilo;
+//			paletteAddr = (_spriteColorPalette[array_case / 8][array_case % 4]) + hilo;
+//			*paletteAddr = value;
+//			_spriteColorPalette_translated[array_case / 8][array_case % 4] = translateCGBColorValue(_spriteColorPalette[array_case / 8][array_case % 4]);
 			break;
 	}
 }
@@ -198,28 +149,10 @@ void				PPU::write(Word address, Byte value)
 //------------------------------------------------------------------------------
 Byte				PPU::read(Word address) const
 {
-	Byte			ret = 0;
-	uint8_t			array_case = 0;
-	uint16_t		paletteTmpValue = 0;
+	Byte			ret;
+	Byte			*paletteAddr;
 
-	if (address >= 0x8000 && address < 0xA000)
-	{
-//		if (VEBEKA == 1)
-//		{
-//			ret = _lcdMemoryBank_1[address - 0x8000];
-//			return (ret) ;
-//		}
-//		else
-//		{
-			ret = _lcdMemoryBank_0[address - 0x8000];
-			return (ret);
-//		}
-	}
-	if (address >= 0xFE00 && address < 0xFEA0)
-	{
-		ret = _lcdOamRam[address - 0xFE00];
-		return (ret);
-	}
+	paletteAddr = 0;
 
 	switch (address)
 	{
@@ -278,41 +211,15 @@ Byte				PPU::read(Word address) const
 			ret = _bcps;
 			break;
 		case 0xFF69:
-			array_case = colorPaletteArrayCaseWrapper(_bcps);
-			paletteTmpValue = _backgroundColorPalettes[array_case / 4][array_case % 4];
-			if (testBit(_bcps, 0) == true)
-			{
-				// high byte
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue = paletteTmpValue >> 8;
-				ret = paletteTmpValue;
-			}
-			else
-			{
-				// low byte
-				paletteTmpValue = paletteTmpValue & 0x00FF;
-				ret = paletteTmpValue;
-			}
+//			_bcpd = _backgroundColorPalette + colorPaletteArrayCaseWrapper(_bcps);
+			ret = _bcpd;
 			break;
 		case 0xFF6A:
 			ret = _ocps;
 			break;
 		case 0xFF6B:
-			array_case = colorPaletteArrayCaseWrapper(_ocps);
-			paletteTmpValue = _spriteColorPalettes[array_case / 4][array_case % 4];
-			if (testBit(_ocps, 0) == true)
-			{
-				// high byte
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue = paletteTmpValue >> 8;
-				ret = paletteTmpValue;
-			}
-			else
-			{
-				// low byte
-				paletteTmpValue = paletteTmpValue & 0x00FF;
-				ret = paletteTmpValue;
-			}
+//			_ocpd = _backgroundColorPalette + colorPaletteArrayCaseWrapper(_ocps);
+			ret = _ocpd;
 			break;
 	}
 	return (ret);
@@ -408,9 +315,30 @@ uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
 }
 
 //------------------------------------------------------------------------------
-void				PPU::setPixel(uint8_t y, uint8_t x, uint32_t value)
+void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorID)
 {
-	_components.driverScreen->setRGBA(y, x, value);
+	if (_ly < LCD_HEIGHT && y < LCD_HEIGHT && x < LCD_WIDTH)
+	{
+		switch (colorID) // only for DMG, will be different for CGB
+		{
+			case 3 :
+				// black
+				_components.driverScreen->setRGBA(y, x, 0, 0, 0, 255);
+				break;
+			case 2 :
+				_components.driverScreen->setRGBA(y, x, 119, 119, 119, 255);
+				// dark grey
+				break;
+			case 1 :
+				_components.driverScreen->setRGBA(y, x, 204, 204, 204, 255);
+				// light grey
+				break;
+			case 0 :
+				_components.driverScreen->setRGBA(y, x, 255, 255, 255, 255);
+				// transparent (white)
+				break;
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -443,16 +371,13 @@ void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and 
 //------------------------------------------------------------------------------
 void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 {
-	// tmp
-	holder.value = contender.value;
-	holder.isSprite = contender.isSprite;
-	holder.spriteInfo.yPos = contender.spriteInfo.yPos;
-	holder.spriteInfo.xPos = contender.spriteInfo.xPos;
-	holder.spriteInfo.tileNumber = contender.spriteInfo.tileNumber;
-	holder.spriteInfo.flags = contender.spriteInfo.flags;
-	
-	/* TODO : blending of pixels
-	if (1)
+	t_pixelSegment t1;
+	t_pixelSegment t2;
+
+	t1 = holder;
+	t2 = contender;
+
+	if (1 /* IS_DMG */)
 	{
 		if (holder.isSprite == false)
 		{
@@ -471,10 +396,10 @@ void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 		}
 	}
 
-	else if (2)
+	else if (2 /* IS_CGB */)
 	{
 		
-	}*/
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -496,9 +421,8 @@ void				PPU::renderSprites()
 
 		for (int pixel = 0; pixel < 8; pixel++)
 		{
-			uint8_t				linePixel = pixel;
-			uint8_t				colorID = 0;
-			t_pixelSegment		contender;
+			uint8_t		linePixel = pixel;
+			uint8_t		colorID = 0;
 
 			if (xFlip == true)
 				linePixel = (linePixel - 7) * (-1);
@@ -506,17 +430,8 @@ void				PPU::renderSprites()
 				colorID += 2;
 			if (testBit(data2, linePixel) == true)
 				colorID += 1;
-
-			if (_spritesLine[sprite].xPos + pixel > 7)
-			{
-				contender.value = colorID;
-				contender.isSprite = true;
-				contender.spriteInfo.yPos = _spritesLine[sprite].yPos;
-				contender.spriteInfo.xPos = _spritesLine[sprite].xPos;
-				contender.spriteInfo.tileNumber = _spritesLine[sprite].tileNumber;
-				contender.spriteInfo.flags = _spritesLine[sprite].flags;
-				blendPixels(_pixelPipeline[contender.spriteInfo.xPos], contender);
-			}
+			
+			setPixelDMG(_ly, _spritesLine[sprite].xPos - _scx + pixel, colorID);
 		}
 	}
 }
@@ -585,6 +500,7 @@ void				PPU::renderTiles()
 		//put in pipeline
 		_pixelPipeline[i].value = colorID;
 		_pixelPipeline[i].isSprite = false;
+		setPixelDMG(_ly, i, colorID);
 	}
 }
 
@@ -597,24 +513,14 @@ void				PPU::sendPixelPipeline()
 	{
 		switch (mode /* DMG, CGB etc */)
 		{
-			case 0:// DMG
-				if (_pixelPipeline[i].isSprite == false)
-				{
-					setPixel(_ly, i, _backgroundDMGPalette_translated[_pixelPipeline[i].value]);
-				}
-				else if (_pixelPipeline[i].isSprite == false)
-				{
-					if (testBit(_pixelPipeline[i].spriteInfo.flags, 4) == true)
-						setPixel(_ly, i, _spritesDMGPalettes_translated[1][_pixelPipeline[i].value]);
-					else
-						setPixel(_ly, i, _spritesDMGPalettes_translated[0][_pixelPipeline[i].value]);
-				}
+			case 0:
 				break ;
 			case 1:
 				break ;
 			case 2:
 				break ;
 		}
+//		setPixelDMG(_ly, i, colorValue);
 	}
 }
 
@@ -633,7 +539,7 @@ void				PPU::renderScanLine()
 }
 
 //------------------------------------------------------------------------------
-uint8_t					PPU::extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end) const
+uint8_t					PPU::extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end)
 {
 	uint8_t				weight = 1;
 	uint8_t				ret = 0;
@@ -707,102 +613,6 @@ void					PPU::translatePalettes()
 	if (2 /* IS_CGB */)
 	{
 		
-	}
-}
-
-//------------------------------------------------------------------------------
-void					PPU::setLCDstatus()
-{
-	uint8_t				statusTmp;
-
-	statusTmp = read(0xFF41);
-	if (isLCDEnabled() == false)
-	{
-		_scanlineCounter = 456;
-		write(0xFF44, 0);
-		statusTmp &= 252;
-		statusTmp = setBit(statusTmp, 0);
-		write(0xFF41, statusTmp);
-		return ;
-	}
-
-	uint8_t				currentMode = statusTmp & 0x3;
-	uint8_t				mode = 0;
-	bool				requestInterruptFlag = false;
-
-	if (read(0xFF44) >= 144)
-	{
-		mode = 1;
-		statusTmp = setBit(statusTmp, 0);
-		statusTmp = unsetBit(statusTmp, 1);
-		requestInterruptFlag = testBit(statusTmp, 4);
-	}
-	else
-	{
-		uint32_t mode2Bounds = 456 - 80;
-		uint32_t mode3Bounds = mode2Bounds - 172;
-	
-		if (_scanlineCounter >= mode2Bounds)
-		{
-			mode = 2;
-			statusTmp = setBit(statusTmp, 1);
-			statusTmp = unsetBit(statusTmp, 0);
-			requestInterruptFlag = testBit(statusTmp, 5);
-		}
-		else if (_scanlineCounter >= mode3Bounds)
-		{
-			mode = 3;
-			statusTmp = setBit(statusTmp, 1);
-			statusTmp = setBit(statusTmp, 0);
-		}
-		else
-		{
-			mode = 0;
-			statusTmp = unsetBit(statusTmp, 1);
-			statusTmp = unsetBit(statusTmp, 0);
-			requestInterruptFlag = testBit(statusTmp, 3);
-		}
-	}
-
-	if (requestInterruptFlag == true && mode != currentMode)
-		_components.interrupt_controller->RequestInterrupt(0x0048);
-
-	if (read(0xFF45))
-	{
-		statusTmp = setBit(statusTmp, 2);
-		if (testBit(statusTmp, 6))
-			_components.interrupt_controller->RequestInterrupt(0x0048);
-	}
-	else
-	{
-		statusTmp = unsetBit(statusTmp, 2);
-	}
-	write(0xFF41, statusTmp);
-}
-
-//------------------------------------------------------------------------------
-void					PPU::updateGraphics(Word cycles)
-{
-	uint8_t				currentScanline;
-
-	setLCDstatus();
-	if (isLCDEnabled())
-		_scanlineCounter -= cycles;
-	else
-		return ;
-
-	if (_scanlineCounter <= 0)
-	{
-		currentScanline = read(0xFF44);
-		currentScanline++;
-		write(0xFF44, currentScanline);
-		_scanlineCounter = 456;
-		if (currentScanline == 144)
-			_components.interrupt_controller->RequestInterrupt(0x0040);
-		if (currentScanline > 153)
-			write(0xFF44, 0);
-		else if (currentScanline < 144)
-			renderScanLine();
 	}
 }
 

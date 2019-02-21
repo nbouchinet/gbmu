@@ -22,18 +22,18 @@
 
 typedef struct		s_spriteInfo
 {
-	uint8_t			yPos; // in screen (0-143)
-	uint8_t			xPos; // in screen (0-159)
+	uint8_t			yPos;
+	uint8_t			xPos;
 	uint8_t			tileNumber;
 	uint8_t			flags;
 }					t_spriteInfo;
 
 typedef struct		s_pixelSegment
 {
-	uint8_t			value; // Color ID
+	uint8_t			value;
 	bool			isSprite;
 	t_spriteInfo	spriteInfo;
-// need to add stuff related to palette // actually maybe not
+// need to add stuff related to palette;
 }					t_pixelSegment;
 
 class PPU : public IReadWrite
@@ -48,20 +48,18 @@ public:
 	static int				getPPUNumber(void);
 	static void				switchPPUDebug(bool status);
 	bool					isScreenFilled(); // pr toi nico :3
-	bool					testBit(uint32_t byte, uint8_t bit_number) const;
-	uint8_t					setBit(uint8_t src, uint8_t bit_number);
-	uint8_t					unsetBit(uint8_t src, uint8_t bit_number);
+	bool					testBit(uint32_t byte, uint8_t bit_number);
 
 private:
 	uint16_t				getTileDataAddress(uint8_t tileIdentifier);
 	uint8_t					readMemBank(uint8_t bank, uint16_t address);
-	uint8_t					extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end) const;
+	uint8_t					extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end);
 	void					setupWindow();
 	void					setupBackgroundMemoryStart();
 	void					setupSpriteAddressStart();
 	bool					isLCDEnabled();
 	void					renderScanLine();
-	void					setPixel(uint8_t y, uint8_t x, uint32_t value);
+	void					setPixelDMG(uint8_t y, uint8_t x, uint8_t value);
 	void					renderTiles(); // put pixels in the pipeline from Tiles
 	void					renderSprites(); // does the same with sprites, handle some merging too
 	void					getSpritesForLine();
@@ -70,9 +68,7 @@ private:
 	void					translatePalettes();
 	uint32_t				translateCGBColorValue(uint16_t value);
 	uint32_t				translateDMGColorValue(uint8_t value);
-	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier) const;
-	void					setLCDstatus();
-	void					updateGraphics(Word cycles);
+	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier);
 
 	ComponentsContainer&	_components;
 
@@ -99,7 +95,6 @@ private:
 	uint8_t					_ocpd;					// (0xFF6B)
 
 
-	uint32_t				_scanlineCounter;
 	uint16_t				_backgroundDataStart;
 	uint16_t				_backgroundChrAttrStart;
 	uint16_t				_spriteDataStart;
@@ -108,21 +103,16 @@ private:
 	bool					_unsignedTileNumbers;
 	bool					_windowingOn;
 
-	uint32_t				_backgroundColorPalettes_translated[8][4];
-	uint32_t				_spriteColorPalettes_translated[8][4];
-	uint16_t				_backgroundColorPalettes[8][4];
-	uint16_t				_spriteColorPalettes[8][4];
+//	uint32_t				_backgroundColorPalettes_translated[8][4];
+//	uint32_t				_spriteColorPalettes_translated[8][4];
+//	uint16_t				_backgroundColorPalettes[8][4];
+//	uint16_t				_spriteColorPalettes[8][4];
 
 	uint32_t				_backgroundDMGPalette_translated[4];
 	uint32_t				_spritesDMGPalettes_translated[2][4];
 
 	t_pixelSegment			_pixelPipeline[LCD_WIDTH];
 	t_spriteInfo			_spritesLine[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
-
-	std::array<Byte, 8192>		_lcdMemoryBank_0;
-//	std::array<Byte, 8192>		_lcdMemoryBank_1;
-	std::array<Byte, 160>		_lcdOamRam;
-
 	uint8_t					_nbSprites;
 
 
