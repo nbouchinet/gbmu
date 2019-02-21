@@ -44,6 +44,7 @@ class Debugger {
 		bool	_enabled = 0;
 		bool	_lock = 1;
 		bool	_run_one_frame = false;
+		bool	_step = false;
 		int		_frame_size = 10;
 		std::chrono::time_point<std::chrono::high_resolution_clock> _past;
 
@@ -236,15 +237,17 @@ class Debugger {
 		void toggle() { _enabled = _enabled ? false : true; }
 		void run_one_sec();
 		void run_one_frame();
+		void run_one_step();
 
 	private:
+		bool is_step();
 		bool isFramePassed();
 		std::vector<uint16_t> construct_register_pool();
 		std::vector<uint8_t> construct_rom_dump(uint16_t addr);
 		void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
 		void update_data(const Core::Iterator &it, uint16_t pc);
 		void fetch(const Core::Iterator &it, uint16_t pc);
-		void lock_game(uint16_t pc);
+		void unlock_game(uint16_t pc);
 		bool is_enabled() const { return _enabled; }
 		bool on_breakpoint(uint16_t pc);
 		using it = std::vector<uint16_t>::const_iterator;

@@ -174,12 +174,24 @@ void Debugger::run_one_frame() {
 	_run_one_frame = true;
 }
 
-void Debugger::lock_game(uint16_t pc)
+void Debugger::run_one_step() {
+	_step = true;
+}
+
+bool Debugger::is_step() {
+	if (_step) {
+		_step = false;
+		return true;
+	}
+	return false;
+}
+
+void Debugger::unlock_game(uint16_t pc)
 {
 	std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed_seconds = _past - current;
 
-	if (on_breakpoint(pc) || elapsed_seconds.count() >= 1 || isFramePassed()) {
+	if (on_breakpoint(pc) || elapsed_seconds.count() >= 1 || isFramePassed() || is_step()) {
 		_lock = 1;
 	}
 }
@@ -187,8 +199,8 @@ void Debugger::lock_game(uint16_t pc)
 void Debugger::fetch(const Core::Iterator &it, uint16_t pc)
 {
 	update_data(it, pc);
-	while (_lock) {// TODO: add step request
-		lock_game(pc);
+	while (_lock) {
+		unlock_game(pc);
 	}
 }
 
