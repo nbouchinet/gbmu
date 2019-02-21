@@ -25,7 +25,7 @@ Debugger::_debug_info::_debug_info(uint16_t _pc, const Debugger::_instr_info &_m
 }
 
 using it = std::vector<Byte>::const_iterator;
-const std::vector<std::pair<int, uint16_t>> Debugger::get_differences(it prev_begin, it current_begin)
+const std::vector<std::pair<int, uint16_t>> Debugger::rdiff(it prev_begin, it current_begin)
 {
 	std::vector<std::pair<int, uint16_t>> diffs;
 
@@ -35,6 +35,15 @@ const std::vector<std::pair<int, uint16_t>> Debugger::get_differences(it prev_be
 		}
 	}
 	return diffs;
+}
+
+const std::vector<std::pair<int, uint16_t>> Debugger::get_register_diffs()
+{
+	std::vector<std::pair<int, uint16_t>> register_diffs;
+
+	register_diffs = _register_diffs;
+	_register_diffs.clear();
+	return register_diffs;
 }
 
 /**
@@ -137,10 +146,6 @@ std::vector<uint16_t> Debugger::construct_register_pool()
 	return rpool;
 }
 
-void Debugger::send_data()
-{
-}
-
 bool Debugger::on_breakpoint(uint16_t pc)
 {
 	if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), pc) != _breakpoint_pool.end()) {
@@ -149,21 +154,32 @@ bool Debugger::on_breakpoint(uint16_t pc)
 	return 0;
 }
 
-void Debugger::wait_one_sec()
+void Debugger::run_one_sec()
 {
 	_past = std::chrono::high_resolution_clock::now();
 }
 
-void Debugger::trigger_data_sending(uint16_t pc)
+bool Debugger::isFramePassed()
+{
+	if (_run_one_frame
+			//&& _components.PPU->isScreenFilled()
+	   ) {
+		_run_one_frame = false;
+		return true;
+	}
+	return false;
+}
+
+void Debugger::run_one_frame() {
+	_run_one_frame = true;
+}
+
+void Debugger::lock_game(uint16_t pc)
 {
 	std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed_seconds = _past - current;
 
-	if (on_breakpoint(pc)
-			|| elapsed_seconds.count() >= 1
-			//|| _components.PPU->isScreenFilled()
-			) {
-		_send_update = 1;
+	if (on_breakpoint(pc) || elapsed_seconds.count() >= 1 || isFramePassed()) {
 		_lock = 1;
 	}
 }
@@ -171,13 +187,8 @@ void Debugger::trigger_data_sending(uint16_t pc)
 void Debugger::fetch(const Core::Iterator &it, uint16_t pc)
 {
 	update_data(it, pc);
-	while (_lock) {
-		trigger_data_sending(pc);
-		if (_send_update) {
-			send_data();
-			_register_diffs.clear();
-			_send_update = 0;
-		}
+	while (_lock) {// TODO: add step request
+		lock_game(pc);
 	}
 }
 
@@ -187,6 +198,6 @@ void Debugger::update_data(const Core::Iterator &it, uint16_t pc)
 
 	set_instruction_pool(it, pc);
 	current = construct_register_pool();
-	_register_diffs = get_differences(_register_pool.cbegin(), current.cbegin());
+	_register_diffs = rdiff(_register_pool.cbegin(), current.cbegin());
 	_register_pool = current;
 }
