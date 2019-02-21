@@ -33,7 +33,7 @@ typedef struct		s_pixelSegment
 	uint8_t			value;
 	bool			isSprite;
 	t_spriteInfo	spriteInfo;
-// need to add stuff related to palette;
+// need to add stuff related to palette // actually maybe not
 }					t_pixelSegment;
 
 class PPU : public IReadWrite
@@ -48,14 +48,14 @@ public:
 	static int				getPPUNumber(void);
 	static void				switchPPUDebug(bool status);
 	bool					isScreenFilled(); // pr toi nico :3
-	bool					testBit(uint32_t byte, uint8_t bit_number);
+	bool					testBit(uint32_t byte, uint8_t bit_number) const;
 	uint8_t					setBit(uint8_t src, uint8_t bit_number);
 	uint8_t					unsetBit(uint8_t src, uint8_t bit_number);
 
 private:
 	uint16_t				getTileDataAddress(uint8_t tileIdentifier);
 	uint8_t					readMemBank(uint8_t bank, uint16_t address);
-	uint8_t					extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end);
+	uint8_t					extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end) const;
 	void					setupWindow();
 	void					setupBackgroundMemoryStart();
 	void					setupSpriteAddressStart();
@@ -70,7 +70,7 @@ private:
 	void					translatePalettes();
 	uint32_t				translateCGBColorValue(uint16_t value);
 	uint32_t				translateDMGColorValue(uint8_t value);
-	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier);
+	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier) const;
 	void					setLCDstatus();
 	void					updateGraphics(Word cycles);
 
@@ -120,7 +120,7 @@ private:
 	t_spriteInfo			_spritesLine[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
 
 	std::array<Byte, 8192>		_lcdMemoryBank_0;
-	std::array<Byte, 8192>		_lcdMemoryBank_1;
+//	std::array<Byte, 8192>		_lcdMemoryBank_1;
 	std::array<Byte, 160>		_lcdOamRam;
 
 	uint8_t					_nbSprites;
