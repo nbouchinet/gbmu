@@ -1,6 +1,7 @@
 #include "PPU.class.h"
 #include "Gameboy.hpp"
 #include "MemoryBus.hpp"
+#include "cpu/InterruptController.hpp"
 
 //------------------------------------------------------------------------------
 PPU::PPU(ComponentsContainer& components) : _components(components)
@@ -636,7 +637,7 @@ void					PPU::setLCDstatus()
 	uint8_t				statusTmp;
 
 	statusTmp = read(0xFF41);
-	if (isLCDEnabled == false)
+	if (isLCDEnabled() == false)
 	{
 		_scanlineCounter = 456;
 		write(0xFF44, 0);
@@ -655,14 +656,14 @@ void					PPU::setLCDstatus()
 		mode = 1;
 		statusTmp = setBit(statusTmp, 0);
 		statusTmp = unsetBit(statusTmp, 1);
-		requestInterruptFlag == testBit(statusTmp, 4);
+		requestInterruptFlag = testBit(statusTmp, 4);
 	}
 	else
 	{
 		uint32_t mode2Bounds = 456 - 80;
 		uint32_t mode3Bounds = mode2Bounds - 172;
 	
-		if (_scanlineCounter >= mode2Bounds())
+		if (_scanlineCounter >= mode2Bounds)
 		{
 			mode = 2;
 			statusTmp = setBit(statusTmp, 1);
@@ -685,13 +686,13 @@ void					PPU::setLCDstatus()
 	}
 
 	if (requestInterruptFlag == true && mode != currentMode)
-		requestInterrupt(0x0048);
+		_components.interrupt_controller->RequestInterrupt(0x0048);
 
 	if (read(0xFF45))
 	{
 		statusTmp = setBit(statusTmp, 2);
 		if (testBit(statusTmp, 6))
-			requestInterrupt(0x0048);
+			_components.interrupt_controller->RequestInterrupt(0x0048);
 	}
 	else
 	{
@@ -706,7 +707,7 @@ void					PPU::updateGraphics(Word cycles)
 	uint8_t				currentScanline;
 
 	setLCDstatus();
-	if (isLCDEnabled)
+	if (isLCDEnabled())
 		_scanlineCounter -= cycles;
 	else
 		return ;
@@ -718,7 +719,7 @@ void					PPU::updateGraphics(Word cycles)
 		write(0xFF44, currentScanline);
 		_scanlineCounter = 456;
 		if (currentScanline == 144)
-			requestInterrupt(0x0040);
+			_components.interrupt_controller->RequestInterrupt(0x0040);
 		if (currentScanline > 153)
 			write(0xFF44, 0);
 		else if (currentScanline < 144)
