@@ -20,6 +20,7 @@ struct ComponentsContainer {
   std::unique_ptr<UnitWorkingRAM> unit_working_ram;
   std::unique_ptr<PPU> ppu;
   std::unique_ptr<ScreenOutput> driverScreen;
+  std::unique_ptr<Bios> bios;
 
   ComponentsContainer(const std::string &);
   ~ComponentsContainer();
