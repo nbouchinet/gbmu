@@ -42,10 +42,10 @@ class Debugger {
 
 		ComponentsContainer &_components;
 		bool	_enabled = 0;
-		bool	_lock = 1;
+		bool	_lock = true;
 		bool	_run_one_frame = false;
 		bool	_run_one_sec = false;
-		bool	_step = false;
+		bool	_run_one_step = false;
 		int		_frame_size = 10;
 		std::chrono::time_point<std::chrono::high_resolution_clock> _past;
 
@@ -243,9 +243,9 @@ class Debugger {
 		void fetch(const Core::Iterator &it, uint16_t pc);
 		bool is_enabled() const { return _enabled; }
 	private:
-		bool is_step();
-		bool is_sec();
-		bool isFramePassed();
+		bool is_step_passed();
+		bool is_sec_passed();
+		bool is_frame_passed();
 		std::vector<uint16_t> construct_register_pool();
 		std::vector<uint8_t> construct_rom_dump(uint16_t addr);
 		void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
