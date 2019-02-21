@@ -153,6 +153,8 @@ void				PPU::write(Word address, Byte value)
 		case 0xFF69:
 			_bcpd = value;
 			array_case = colorPaletteArrayCaseWrapper(_bcps);
+			if (testBit(_bcps, 7) == true)
+				array_case += 1;
 			if (testBit(_bcps, 0) == true) // high byte
 			{
 				paletteTmpValue = value;
@@ -173,6 +175,8 @@ void				PPU::write(Word address, Byte value)
 		case 0xFF6B:
 			_ocpd = value;
 			array_case = colorPaletteArrayCaseWrapper(_ocps);
+			if (testBit(_ocps, 7) == true)
+				array_case += 1;
 			if (testBit(_ocps, 0) == true) // high byte
 			{
 				paletteTmpValue = value;
@@ -289,7 +293,6 @@ Byte				PPU::read(Word address) const
 				paletteTmpValue = paletteTmpValue & 0x00FF;
 				ret = paletteTmpValue;
 			}
-//			_bcpd = ret;
 			break;
 		case 0xFF6A:
 			ret = _ocps;
@@ -310,7 +313,6 @@ Byte				PPU::read(Word address) const
 				paletteTmpValue = paletteTmpValue & 0x00FF;
 				ret = paletteTmpValue;
 			}
-//			_ocpd = ret;
 			break;
 	}
 	return (ret);
@@ -406,30 +408,9 @@ uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
 }
 
 //------------------------------------------------------------------------------
-void				PPU::setPixelDMG(uint8_t y, uint8_t x, uint8_t colorID)
+void				PPU::setPixel(uint8_t y, uint8_t x, uint32_t value)
 {
-	if (_ly < LCD_HEIGHT && y < LCD_HEIGHT && x < LCD_WIDTH)
-	{
-		switch (colorID) // only for DMG, will be different for CGB
-		{
-			case 3 :
-				// black
-				_components.driverScreen->setRGBA(y, x, 0, 0, 0, 255);
-				break;
-			case 2 :
-				_components.driverScreen->setRGBA(y, x, 119, 119, 119, 255);
-				// dark grey
-				break;
-			case 1 :
-				_components.driverScreen->setRGBA(y, x, 204, 204, 204, 255);
-				// light grey
-				break;
-			case 0 :
-				_components.driverScreen->setRGBA(y, x, 255, 255, 255, 255);
-				// transparent (white)
-				break;
-		}
-	}
+	_components.driverScreen->setRGBA(y, x, value);
 }
 
 //------------------------------------------------------------------------------
@@ -462,13 +443,16 @@ void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and 
 //------------------------------------------------------------------------------
 void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 {
-	t_pixelSegment t1;
-	t_pixelSegment t2;
-
-	t1 = holder;
-	t2 = contender;
-
-	if (1 /* IS_DMG */)
+	// tmp
+	holder.value = contender.value;
+	holder.isSprite = contender.isSprite;
+	holder.spriteInfo.yPos = contender.spriteInfo.yPos;
+	holder.spriteInfo.xPos = contender.spriteInfo.xPos;
+	holder.spriteInfo.tileNumber = contender.spriteInfo.tileNumber;
+	holder.spriteInfo.flags = contender.spriteInfo.flags;
+	
+	/* TODO : blending of pixels
+	if (1)
 	{
 		if (holder.isSprite == false)
 		{
@@ -487,10 +471,10 @@ void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 		}
 	}
 
-	else if (2 /* IS_CGB */)
+	else if (2)
 	{
 		
-	}
+	}*/
 }
 
 //------------------------------------------------------------------------------
@@ -512,8 +496,9 @@ void				PPU::renderSprites()
 
 		for (int pixel = 0; pixel < 8; pixel++)
 		{
-			uint8_t		linePixel = pixel;
-			uint8_t		colorID = 0;
+			uint8_t				linePixel = pixel;
+			uint8_t				colorID = 0;
+			t_pixelSegment		contender;
 
 			if (xFlip == true)
 				linePixel = (linePixel - 7) * (-1);
@@ -521,8 +506,17 @@ void				PPU::renderSprites()
 				colorID += 2;
 			if (testBit(data2, linePixel) == true)
 				colorID += 1;
-			
-			setPixelDMG(_ly, _spritesLine[sprite].xPos - _scx + pixel, colorID);
+
+			if (_spritesLine[sprite].xPos + pixel > 7)
+			{
+				contender.value = colorID;
+				contender.isSprite = true;
+				contender.spriteInfo.yPos = _spritesLine[sprite].yPos;
+				contender.spriteInfo.xPos = _spritesLine[sprite].xPos;
+				contender.spriteInfo.tileNumber = _spritesLine[sprite].tileNumber;
+				contender.spriteInfo.flags = _spritesLine[sprite].flags;
+				blendPixels(_pixelPipeline[contender.spriteInfo.xPos], contender);
+			}
 		}
 	}
 }
@@ -591,7 +585,6 @@ void				PPU::renderTiles()
 		//put in pipeline
 		_pixelPipeline[i].value = colorID;
 		_pixelPipeline[i].isSprite = false;
-		setPixelDMG(_ly, i, colorID);
 	}
 }
 
@@ -604,14 +597,24 @@ void				PPU::sendPixelPipeline()
 	{
 		switch (mode /* DMG, CGB etc */)
 		{
-			case 0:
+			case 0:// DMG
+				if (_pixelPipeline[i].isSprite == false)
+				{
+					setPixel(_ly, i, _backgroundDMGPalette_translated[_pixelPipeline[i].value]);
+				}
+				else if (_pixelPipeline[i].isSprite == false)
+				{
+					if (testBit(_pixelPipeline[i].spriteInfo.flags, 4) == true)
+						setPixel(_ly, i, _spritesDMGPalettes_translated[1][_pixelPipeline[i].value]);
+					else
+						setPixel(_ly, i, _spritesDMGPalettes_translated[0][_pixelPipeline[i].value]);
+				}
 				break ;
 			case 1:
 				break ;
 			case 2:
 				break ;
 		}
-//		setPixelDMG(_ly, i, colorValue);
 	}
 }
 
