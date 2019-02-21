@@ -149,18 +149,12 @@ std::vector<uint16_t> Debugger::construct_register_pool()
 bool Debugger::on_breakpoint(uint16_t pc)
 {
 	if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), pc) != _breakpoint_pool.end()) {
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
-void Debugger::run_one_sec()
-{
-	_past = std::chrono::high_resolution_clock::now();
-	_run_one_sec = true;
-}
-
-bool Debugger::isFramePassed()
+bool Debugger::is_frame_passed()
 {
 	if (_run_one_frame
 			//&& _components.PPU->isScreenFilled()
@@ -171,23 +165,32 @@ bool Debugger::isFramePassed()
 	return false;
 }
 
+void Debugger::run_one_sec()
+{
+	_past = std::chrono::high_resolution_clock::now();
+	_run_one_sec = true;
+	_lock = false;
+}
+
 void Debugger::run_one_frame() {
 	_run_one_frame = true;
+	_lock = false;
 }
 
 void Debugger::run_one_step() {
-	_step = true;
+	_run_one_step = true;
+	_lock = false;
 }
 
-bool Debugger::is_step() {
-	if (_step) {
-		_step = false;
+bool Debugger::is_step_passed() {
+	if (_run_one_step) {
+		_run_one_step = false;
 		return true;
 	}
 	return false;
 }
 
-bool Debugger::is_sec() {
+bool Debugger::is_sec_passed() {
 	std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed_seconds = _past - current;
 
@@ -202,8 +205,8 @@ bool Debugger::is_sec() {
 
 void Debugger::unlock_game(uint16_t pc)
 {
-	if (on_breakpoint(pc) || is_sec() || isFramePassed() || is_step()) {
-		_lock = 1;
+	if (on_breakpoint(pc) || is_sec_passed() || is_frame_passed() || is_step_passed()) {
+		_lock = true;
 	}
 }
 
