@@ -16,6 +16,7 @@ class Timer;
 class LCDRegisters;
 class UnitWorkingRAM;
 class Gameboy;
+class Bios;
 struct ComponentsContainer;
 
 

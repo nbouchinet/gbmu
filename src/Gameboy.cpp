@@ -1,4 +1,5 @@
 #include "Gameboy.hpp"
+#include "src/Bios.hpp"
 #include "src/Cartridge.hpp"
 #include "src/LCDRegisters.hpp"
 #include "src/MemoryBus.hpp"
@@ -22,12 +23,14 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
   mem_bus = std::make_unique<MemoryBus>(*this);
   ppu = std::make_unique<PPU>(*this);
   driverScreen = std::make_unique<ScreenOutput>();
+  bios = std::make_unique<Bios>(*this);
 }
 
 // Dtor Implementation MUST be here where the types are complete
 ComponentsContainer::~ComponentsContainer() {}
 
-Gameboy::Gameboy(const std::string &rom_path) : _components(rom_path), _debugger(_components) {
+Gameboy::Gameboy(const std::string &rom_path)
+    : _components(rom_path), _debugger(_components) {
   _begin = _components.cartridge->get_begin();
   _end = _components.cartridge->get_end();
 }
@@ -42,11 +45,8 @@ void Gameboy::step() {
 }
 
 int Gameboy::run() {
-  try {
-    do_checksum();
-  } catch (BadChecksum &e) {
-    throw;
-  }
+  _components.bios->compare_logo();
+  do_checksum();
   while (_begin + _components.core->pc() != _end) {
     step();
   }
