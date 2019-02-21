@@ -22,7 +22,7 @@ PPU::~PPU()
 }
 
 //==============================================================================
-bool				PPU::testBit(uint32_t byte, uint8_t bit_number) const
+bool				PPU::testBit(uint32_t byte, uint8_t bit_number)
 {
 	if (_debug_PPU == true)
 		std::cerr << "testBit " << static_cast<unsigned int>(byte)
@@ -55,7 +55,7 @@ uint8_t					PPU::unsetBit(uint8_t src, uint8_t bit_number)
 }
 
 //------------------------------------------------------------------------------
-uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier) const
+uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier)
 {
 	uint8_t				paletteNumber;
 	uint8_t				paletteDataNumber;
@@ -72,8 +72,13 @@ uint16_t				PPU::colorPaletteArrayCaseWrapper(uint8_t specifier) const
 //------------------------------------------------------------------------------
 void				PPU::write(Word address, Byte value)
 {
-	uint16_t		paletteTmpValue = 0;
-	uint8_t			array_case = 0;
+	Byte			*paletteAddr;
+	uint8_t			array_case;
+	uint8_t			hilo;
+
+	paletteAddr = 0;
+	array_case = 0;
+	hilo = 0;
 
 	if (address >= 0x8000 && address < 0xA000)
 	{
@@ -84,7 +89,7 @@ void				PPU::write(Word address, Byte value)
 //		}
 //		else
 //		{
-			_lcdMemoryBank_0[address - 0x8000] = value;
+			_lcdMemoryBank_0[addresss - 0x8000] = value;
 			return ;
 //		}
 	}
@@ -153,18 +158,10 @@ void				PPU::write(Word address, Byte value)
 		case 0xFF69:
 			_bcpd = value;
 			array_case = colorPaletteArrayCaseWrapper(_bcps);
-			if (testBit(_bcps, 0) == true) // high byte
-			{
-				paletteTmpValue = value;
-				paletteTmpValue = paletteTmpValue << 8;
-				paletteTmpValue += _backgroundColorPalettes[array_case / 4][array_case % 4] & 0x00FF;
-			}
-			else // low byte
-			{
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue += value;
-			}
-			_backgroundColorPalettes[array_case / 4][array_case % 4] = paletteTmpValue;
+			if (testBit(_bcps, 0) == false)
+				hilo = 1;
+			paletteAddr = (reinterpret_cast<Byte *>(&_backgroundColorPalettes[array_case / 4][array_case % 4])) + hilo;
+			*paletteAddr = value;
 			_backgroundColorPalettes_translated[array_case / 4][array_case % 4] = translateCGBColorValue(_backgroundColorPalettes[array_case / 4][array_case % 4]);
 			break;
 		case 0xFF6A:
@@ -173,20 +170,11 @@ void				PPU::write(Word address, Byte value)
 		case 0xFF6B:
 			_ocpd = value;
 			array_case = colorPaletteArrayCaseWrapper(_ocps);
-			if (testBit(_ocps, 0) == true) // high byte
-			{
-				paletteTmpValue = value;
-				paletteTmpValue = paletteTmpValue << 8;
-				paletteTmpValue += _spriteColorPalettes[array_case / 4][array_case % 4] & 0x00FF;
-			}
-			else // low byte
-			{
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue += value;
-			}
-			_spriteColorPalettes[array_case / 4][array_case % 4] = paletteTmpValue;
+			paletteAddr = (reinterpret_cast<Byte *>(&_spriteColorPalettes[array_case / 4][array_case % 4])) + hilo;
 			_spriteColorPalettes_translated[array_case / 4][array_case % 4] = translateCGBColorValue(_spriteColorPalettes[array_case / 4][array_case % 4]);
-			
+			if (testBit(_ocps, 0) == false)
+				hilo = 1;
+			*paletteAddr = value;
 			break;
 	}
 }
@@ -194,9 +182,10 @@ void				PPU::write(Word address, Byte value)
 //------------------------------------------------------------------------------
 Byte				PPU::read(Word address) const
 {
-	Byte			ret = 0;
-	uint8_t			array_case = 0;
-	uint16_t		paletteTmpValue = 0;
+	Byte			ret;
+	Byte			*paletteAddr;
+
+	paletteAddr = 0;
 
 	if (address >= 0x8000 && address < 0xA000)
 	{
@@ -207,7 +196,7 @@ Byte				PPU::read(Word address) const
 //		}
 //		else
 //		{
-			ret = _lcdMemoryBank_0[address - 0x8000];
+			ret = _lcdMemoryBank_0[addresss - 0x8000];
 			return (ret);
 //		}
 	}
@@ -275,42 +264,22 @@ Byte				PPU::read(Word address) const
 			break;
 		case 0xFF69:
 			array_case = colorPaletteArrayCaseWrapper(_bcps);
-			paletteTmpValue = _backgroundColorPalettes[array_case / 4][array_case % 4];
-			if (testBit(_bcps, 0) == true)
-			{
-				// high byte
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue = paletteTmpValue >> 8;
-				ret = paletteTmpValue;
-			}
-			else
-			{
-				// low byte
-				paletteTmpValue = paletteTmpValue & 0x00FF;
-				ret = paletteTmpValue;
-			}
-//			_bcpd = ret;
+			if (testBit(_bcps, 0) == false)
+				hilo = 1;
+			paletteAddr = (reinterpret_cast<Byte *>(&_backgroundColorPalettes[array_case / 4][array_case % 4])) + hilo;
+			ret = *paletteAddr;
+			_bcpd = ret;
 			break;
 		case 0xFF6A:
 			ret = _ocps;
 			break;
 		case 0xFF6B:
 			array_case = colorPaletteArrayCaseWrapper(_ocps);
-			paletteTmpValue = _spriteColorPalettes[array_case / 4][array_case % 4];
-			if (testBit(_ocps, 0) == true)
-			{
-				// high byte
-				paletteTmpValue = paletteTmpValue & 0xFF00;
-				paletteTmpValue = paletteTmpValue >> 8;
-				ret = paletteTmpValue;
-			}
-			else
-			{
-				// low byte
-				paletteTmpValue = paletteTmpValue & 0x00FF;
-				ret = paletteTmpValue;
-			}
-//			_ocpd = ret;
+			if (testBit(_ocps, 0) == false)
+				hilo = 1;
+			paletteAddr = (reinterpret_cast<Byte *>(&_spriteColorPalettes[array_case / 4][array_case % 4])) + hilo;
+			ret = *paletteAddr;
+			_ocpd = ret;
 			break;
 	}
 	return (ret);
@@ -630,7 +599,7 @@ void				PPU::renderScanLine()
 }
 
 //------------------------------------------------------------------------------
-uint8_t					PPU::extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end) const
+uint8_t					PPU::extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end)
 {
 	uint8_t				weight = 1;
 	uint8_t				ret = 0;
