@@ -29,17 +29,6 @@ class Debugger {
 
 	private:
 
-		/**
-		 *
-		 *  - Debugger on a besoin de quoi getter pour avoir les valeurs des registres: [pc(); sp(); ...]
-		 *  - Lire la rom (Cartridge.hpp) donc faire un getter de std::vector<Byte> rom naviguer dans la rom avec un user input;
-		 *  - Afficher la memoire de la rom pointer par le program counter 
-		 *  - Execute only one instruction
-		 *  - Execute during one second thanks to the timer
-		 *  - Execute during one frame
-		 *  - Reset all, reload the cartridge
-		 */
-
 		ComponentsContainer &_components;
 		bool	_enabled = 0;
 		bool	_send_update = 0;
