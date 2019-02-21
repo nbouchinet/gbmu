@@ -193,6 +193,7 @@ bool Debugger::is_sec() {
 
 	if (_run_one_sec) {
 		if (elapsed_seconds.count() >= 1) {
+			_run_one_sec = false;
 			return true;
 		}
 	}
