@@ -157,6 +157,7 @@ bool Debugger::on_breakpoint(uint16_t pc)
 void Debugger::run_one_sec()
 {
 	_past = std::chrono::high_resolution_clock::now();
+	_run_one_sec = true;
 }
 
 bool Debugger::isFramePassed()
@@ -186,12 +187,21 @@ bool Debugger::is_step() {
 	return false;
 }
 
-void Debugger::unlock_game(uint16_t pc)
-{
+bool Debugger::is_sec() {
 	std::chrono::time_point<std::chrono::high_resolution_clock> current = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed_seconds = _past - current;
 
-	if (on_breakpoint(pc) || elapsed_seconds.count() >= 1 || isFramePassed() || is_step()) {
+	if (_run_one_sec) {
+		if (elapsed_seconds.count() >= 1) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Debugger::unlock_game(uint16_t pc)
+{
+	if (on_breakpoint(pc) || is_sec() || isFramePassed() || is_step()) {
 		_lock = 1;
 	}
 }
