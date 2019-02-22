@@ -56,21 +56,17 @@ void InterruptController::ExecuteInterrupt(Byte interrupt) {
   _rIF = (_rIF & ~interrupt);
   switch (interrupt) {
     case 0:
-      std::cout << "vertical blank interrupt" << std::endl;
       _components.core->instr_call(Core::JumpCondition::None, VBI);
       break;
     case 1:
-      std::cout << "lcdc status interrupt" << std::endl;
       _components.core->instr_call(Core::JumpCondition::None, LCDCSI);
       break;
     case 2:
-      std::cout << "timer overflow interrupt" << std::endl;
       _components.core->instr_call(Core::JumpCondition::None, TOI);
       break;
     case 3:
       break;
     case 4:
-      std::cout << "joypad interrupt" << std::endl;
       _components.core->instr_call(Core::JumpCondition::None, JOYI);
       break;
   }
