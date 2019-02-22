@@ -115,7 +115,19 @@ void				PPU::write(Word address, Byte value)
 			_lyc = value;
 			break;
 		case 0xFF46:
-			_dma = value;
+			uint16_t	dmaAddr;
+			dmaAddr = address << 8;
+			if (1) // IS DMG
+			{
+				for (int i = 0; i < 0xA0; i++)
+				{
+					write(0xFE00 + i, _components.mem_bus->read<Byte>(dmaAddr + i));
+				}
+			}
+			else if (2) // IS CGB
+			{
+				
+			}
 			break;
 		case 0xFF47:
 			_bgp = value;
@@ -624,6 +636,7 @@ void				PPU::renderScanLine()
 	setupWindow();
 	setupBackgroundMemoryStart();
 	setupSpriteAddressStart();
+	translatePalettes(); // TMP MOVE SOMEWHERE ELSE LATER ?
 
 	if (testBit(_lcdc, 0) == true)
 		renderTiles();
