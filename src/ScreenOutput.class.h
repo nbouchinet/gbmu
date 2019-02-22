@@ -28,7 +28,7 @@ public:
 	void				setRGBA(uint8_t y, uint8_t x, uint8_t R, uint8_t G, uint8_t B, uint8_t A);
 	void				setRGBA(uint8_t y, uint8_t x, uint32_t rgba);
 	uint32_t &			getRGBA(uint8_t y, uint8_t x);
-	std::array<std::array<uint32_t, LCD_HEIGHT>, LCD_WIDTH> 		getScreen() { return screen; }
+	std::array<std::array<uint32_t, LCD_HEIGHT>, LCD_WIDTH> & 		getScreen() { return screen; }
 
 private:
 	std::array<std::array<uint32_t, LCD_HEIGHT>, LCD_WIDTH>			screen;
