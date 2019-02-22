@@ -3,7 +3,7 @@
 .SUFFIXES:
 NAME		:= gbmu
 CC 		:= clang++
-CFLAGS		:= -I. -Wall -Wextra -Werror -g -std='c++14'
+CFLAGS		:= -I. -Wall -Wextra -Werror -g -std='c++14' -pthread
 RM		:= rm -f
 OBJECT_DIR	:= obj
 COMP		:= $(CC) $(CFLAGS) -c -o

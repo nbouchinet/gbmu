@@ -119,9 +119,9 @@ private:
 	t_pixelSegment			_pixelPipeline[LCD_WIDTH];
 	t_spriteInfo			_spritesLine[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
 
-	std::array<Byte, 8192>		_lcdMemoryBank_0;
+	std::array<Byte, 8192>		_lcdMemoryBank_0; // (0x8000-0x97FF) Tiles RAM bank 0
 //	std::array<Byte, 8192>		_lcdMemoryBank_1;
-	std::array<Byte, 160>		_lcdOamRam;
+	std::array<Byte, 160>		_lcdOamRam; // (0xFE00 - 0xFE9F) Sprite RAM
 
 	uint8_t					_nbSprites;
 
