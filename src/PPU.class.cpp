@@ -642,7 +642,7 @@ void				PPU::renderTiles()
 		if (boiItsaWindow == true)
 			tileNumberAddress = _windowChrAttrStart + tileRow + tileCol;	// 1 byte per tileData, just the tile number
 		tileCol = xPos / 8;
-		tileNumberAddress = _backgroundDataStart + tileRow + tileCol;
+		tileNumberAddress = _backgroundChrAttrStart + tileRow + tileCol;
 		if (_unsignedTileNumbers)
 		{
 			tileNumber = (uint8_t)_components.mem_bus->read<Byte>(tileNumberAddress);
@@ -687,7 +687,7 @@ void				PPU::sendPixelPipeline()
 				{
 					setPixel(_ly, i, _backgroundDMGPalette_translated[_pixelPipeline[i].value]);
 				}
-				else if (_pixelPipeline[i].isSprite == false)
+				else if (_pixelPipeline[i].isSprite == true)
 				{
 					if (testBit(_pixelPipeline[i].spriteInfo.flags, 4) == true)
 						setPixel(_ly, i, _spritesDMGPalettes_translated[1][_pixelPipeline[i].value]);
@@ -872,20 +872,24 @@ void					PPU::updateGraphics(Word cycles)
 
 	setLCDstatus();
 	if (isLCDEnabled())
-		_scanlineCounter -= cycles;
+	{
+		if (static_cast<int>(_scanlineCounter) - cycles <= 0)
+			_scanlineCounter = 0;
+		else
+			_scanlineCounter -= cycles;
+	}
 	else
 		return ;
 
 	if (_scanlineCounter <= 0)
 	{
-		currentScanline = read(0xFF44);
-		currentScanline++;
-		write(0xFF44, currentScanline);
+		_ly++;
+		currentScanline = _ly;
 		_scanlineCounter = 456;
 		if (currentScanline == 144)
 			_components.interrupt_controller->RequestInterrupt(0x0040);
 		if (currentScanline > 153)
-			write(0xFF44, 0);
+			_ly = 0;
 		else if (currentScanline < 144)
 			renderScanLine();
 	}
