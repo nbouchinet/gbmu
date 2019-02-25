@@ -21,7 +21,7 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
   lcd_registers = std::make_unique<LCDRegisters>();
   unit_working_ram = std::make_unique<UnitWorkingRAM>();
   ppu = std::make_unique<PPU>(*this);
-  driverScreen = std::make_unique<ScreenOutput>();
+  driver_screen = std::make_unique<ScreenOutput>();
   bios = std::make_unique<Bios>(*this);
   mem_bus = std::make_unique<MemoryBus>(*this);
 }
@@ -75,15 +75,6 @@ void Gameboy::init() {
   _components.mem_bus->write(0xFF24, 0x77); // Sound4 Register
   _components.mem_bus->write(0xFF25, 0xF3); // Sound4 Register
   _components.mem_bus->write(0xFF26, 0xF1); // Sound4 Register
-  _components.mem_bus->write(0xFF40, 0x91); // LCD Register
-  _components.mem_bus->write(0xFF42, 0x00); // LCD Register
-  _components.mem_bus->write(0xFF43, 0x00); // LCD Register
-  _components.mem_bus->write(0xFF45, 0x00); // LCD Register
-  _components.mem_bus->write(0xFF47, 0xFC); // LCD Register
-  _components.mem_bus->write(0xFF48, 0xFF); // LCD Register
-  _components.mem_bus->write(0xFF49, 0xFF); // LCD Register
-  _components.mem_bus->write(0xFF4A, 0x00); // LCD Register
-  _components.mem_bus->write(0xFF4B, 0x00); // LCD Register
   _components.mem_bus->write(0xFFFF, 0x00);
 }
 
