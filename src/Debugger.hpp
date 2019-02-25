@@ -242,7 +242,7 @@ class Debugger {
 		void unlock_game(uint16_t pc);
 		bool on_breakpoint(uint16_t pc);
 		using it = std::vector<uint16_t>::const_iterator;
-		const std::vector<std::pair<int, uint16_t>> rdiff(it prev_begin, it current_begin);
+		const std::vector<std::pair<int, uint16_t>> rdiff(const std::vector<uint16_t> &prev, const std::vector<uint16_t> &current);
 };
 
 #endif

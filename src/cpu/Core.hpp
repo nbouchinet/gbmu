@@ -124,10 +124,10 @@ public:
   auto clock() const { return _clock; }
   auto pc() const { return _pc.word; }
   auto sp() const { return _sp.word; }
-  auto af() const { return _af; };
-  auto bc() const { return _bc; };
-  auto de() const { return _de; };
-  auto hl() const { return _hl; };
+  auto af() const { return _af; }
+  auto bc() const { return _bc; }
+  auto de() const { return _de; }
+  auto hl() const { return _hl; }
   bool in_jump_state() const { return _in_jump_state; }
 
   void exec_instruction(std::function<void(void)> instr, Byte clock_cycles1,
