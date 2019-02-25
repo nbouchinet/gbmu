@@ -53,6 +53,7 @@ public:
 	uint8_t					unsetBit(uint8_t src, uint8_t bit_number);
 
 private:
+	void					init();
 	uint16_t				getTileDataAddress(uint8_t tileIdentifier);
 	uint8_t					readMemBank(uint8_t bank, uint16_t address);
 	uint8_t					extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end) const;
@@ -118,12 +119,12 @@ private:
 
 	t_pixelSegment			_pixelPipeline[LCD_WIDTH];
 	t_spriteInfo			_spritesLine[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
+	uint8_t					_nbSprites;
 
 	std::array<Byte, 8192>		_lcdMemoryBank_0; // (0x8000-0x97FF) Tiles RAM bank 0
-//	std::array<Byte, 8192>		_lcdMemoryBank_1;
-	std::array<Byte, 160>		_lcdOamRam; // (0xFE00 - 0xFE9F) Sprite RAM
+	std::array<Byte, 8192>		_lcdMemoryBank_1;
+	std::array<Byte, LCD_WIDTH>	_lcdOamRam; // (0xFE00 - 0xFE9F) Sprite RAM
 
-	uint8_t					_nbSprites;
 
 
 	static int				_nb_PPU;

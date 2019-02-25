@@ -19,7 +19,7 @@ struct ComponentsContainer {
   std::unique_ptr<LCDRegisters> lcd_registers;
   std::unique_ptr<UnitWorkingRAM> unit_working_ram;
   std::unique_ptr<PPU> ppu;
-  std::unique_ptr<ScreenOutput> driverScreen;
+  std::unique_ptr<ScreenOutput> driver_screen;
   std::unique_ptr<Bios> bios;
 
   ComponentsContainer(const std::string &);
@@ -53,7 +53,7 @@ public:
   void init();
   void save(std::string save_name);
   void load_save(std::string save_name);
-  uint32_t get_pixel(uint8_t y, uint8_t x) { return (_components.driverScreen->getRGBA(y, x)); }
+  uint32_t get_pixel(uint8_t y, uint8_t x) { return (_components.driver_screen->getRGBA(y, x)); }
 
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
