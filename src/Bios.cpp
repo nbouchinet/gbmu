@@ -2,7 +2,7 @@
 
 std::vector <Byte>Bios::dump_logo()
 {
-	std::vector	<Byte>cartridge_nintendo_logo(47);
+	std::vector	<Byte>cartridge_nintendo_logo(48);
 	int i, j;
 
 	for (i = 0, j = 0x104; i <= 47; ++i, ++j) {

@@ -16,7 +16,9 @@ TEST_FILES		:= 	sample.cpp \
 				MemoryBankController1.cpp \
 				MemoryBankController2.cpp \
 				MemoryBankController3.cpp \
-				RealTimeClock.cpp
+				RealTimeClock.cpp \
+				Timer.cpp \
+				Interrupt.cpp
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
 RUN_TEST_RULES	:= $(addprefix test_, $(TEST_FILES:.cpp=))
