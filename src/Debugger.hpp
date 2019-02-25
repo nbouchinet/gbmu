@@ -215,15 +215,16 @@ class Debugger {
 		};
 
 	public:
-		typedef enum{
+		enum e_dbg_state{
 			RUN_ONE_SEC,
 			RUN_ONE_FRAME,
 			RUN_ONE_STEP
 
-		}e_dbg_state;
+		};
 
 		//information fetch
 		//TODO: get_mem_dump();
+		std::vector<uint16_t> construct_register_pool();
 		void set_instruction_pool_size(int size) {_frame_size = size;}
 		const std::vector<std::pair<int, uint16_t>> get_register_diffs();
 		const std::vector<_debug_info> & get_instruction_pool() const {return _instr_pool;}
@@ -240,19 +241,18 @@ class Debugger {
 		void fetch(const Core::Iterator &it, uint16_t pc);
 		bool is_enabled() const { return _enabled; }
 
-		//setters
-		void set_run_one_sec(bool val) { _run_one_sec = val; }
-		void set_run_one_frame(bool val) { _run_one_frame = val; }
-		void set_run_one_step(bool val) { _run_one_step = val; }
+		//getter
+		bool get_run_sec() const { return _run_one_sec; }
+		bool get_run_frame() const { return _run_one_frame; }
+		bool get_run_step() const { return _run_one_step; }
 	private:
 		bool is_step_passed();
 		bool is_sec_passed();
 		bool is_frame_passed();
-		std::vector<uint16_t> construct_register_pool();
 		std::vector<uint8_t> construct_rom_dump(uint16_t addr);
 		void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
 		void update_data(const Core::Iterator &it, uint16_t pc);
-		void unlock_game(uint16_t pc);
+		void lock_game(uint16_t pc);
 		bool on_breakpoint(uint16_t pc);
 		using it = std::vector<uint16_t>::const_iterator;
 		const std::vector<std::pair<int, uint16_t>> rdiff(const std::vector<uint16_t> &prev, const std::vector<uint16_t> &current);

@@ -40,13 +40,13 @@ Gameboy::Gameboy(const std::string &rom_path)
 void Gameboy::notify_debugger(Debugger::e_dbg_state state){
 	switch (state) {
 		case Debugger::RUN_ONE_SEC:
-			_debugger.set_run_one_sec(true);
+			_debugger.run_one_sec();
 			break;
 		case Debugger::RUN_ONE_FRAME:
-			_debugger.set_run_one_frame(true);
+			_debugger.run_one_frame();
 			break;
 		case Debugger::RUN_ONE_STEP:
-			_debugger.set_run_one_step(true);
+			_debugger.run_one_step();
 			break;
 	}
 }

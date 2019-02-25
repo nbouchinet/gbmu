@@ -6,19 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>975</width>
     <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>800</width>
+    <width>975</width>
     <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>800</width>
+    <width>975</width>
     <height>600</height>
    </size>
   </property>
@@ -77,19 +77,6 @@
     <string>Run One Second</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="breakpointsButton">
-   <property name="geometry">
-    <rect>
-     <x>680</x>
-     <y>0</y>
-     <width>114</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Breakpoints</string>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="memoryLineEdit">
    <property name="geometry">
     <rect>
@@ -142,7 +129,7 @@
   <widget class="QLabel" name="videoRegistersLabel">
    <property name="geometry">
     <rect>
-     <x>540</x>
+     <x>530</x>
      <y>30</y>
      <width>101</width>
      <height>16</height>
@@ -155,7 +142,7 @@
   <widget class="QLabel" name="otherRegisterslabel">
    <property name="geometry">
     <rect>
-     <x>670</x>
+     <x>690</x>
      <y>30</y>
      <width>101</width>
      <height>16</height>
@@ -198,9 +185,9 @@
   <widget class="QTableWidget" name="videoRegistersWidget">
    <property name="geometry">
     <rect>
-     <x>540</x>
+     <x>530</x>
      <y>50</y>
-     <width>111</width>
+     <width>141</width>
      <height>541</height>
     </rect>
    </property>
@@ -208,11 +195,70 @@
   <widget class="QTableWidget" name="otherRegistersWidget">
    <property name="geometry">
     <rect>
-     <x>670</x>
+     <x>690</x>
      <y>50</y>
-     <width>121</width>
+     <width>151</width>
      <height>541</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="breakpointsWidget">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>50</y>
+     <width>101</width>
+     <height>431</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="breakpointsEdit">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>490</y>
+     <width>101</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="addBreakpointButton">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>520</y>
+     <width>121</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Add</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="deleteBreakpointButton">
+   <property name="geometry">
+    <rect>
+     <x>850</x>
+     <y>550</y>
+     <width>121</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Delete</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="breakpointsLabel">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>30</y>
+     <width>81</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Breakpoints</string>
    </property>
   </widget>
  </widget>
