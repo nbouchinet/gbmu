@@ -51,6 +51,7 @@ public:
 	bool					testBit(uint32_t byte, uint8_t bit_number) const;
 	uint8_t					setBit(uint8_t src, uint8_t bit_number);
 	uint8_t					unsetBit(uint8_t src, uint8_t bit_number);
+	void					updateGraphics(Word cycles);
 
 private:
 	void					init();
@@ -73,7 +74,6 @@ private:
 	uint32_t				translateDMGColorValue(uint8_t value);
 	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier) const;
 	void					setLCDstatus();
-	void					updateGraphics(Word cycles);
 
 	ComponentsContainer&	_components;
 
