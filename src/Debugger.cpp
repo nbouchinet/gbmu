@@ -25,11 +25,16 @@ Debugger::_debug_info::_debug_info(uint16_t _pc, const Debugger::_instr_info &_m
 }
 
 using it = std::vector<Byte>::const_iterator;
-const std::vector<std::pair<int, uint16_t>> Debugger::rdiff(it prev_begin, it current_begin)
+const std::vector<std::pair<int, uint16_t>> Debugger::rdiff(const std::vector<uint16_t> &prev, const std::vector<uint16_t> &current)
 {
+	it prev_begin = prev.cbegin();
+	it current_begin = current.cbegin();
+	it prev_end = prev.cend();
+	it current_end = current.cend();
+
 	std::vector<std::pair<int, uint16_t>> diffs;
 
-	for (int i = 0; i <= 40; i++, prev_begin++, current_begin++) {
+	for (int i = 0; (prev_begin != prev_end) || (current_begin != current_end); i++, prev_begin++, current_begin++) {
 		if (*prev_begin != *current_begin) {
 			diffs.emplace_back(i, *current_begin);
 		}
@@ -231,6 +236,6 @@ void Debugger::update_data(const Core::Iterator &it, uint16_t pc)
 
 	set_instruction_pool(it, pc);
 	current = construct_register_pool();
-	_register_diffs = rdiff(_register_pool.cbegin(), current.cbegin());
+	_register_diffs = rdiff(_register_pool, current);
 	_register_pool = current;
 }
