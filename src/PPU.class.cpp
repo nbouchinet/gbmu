@@ -69,16 +69,16 @@ void				PPU::init()
 		_spritesDMGPalettes_translated[1][i] = 0;
 	}
 
-	_lcdc = 0;
+	_lcdc = 0x91;
 	_stat = 0;
 	_scy = 0;
 	_scx = 0;
 	_ly = 0;
 	_lyc = 0;
 	_dma = 0;
-	_bgp = 0;
-	_obp0 = 0;
-	_obp1 = 0;
+	_bgp = 0xFC;
+	_obp0 = 0xFF;
+	_obp1 = 0xFF;
 	_wy = 0;
 	_wx = 0;
 	_hdma1 = 0;
