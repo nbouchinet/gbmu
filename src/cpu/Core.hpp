@@ -38,6 +38,7 @@ private:
   Register _de = {.word = 0x00d8};
   Register _hl = {.word = 0x014d};
   Word _clock = 0x00;
+  Word _cycles = 0x00;
   bool _in_jump_state = false;
   bool _has_jumped = false;
   std::array<Byte, StackSize> _stack;
@@ -122,6 +123,7 @@ public:
 
   bool get_flag(Flags f) const { return _af.low & static_cast<int>(f); }
   auto clock() const { return _clock; }
+  auto cycles() const { return _cycles; }
   auto pc() const { return _pc.word; }
   auto sp() const { return _sp.word; }
   auto af() const { return _af; }
