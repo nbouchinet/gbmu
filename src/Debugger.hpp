@@ -13,24 +13,24 @@ class Debugger {
 	public:
 		Debugger(ComponentsContainer &components);
 		struct _instr_info {
-			const char * instr;
-			uint8_t size;
+			const char * instr = NULL;
+			uint8_t size = 0x00;
 		};
 
 
 		struct _debug_info {
 			_debug_info(uint16_t pc, const _instr_info &map_info, Core::Iterator it, uint8_t size);
 
-			uint16_t pc;
-			const char * instr;
-			Byte value[3];
-			uint8_t size;
+			uint16_t pc = 0x00;
+			const char * instr = NULL;
+			Byte value[3] = {0, 0, 0};
+			uint8_t size = 0x00;
 		};
 
 	private:
 
 		ComponentsContainer &_components;
-		bool	_enabled = 0;
+		bool	_enabled = 1;
 		bool	_lock = true;
 		bool	_run_one_frame = false;
 		bool	_run_one_sec = false;

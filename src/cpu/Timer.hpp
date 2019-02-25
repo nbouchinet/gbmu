@@ -11,17 +11,17 @@ class Timer : public IReadWrite {
   static constexpr Word TMA = 0xFF06;   // Timer modulo
   static constexpr Word TAC = 0xFF07;   // Timer controller
 
-  Byte _rDIV;
-  Byte _rTIMA;
-  Byte _rTMA;
+  Byte _rDIV = 0x00;
+  Byte _rTIMA = 0x00;
+  Byte _rTMA = 0x00;
   Byte _rTAC : 3;
-  Word _counter;
-  Byte _rDIVCounter;
+  Word _counter = 0x00;
+  Byte _rDIVCounter = 0x00;
 
   ComponentsContainer& _components;
 
  public:
-  Timer(ComponentsContainer& components) : _components(components){};
+  Timer(ComponentsContainer& components) : _rTAC(0), _components(components){};
 
   Byte read(Word addr) const override;
   void write(Word addr, Byte val) override;
