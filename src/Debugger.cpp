@@ -24,17 +24,16 @@ Debugger::_debug_info::_debug_info(uint16_t _pc, const Debugger::_instr_info &_m
 	}
 }
 
-using it = std::vector<Byte>::const_iterator;
 const std::vector<std::pair<int, uint16_t>> Debugger::rdiff(const std::vector<uint16_t> &prev, const std::vector<uint16_t> &current)
 {
-	it prev_begin = prev.cbegin();
-	it current_begin = current.cbegin();
-	it prev_end = prev.cend();
-	it current_end = current.cend();
+	auto prev_begin = prev.cbegin();
+	auto current_begin = current.cbegin();
+	auto prev_end = prev.cend();
+	auto current_end = current.cend();
 
 	std::vector<std::pair<int, uint16_t>> diffs;
 
-	for (int i = 0; (prev_begin != prev_end) || (current_begin != current_end); i++, prev_begin++, current_begin++) {
+	for (int i = 0; (prev_begin != prev_end) && (current_begin != current_end); i++, prev_begin++, current_begin++) {
 		if (*prev_begin != *current_begin) {
 			diffs.emplace_back(i, *current_begin);
 		}
