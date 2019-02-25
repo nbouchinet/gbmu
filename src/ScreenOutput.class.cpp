@@ -4,7 +4,7 @@
 ScreenOutput::ScreenOutput()
 {
 	if (_debug_ScreenOutput == true)
-		std::cout << "[ScreenOutput default constructor called]" << std::endl;
+		std::cerr << "[ScreenOutput default constructor called]" << std::endl;
 	return;
 }
 
@@ -12,12 +12,12 @@ ScreenOutput::ScreenOutput()
 ScreenOutput::~ScreenOutput()
 {
 	if (_debug_ScreenOutput == true)
-		std::cout << "[ScreenOutput destructor called]" << std::endl;
+		std::cerr << "[ScreenOutput destructor called]" << std::endl;
 	return;
 }
 
 //==============================================================================
-uint8_t					ScreenOutput::getR(uint8_t y, uint8_t x)
+uint8_t					ScreenOutput::getR(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -25,7 +25,7 @@ uint8_t					ScreenOutput::getR(uint8_t y, uint8_t x)
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return (0) ;
+		throw (OutOfScreenException());
 	}
 
 	tmp = screen[y][x] & 0xFF000000;
@@ -34,7 +34,7 @@ uint8_t					ScreenOutput::getR(uint8_t y, uint8_t x)
 }
 
 //------------------------------------------------------------------------------
-uint8_t					ScreenOutput::getG(uint8_t y, uint8_t x)
+uint8_t					ScreenOutput::getG(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -42,7 +42,7 @@ uint8_t					ScreenOutput::getG(uint8_t y, uint8_t x)
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return (0) ;
+		throw (OutOfScreenException());
 	}
 
 	tmp = screen[y][x] & 0x00FF0000;
@@ -51,7 +51,7 @@ uint8_t					ScreenOutput::getG(uint8_t y, uint8_t x)
 }
 
 //------------------------------------------------------------------------------
-uint8_t					ScreenOutput::getB(uint8_t y, uint8_t x)
+uint8_t					ScreenOutput::getB(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -59,7 +59,7 @@ uint8_t					ScreenOutput::getB(uint8_t y, uint8_t x)
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return (0) ;
+		throw (OutOfScreenException());
 	}
 
 	tmp = screen[y][x] & 0x0000FF00;
@@ -69,7 +69,7 @@ uint8_t					ScreenOutput::getB(uint8_t y, uint8_t x)
 }
 
 //------------------------------------------------------------------------------
-uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x)
+uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -77,7 +77,7 @@ uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x)
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return (0) ;
+		throw (OutOfScreenException());
 	}
 
 	tmp = screen[y][x] & 0x000000FF;
@@ -86,13 +86,13 @@ uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x)
 }
 
 //------------------------------------------------------------------------------
-uint32_t &				ScreenOutput::getRGBA(uint8_t y, uint8_t x)
+uint32_t				ScreenOutput::getRGBA(uint8_t y, uint8_t x) const
 {
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return (screen[0][0]) ;
+		throw (OutOfScreenException());
 	}
 	return (screen[y][x]);
 }
@@ -104,7 +104,7 @@ void					ScreenOutput::setRGBA(uint8_t y, uint8_t x, uint32_t rgba)
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return ;
+		throw (OutOfScreenException());
 	}
 	screen[y][x] = rgba;
 }
@@ -120,7 +120,7 @@ void					ScreenOutput::setRGBA(uint8_t y, uint8_t x, uint8_t R, uint8_t G, uint8
 	{
 		if (_debug_ScreenOutput == true)
 			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
-		return ;
+		throw (OutOfScreenException());
 	}
 
 	rPart = ((static_cast<uint32_t>(R)) << 24);
