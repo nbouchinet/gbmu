@@ -212,7 +212,7 @@ bool Debugger::is_sec_passed() {
 	return false;
 }
 
-void Debugger::unlock_game(uint16_t pc)
+void Debugger::lock_game(uint16_t pc)
 {
 	if (on_breakpoint(pc) || is_sec_passed() || is_frame_passed() || is_step_passed()) {
 		_lock = true;
@@ -222,9 +222,8 @@ void Debugger::unlock_game(uint16_t pc)
 void Debugger::fetch(const Core::Iterator &it, uint16_t pc)
 {
 	update_data(it, pc);
-	while (_lock) {
-		unlock_game(pc);
-	}
+	lock_game(pc);
+	while (_lock) {}
 }
 
 void Debugger::update_data(const Core::Iterator &it, uint16_t pc)

@@ -69,6 +69,7 @@ void MainWindow::on_actionMute_triggered()
 
 void MainWindow::on_actionDebug_triggered()
 {
+	g_gameboy.get_debugger().toggle();
     DebuggerWindow debuggerwindow;
     debuggerwindow.setModal(true);
     debuggerwindow.exec();
