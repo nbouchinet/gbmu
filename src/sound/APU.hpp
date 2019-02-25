@@ -23,7 +23,7 @@ class APU : public IReadWrite {
   };
 
   int _update_countdown = 0;
-//  int _sampling_countdown = 0;
+  int _sampling_countdown = 0;
   unsigned int _modulation_units_steps = 0;
   Byte _right_volume: 3;
   Byte _left_volume: 3;
@@ -37,11 +37,13 @@ class APU : public IReadWrite {
   AudioInterface * const _audio_interface;
 
   std::array<MemoryRangedChannel, 4> _channels;
+
+  void update_clock();
  public:
   APU(AudioInterface*);
   APU() = delete;
 
-  void update_clock();
+  void update_clock(Word);
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
 };

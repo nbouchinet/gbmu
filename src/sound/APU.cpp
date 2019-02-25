@@ -28,24 +28,42 @@ APU::APU(AudioInterface* interface)
 void APU::update_clock() {
   if (not _APU_on) return;
   if (--_update_countdown <= 0) {
-    _update_countdown = CPU_FREQ / UPDATE_FREQ;
-    for (auto& ranged_channel : _channels)
-      ranged_channel.channel->update(_modulation_units_steps);
+    _update_countdown = (CPU_FREQ / UPDATE_FREQ);
+    for (auto& ranged_channel : _channels) {
+      ranged_channel.channel->update_modules(_modulation_units_steps);
+      ranged_channel.channel->update();
+    }
     if (++_modulation_units_steps >= 8) _modulation_units_steps = 0;
+  } else {
+    for (auto& ranged_channel : _channels) ranged_channel.channel->update();
   }
 
-  auto get_output = [&](Byte b) -> float {
-    return (test_bit(b, _channel_to_terminal_output))
-               ? _channels[0].channel->get_output()
-               : 0;
-  };
-  _right_output[_output_index] = std::min(1.f, get_output(0));
-  _left_output[_output_index++] = std::min(1.f, get_output(0));
-  if (_output_index >= AudioInterface::SamplesTableSize) {
-    while (
-        not _audio_interface->queue_stereo_samples(_right_output, _left_output))
-      ;
-    _output_index = 0;
+  if (--_sampling_countdown <= 0) {
+    _sampling_countdown = (CPU_FREQ / SAMPLING_FREQ);
+    auto get_output = [&](Byte b) -> float {
+      return (test_bit(b, _channel_to_terminal_output))
+                 ? _channels[0].channel->get_output()
+                 : 0;
+    };
+    _right_output[_output_index] = std::min(1.f, get_output(0));
+    _left_output[_output_index++] = std::min(1.f, get_output(0));
+    if (_output_index >= AudioInterface::SamplesTableSize) {
+      //std::cerr << "---------\n";
+      //for (auto& e : _right_output) {
+      //  std::cerr << e << ", ";
+      //}
+      //(void)_audio_interface;
+      while (not _audio_interface->queue_stereo_samples(_right_output,
+                                                        _left_output))
+        ;
+     _output_index = 0;
+    }
+  }
+}
+
+void APU::update_clock(Word cycles) {
+  while (--cycles) {
+    update_clock();
   }
 }
 

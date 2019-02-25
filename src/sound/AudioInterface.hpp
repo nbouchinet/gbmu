@@ -9,7 +9,7 @@ namespace sound {
 
 class AudioInterface {
  public:
-  static constexpr std::size_t SamplesTableSize = 1024;
+  static constexpr std::size_t SamplesTableSize = 64;
   using Sample = float;
   using MonoSamples = std::array<Sample, SamplesTableSize>;
 

@@ -16,6 +16,7 @@ class SoundChannel : public IReadWrite {
   std::vector<ModUnitPtr> _modulation_units;
 
   virtual void do_trigger() = 0;
+  virtual void do_update() = 0;
 
  protected:
   int p_output_volume = 0;
@@ -28,7 +29,8 @@ class SoundChannel : public IReadWrite {
  public:
   virtual ~SoundChannel() = default;
 
-  void update(unsigned int modulation_unit_step);
+  void update_modules(unsigned int modulation_unit_step);
+  void update();
   void trigger();
 
   int get_output() const {

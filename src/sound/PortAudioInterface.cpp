@@ -15,6 +15,7 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
                                  const PaStreamCallbackTimeInfo*,
                                  PaStreamCallbackFlags) {
   if (_lock) return paContinue;
+ // std::cerr << "b\n";
   _lock = true;
   assert(output_buffer != nullptr);
   float** out = static_cast<float**>(output_buffer);

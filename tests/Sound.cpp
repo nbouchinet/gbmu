@@ -56,7 +56,7 @@ int main(int, char **) {
   apu.write(0xff12, 0xf3);
   apu.write(0xff13, 0x83);
   apu.write(0xff14, 0x87);
-  loop_at_41mhz([&]() { apu.update_clock(); });
+  loop_at_41mhz([&]() { apu.update_clock(4); });
   i.terminate();
   return 1;
 }
