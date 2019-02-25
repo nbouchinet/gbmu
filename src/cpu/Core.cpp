@@ -390,10 +390,13 @@ void Core::instr_res(Byte bit, Byte &reg) { reset_bit(bit, reg); }
 void Core::exec_instruction(std::function<void(void)> instr, Byte clock_cycles1,
                             Byte clock_cycles2) {
   instr();
-  if (_has_jumped)
+  if (_has_jumped) {
     _clock += clock_cycles1;
-  else
+    _cycles = clock_cycles1;
+  } else {
     _clock += clock_cycles2;
+    _cycles = clock_cycles2;
+  }
   _has_jumped = false;
 }
 
@@ -403,8 +406,10 @@ void Core::exec_instruction(std::function<void(Byte &)> instr, Word addr,
   instr(b);
   if (_has_jumped) {
     _clock += clock_cycles1;
+    _cycles = clock_cycles1;
   } else {
     _clock += clock_cycles2;
+    _cycles = clock_cycles2;
   }
   _components.mem_bus->write<Byte>(addr, b);
   _has_jumped = false;
@@ -414,6 +419,7 @@ void Core::exec_instruction(std::function<void(void)> instr,
                             Byte clock_cycles) {
   instr();
   _clock += clock_cycles;
+  _cycles = clock_cycles;
 }
 
 void Core::exec_instruction(std::function<void(Byte &)> instr, Word addr,
@@ -422,6 +428,7 @@ void Core::exec_instruction(std::function<void(Byte &)> instr, Word addr,
   instr(b);
   _components.mem_bus->write<Byte>(addr, b);
   _clock += clock_cycles;
+  _cycles = clock_cycles;
 }
 
 void Core::exec_instruction(std::function<void(Word &)> instr, Word addr,
@@ -430,6 +437,7 @@ void Core::exec_instruction(std::function<void(Word &)> instr, Word addr,
   instr(b);
   _components.mem_bus->write<Word>(addr, b);
   _clock += clock_cycles;
+  _cycles = clock_cycles;
 }
 
 void Core::execute(Core::Iterator it) {
