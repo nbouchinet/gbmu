@@ -12,7 +12,8 @@
   _ranged_components.push_back(RangedComponent{begin, end, c});
 
 MemoryBus::MemoryBus(ComponentsContainer &components) {
-  push_component(0x0000, 0xBFFF, components.cartridge.get());
+  push_component(0x0000, 0x7FFF, components.cartridge.get());
+  push_component(0xA000, 0xBFFF, components.cartridge.get());
   push_component(0xC000, 0xDFFF, components.unit_working_ram.get());
   push_component(0xFF04, 0xFF08, components.timer.get());
   push_component(0xFF0F, 0xFF0F, components.interrupt_controller.get());
