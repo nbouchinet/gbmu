@@ -13,7 +13,7 @@ class Debugger {
 	public:
 		Debugger(ComponentsContainer &components);
 		struct _instr_info {
-			const char * instr = NULL;
+			const char * instr = nullptr;
 			uint8_t size = 0x00;
 		};
 
@@ -22,7 +22,7 @@ class Debugger {
 			_debug_info(uint16_t pc, const _instr_info &map_info, Core::Iterator it, uint8_t size);
 
 			uint16_t pc = 0x00;
-			const char * instr = NULL;
+			const char * instr = nullptr;
 			Byte value[3] = {0, 0, 0};
 			uint8_t size = 0x00;
 		};
@@ -30,7 +30,7 @@ class Debugger {
 	private:
 
 		ComponentsContainer &_components;
-		bool	_enabled = 1;
+		bool	_enabled = true;
 		bool	_lock = true;
 		bool	_run_one_frame = false;
 		bool	_run_one_sec = false;
