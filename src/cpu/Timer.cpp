@@ -66,7 +66,6 @@ void Timer::SetFrequence() {
 void Timer::Update(Word cycles) {
   UpdateDivider(cycles);
   if (TimerEnabled()) {
-    std::cout << "Timer Enabled" << std::endl;
     _counter -= cycles;
     if (_counter <= 0) SetFrequence();
     if (_rTIMA == 255) {  // Check if Timer Counter will overflow
