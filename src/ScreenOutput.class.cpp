@@ -23,8 +23,6 @@ uint8_t					ScreenOutput::getR(uint8_t y, uint8_t x) const
 
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
-		if (_debug_ScreenOutput == true)
-			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
 		throw (OutOfScreenException());
 	}
 
@@ -40,8 +38,6 @@ uint8_t					ScreenOutput::getG(uint8_t y, uint8_t x) const
 
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
-		if (_debug_ScreenOutput == true)
-			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
 		throw (OutOfScreenException());
 	}
 
@@ -57,8 +53,6 @@ uint8_t					ScreenOutput::getB(uint8_t y, uint8_t x) const
 
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
-		if (_debug_ScreenOutput == true)
-			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
 		throw (OutOfScreenException());
 	}
 
@@ -75,8 +69,6 @@ uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x) const
 
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
-		if (_debug_ScreenOutput == true)
-			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
 		throw (OutOfScreenException());
 	}
 
@@ -90,8 +82,6 @@ uint32_t				ScreenOutput::getRGBA(uint8_t y, uint8_t x) const
 {
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
-		if (_debug_ScreenOutput == true)
-			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
 		throw (OutOfScreenException());
 	}
 	return (screen[y][x]);
@@ -102,8 +92,6 @@ void					ScreenOutput::setRGBA(uint8_t y, uint8_t x, uint32_t rgba)
 {
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
-		if (_debug_ScreenOutput == true)
-			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
 		throw (OutOfScreenException());
 	}
 	screen[y][x] = rgba;
@@ -118,8 +106,6 @@ void					ScreenOutput::setRGBA(uint8_t y, uint8_t x, uint8_t R, uint8_t G, uint8
 
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
-		if (_debug_ScreenOutput == true)
-			std::cerr << "ERROR : coordinates are somehow out of the screen" << std::endl;
 		throw (OutOfScreenException());
 	}
 
