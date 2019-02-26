@@ -118,6 +118,18 @@ void Debugger::remove_watchpoint(uint16_t addr) {
   _watchpoint_pool.erase( std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare));
 }
 
+bool Debugger::watchpoint_changed() {
+	bool find = false;
+
+	for (auto value : _watchpoint_pool) {
+		if (value.second != _components.mem_bus->read<Byte>(value.first)) {
+			value.second = _components.mem_bus->read<Byte>(value.first);
+			find = true;
+		}
+	}
+	return find;
+}
+
 std::vector<uint16_t> Debugger::construct_register_pool() {
   std::vector<uint16_t> rpool(40);
   // registers
@@ -185,8 +197,6 @@ bool Debugger::on_breakpoint(uint16_t pc) {
   return false;
 }
 
-bool Debugger::on_watchpoint() { return false; }
-
 bool Debugger::is_frame_passed() {
   if (_run_one_frame && _components.ppu->isScreenFilled()) {
     _run_one_frame = false;
@@ -239,7 +249,7 @@ bool Debugger::is_sec_passed() {
 
 void Debugger::lock_game(const Core::Iterator &it, uint16_t pc) {
   if (on_breakpoint(pc) || is_sec_passed() || is_frame_passed() ||
-      is_step_passed()) {
+      is_step_passed() || watchpoint_changed()) {
     update_data(it, pc);
     _lock = true;
   }
