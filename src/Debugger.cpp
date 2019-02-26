@@ -12,7 +12,6 @@
 Debugger::Debugger(ComponentsContainer &components) : _components(components) {
   _enabled = false;
   _register_pool = construct_register_pool();
-  construct_memory_dump();
 }
 
 Debugger::_debug_info::_debug_info(uint16_t _pc,
@@ -96,19 +95,6 @@ void Debugger::remove_breakpoint(uint16_t addr) {
       std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr));
 }
 
-std::vector<uint8_t> Debugger::construct_rom_dump(uint16_t addr) {
-  std::vector<uint8_t> hpool(144);
-  std::vector<Byte>::const_iterator rbegin;
-  std::vector<Byte>::const_iterator rend;
-
-  addr = (addr & 0xFFF0);
-  rbegin = _components.cartridge->get_begin() + addr;
-  for (int i = 0; i < 144; i++) {
-    hpool.push_back(*(rbegin + i));
-  }
-  return hpool;
-}
-
 std::vector<uint16_t> Debugger::construct_register_pool() {
   std::vector<uint16_t> rpool(40);
   // registers
@@ -157,10 +143,14 @@ std::vector<uint16_t> Debugger::construct_register_pool() {
   return rpool;
 }
 
-void Debugger::construct_memory_dump() {
-	for (int i = 0; i <= 0xFFFF; i++) {
-		_memory_dump.push_back(_components.mem_bus->read<Byte>(i));
+const std::vector<Byte> Debugger::get_memory_dump(Byte address) const {
+	std::vector<Byte> memory_dump;
+	for (int i = 0; i <= 100; i++) {
+		if (address + i < 0xFFFF) {
+			memory_dump.push_back(_components.mem_bus->read<Byte>(address + i));
+		}
 	}
+	return memory_dump;
 }
 
 bool Debugger::on_breakpoint(uint16_t pc) {

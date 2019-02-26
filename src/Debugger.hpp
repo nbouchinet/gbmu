@@ -42,7 +42,6 @@ private:
   std::vector<_debug_info> _instr_pool;
   std::vector<uint16_t> _breakpoint_pool;
   std::vector<uint16_t> _register_pool;
-  std::vector<Byte> _memory_dump;
   std::vector<std::pair<int, uint16_t>> _register_diffs;
 
   std::map<int, _instr_info> _instr_map = {
@@ -320,9 +319,7 @@ public:
   const std::vector<uint16_t> &get_register_pool() const {
     return _register_pool;
   }
-  const std::vector<Byte> &get_memory_dump() const {
-	  return _memory_dump;
-  }
+  const std::vector<Byte> get_memory_dump(Byte address) const;
 
   // event trigger
   void add_breakpoint(uint16_t addr);
@@ -344,9 +341,7 @@ private:
   bool is_step_passed();
   bool is_sec_passed();
   bool is_frame_passed();
-  std::vector<uint8_t> construct_rom_dump(uint16_t addr);
   void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
-  void construct_memory_dump();
   void update_data(const Core::Iterator &it, uint16_t pc);
   void lock_game(uint16_t pc);
   bool on_breakpoint(uint16_t pc);
