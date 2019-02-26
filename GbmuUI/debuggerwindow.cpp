@@ -144,3 +144,13 @@ void DebuggerWindow::on_runDurationButton_clicked()
 	while (g_gameboy.get_debugger().get_run_duration()){}
 	refresh_info();
 }
+
+void DebuggerWindow::on_addBreakpointButton_clicked()
+{
+
+}
+
+void DebuggerWindow::on_breakpointsEdit_editingFinished()
+{
+
+}
