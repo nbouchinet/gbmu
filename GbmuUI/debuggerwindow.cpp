@@ -140,7 +140,6 @@ void DebuggerWindow::on_runDurationSpinBox_valueChanged(int arg1)
 
 void DebuggerWindow::on_runDurationButton_clicked()
 {
-	std::cout << "spinbox value: " << ui->runDurationSpinBox->value() << std::endl;
 	g_gameboy.notify_debugger(Debugger::RUN_DURATION, ui->runDurationSpinBox->value());
 	while (g_gameboy.get_debugger().get_run_duration()){}
 	refresh_info();
