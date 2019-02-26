@@ -64,7 +64,7 @@
     <string>Run One Frame</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="runOneSecondButton">
+  <widget class="QPushButton" name="runDurationButton">
    <property name="geometry">
     <rect>
      <x>340</x>
@@ -74,7 +74,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Run One Second</string>
+    <string>Run Duration</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="memoryLineEdit">
@@ -259,6 +259,16 @@
    </property>
    <property name="text">
     <string>Breakpoints</string>
+   </property>
+  </widget>
+  <widget class="QSpinBox" name="runDurationSpinBox">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>0</y>
+     <width>41</width>
+     <height>31</height>
+    </rect>
    </property>
   </widget>
  </widget>

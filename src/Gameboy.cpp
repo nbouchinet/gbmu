@@ -37,10 +37,10 @@ Gameboy::Gameboy(const std::string &rom_path)
   _end = _components.cartridge->get_end();
 }
 
-void Gameboy::notify_debugger(Debugger::e_dbg_state state){
+void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration){
 	switch (state) {
-		case Debugger::RUN_ONE_SEC:
-			_debugger.run_one_sec();
+		case Debugger::RUN_DURATION:
+			_debugger.run_duration(duration);
 			break;
 		case Debugger::RUN_ONE_FRAME:
 			_debugger.run_one_frame();
