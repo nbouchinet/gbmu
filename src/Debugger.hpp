@@ -30,10 +30,11 @@ public:
 
 private:
   ComponentsContainer &_components;
+  int _duration = 1;
   bool _enabled;
   bool _lock = true;
   bool _run_one_frame = false;
-  bool _run_one_sec = false;
+  bool _run_duration = false;
   bool _run_one_step = false;
   int _frame_size = 10;
   std::chrono::time_point<std::chrono::high_resolution_clock> _past;
@@ -299,7 +300,7 @@ private:
 
 public:
   enum e_dbg_state {
-    RUN_ONE_SEC,
+    run_duration,
     RUN_ONE_FRAME,
     RUN_ONE_STEP
 
@@ -324,7 +325,7 @@ public:
   void add_breakpoint(uint16_t addr);
   void remove_breakpoint(uint16_t addr);
   void toggle() { _enabled = _enabled ? false : true; }
-  void run_one_sec();
+  void run_duration(int duration);
   void run_one_frame();
   void run_one_step();
 
@@ -332,7 +333,7 @@ public:
   bool is_enabled() const { return _enabled; }
 
   // getter
-  bool get_run_sec() const { return _run_one_sec; }
+  bool get_run_sec() const { return _run_duration; }
   bool get_run_frame() const { return _run_one_frame; }
   bool get_run_step() const { return _run_one_step; }
 

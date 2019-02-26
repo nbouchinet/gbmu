@@ -1,4 +1,4 @@
-#include "Debugger.hpp"
+uinclude "Debugger.hpp"
 #include "src/Gameboy.hpp"
 #include "src/cpu/InterruptController.hpp"
 #include <algorithm>
@@ -172,9 +172,10 @@ bool Debugger::is_frame_passed() {
   return false;
 }
 
-void Debugger::run_one_sec() {
+void Debugger::run_duration(int duration) {
+  _duration = duration;
   _past = std::chrono::high_resolution_clock::now();
-  _run_one_sec = true;
+  _run_duration = true;
   _lock = false;
 }
 
@@ -201,9 +202,9 @@ bool Debugger::is_sec_passed() {
       std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_seconds = current - _past;
 
-  if (_run_one_sec) {
-    if (elapsed_seconds.count() >= 1) {
-      _run_one_sec = false;
+  if (_run_duration) {
+    if (elapsed_seconds.count() >= _duration) {
+      _run_duration = false;
       return true;
     }
   }
