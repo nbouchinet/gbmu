@@ -12,6 +12,7 @@
 Debugger::Debugger(ComponentsContainer &components) : _components(components) {
   _enabled = false;
   _register_pool = construct_register_pool();
+  construct_memory_dump();
 }
 
 Debugger::_debug_info::_debug_info(uint16_t _pc,
@@ -154,6 +155,12 @@ std::vector<uint16_t> Debugger::construct_register_pool() {
   rpool[39] = {_components.mem_bus->read<Byte>(0xFF6B)};
 
   return rpool;
+}
+
+void Debugger::construct_memory_dump() {
+	for (int i = 0; i <= 0xFFFF; i++) {
+		_memory_dump.push_back(_components.mem_bus->read<Byte>(i));
+	}
 }
 
 bool Debugger::on_breakpoint(uint16_t pc) {
