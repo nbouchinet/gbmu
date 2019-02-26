@@ -343,7 +343,7 @@ private:
   bool is_frame_passed();
   void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
   void update_data(const Core::Iterator &it, uint16_t pc);
-  void lock_game(uint16_t pc);
+  void lock_game(const Core::Iterator &it, uint16_t pc);
   bool on_breakpoint(uint16_t pc);
   using it = std::vector<uint16_t>::const_iterator;
   const std::vector<std::pair<int, uint16_t>>
