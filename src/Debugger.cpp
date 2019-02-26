@@ -83,6 +83,7 @@ void Debugger::set_instruction_pool(const Core::Iterator &it, uint16_t pc) {
     }
   }
 }
+
 void Debugger::add_breakpoint(uint16_t addr) {
   if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr) ==
       _breakpoint_pool.end()) {
@@ -93,6 +94,28 @@ void Debugger::add_breakpoint(uint16_t addr) {
 void Debugger::remove_breakpoint(uint16_t addr) {
   _breakpoint_pool.erase(
       std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr));
+}
+
+void Debugger::add_watchpoint(uint16_t addr) {
+  uint16_t value = _components.mem_bus->read<Byte>(addr);
+
+  auto compare = [&](const std::pair<uint16_t, uint16_t> &pair) -> bool {
+    return pair.first == addr && pair.second == value;
+  };
+
+  if (std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare) == _watchpoint_pool.end()) {
+    _watchpoint_pool.emplace_back(addr, _components.mem_bus->read<Byte>(addr));
+  }
+}
+
+void Debugger::remove_watchpoint(uint16_t addr) {
+  uint16_t value = _components.mem_bus->read<Byte>(addr);
+
+  auto compare = [&](const std::pair<uint16_t, uint16_t> &pair) -> bool {
+    return pair.first == addr && pair.second == value;
+  };
+
+  _watchpoint_pool.erase( std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare));
 }
 
 std::vector<uint16_t> Debugger::construct_register_pool() {
@@ -145,6 +168,7 @@ std::vector<uint16_t> Debugger::construct_register_pool() {
 
 const std::vector<Byte> Debugger::get_memory_dump(Byte address) const {
   std::vector<Byte> memory_dump;
+
   for (int i = 0; i <= 100; i++) {
     if (address + i < 0xFFFF) {
       memory_dump.push_back(_components.mem_bus->read<Byte>(address + i));
@@ -160,6 +184,8 @@ bool Debugger::on_breakpoint(uint16_t pc) {
   }
   return false;
 }
+
+bool Debugger::on_watchpoint() { return false; }
 
 bool Debugger::is_frame_passed() {
   if (_run_one_frame && _components.ppu->isScreenFilled()) {
