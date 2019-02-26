@@ -307,7 +307,6 @@ public:
   };
 
   // information fetch
-  // TODO: get_mem_dump();
   std::vector<uint16_t> construct_register_pool();
   void set_instruction_pool_size(int size) { _frame_size = size; }
   const std::vector<std::pair<int, uint16_t>> get_register_diffs();
@@ -320,6 +319,7 @@ public:
   const std::vector<uint16_t> &get_register_pool() const {
     return _register_pool;
   }
+  const std::vector<Byte> get_memory_dump(Byte address) const;
 
   // event trigger
   void add_breakpoint(uint16_t addr);
@@ -341,10 +341,9 @@ private:
   bool is_step_passed();
   bool is_sec_passed();
   bool is_frame_passed();
-  std::vector<uint8_t> construct_rom_dump(uint16_t addr);
   void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
   void update_data(const Core::Iterator &it, uint16_t pc);
-  void lock_game(uint16_t pc);
+  void lock_game(const Core::Iterator &it, uint16_t pc);
   bool on_breakpoint(uint16_t pc);
   using it = std::vector<uint16_t>::const_iterator;
   const std::vector<std::pair<int, uint16_t>>

@@ -95,19 +95,6 @@ void Debugger::remove_breakpoint(uint16_t addr) {
       std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr));
 }
 
-std::vector<uint8_t> Debugger::construct_rom_dump(uint16_t addr) {
-  std::vector<uint8_t> hpool(144);
-  std::vector<Byte>::const_iterator rbegin;
-  std::vector<Byte>::const_iterator rend;
-
-  addr = (addr & 0xFFF0);
-  rbegin = _components.cartridge->get_begin() + addr;
-  for (int i = 0; i < 144; i++) {
-    hpool.push_back(*(rbegin + i));
-  }
-  return hpool;
-}
-
 std::vector<uint16_t> Debugger::construct_register_pool() {
   std::vector<uint16_t> rpool(40);
   // registers
@@ -156,6 +143,16 @@ std::vector<uint16_t> Debugger::construct_register_pool() {
   return rpool;
 }
 
+const std::vector<Byte> Debugger::get_memory_dump(Byte address) const {
+  std::vector<Byte> memory_dump;
+  for (int i = 0; i <= 100; i++) {
+    if (address + i < 0xFFFF) {
+      memory_dump.push_back(_components.mem_bus->read<Byte>(address + i));
+    }
+  }
+  return memory_dump;
+}
+
 bool Debugger::on_breakpoint(uint16_t pc) {
   if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), pc) !=
       _breakpoint_pool.end()) {
@@ -173,6 +170,7 @@ bool Debugger::is_frame_passed() {
 }
 
 void Debugger::run_duration(int duration) {
+  _register_pool = construct_register_pool();
   _duration = duration;
   _past = std::chrono::high_resolution_clock::now();
   _run_duration = true;
@@ -180,11 +178,13 @@ void Debugger::run_duration(int duration) {
 }
 
 void Debugger::run_one_frame() {
+  _register_pool = construct_register_pool();
   _run_one_frame = true;
   _lock = false;
 }
 
 void Debugger::run_one_step() {
+  _register_pool = construct_register_pool();
   _run_one_step = true;
   _lock = false;
 }
@@ -211,16 +211,16 @@ bool Debugger::is_sec_passed() {
   return false;
 }
 
-void Debugger::lock_game(uint16_t pc) {
+void Debugger::lock_game(const Core::Iterator &it, uint16_t pc) {
   if (on_breakpoint(pc) || is_sec_passed() || is_frame_passed() ||
       is_step_passed()) {
+    update_data(it, pc);
     _lock = true;
   }
 }
 
 void Debugger::fetch(const Core::Iterator &it, uint16_t pc) {
-  update_data(it, pc);
-  lock_game(pc);
+  lock_game(it, pc);
   while (_lock) {
   }
 }
@@ -231,5 +231,4 @@ void Debugger::update_data(const Core::Iterator &it, uint16_t pc) {
   set_instruction_pool(it, pc);
   current = construct_register_pool();
   _register_diffs = rdiff(_register_pool, current);
-  _register_pool = current;
 }
