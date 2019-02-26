@@ -14,10 +14,8 @@
 
 /* TODO LIST
 
-	handle color palettes
-	do the pixel mixing algorythm
-	!!! update read and write with bcps bcpd ocps ocpd !!!
-	!!! change the way color palettes are handled (no pre calculations)
+	finish the pixel mixing algorythm for CGB
+	hdma transfers !!!
 */
 
 typedef struct		s_spriteInfo
@@ -26,6 +24,7 @@ typedef struct		s_spriteInfo
 	uint8_t			xPos; // in screen (0-159)
 	uint8_t			tileNumber;
 	uint8_t			flags;
+	uint8_t			objNumber;
 }					t_spriteInfo;
 
 typedef struct		s_pixelSegment
@@ -56,6 +55,7 @@ public:
 private:
 	void					init();
 	uint16_t				getTileDataAddress(uint8_t tileIdentifier);
+	uint16_t				determineTileNumberAddress(uint8_t yPos, uint8_t xPos, bool boiItsaWindow);
 	uint8_t					readMemBank(uint8_t bank, uint16_t address);
 	uint8_t					extractValue(uint32_t val, uint8_t bit_start, uint8_t bit_end) const;
 	void					setupWindow();
@@ -74,6 +74,7 @@ private:
 	uint32_t				translateDMGColorValue(uint8_t value);
 	uint16_t				colorPaletteArrayCaseWrapper(uint8_t specifier) const;
 	void					setLCDstatus();
+	void					replacePixelSegment(t_pixelSegment &holder, t_pixelSegment &contender);
 
 	ComponentsContainer&	_components;
 
@@ -116,6 +117,9 @@ private:
 
 	uint32_t				_backgroundDMGPalette_translated[4];
 	uint32_t				_spritesDMGPalettes_translated[2][4];
+
+	uint8_t					_backgroundDMGPalette[4];
+	uint8_t					_spritesDMGPalettes[2][4];
 
 	t_pixelSegment			_pixelPipeline[LCD_WIDTH];
 	t_spriteInfo			_spritesLine[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line

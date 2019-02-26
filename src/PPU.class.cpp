@@ -41,6 +41,7 @@ void				PPU::init()
 		_pixelPipeline[i].spriteInfo.xPos = 0;
 		_pixelPipeline[i].spriteInfo.tileNumber = 0;
 		_pixelPipeline[i].spriteInfo.flags = 0;
+		_pixelPipeline[i].spriteInfo.objNumber = 0;
 	}
 
 	for (int i = 0; i < MAX_SPRITE_PER_LINE; i++)
@@ -49,6 +50,7 @@ void				PPU::init()
 		_spritesLine[i].xPos = 0;
 		_spritesLine[i].tileNumber = 0;
 		_spritesLine[i].flags = 0;
+		_spritesLine[i].objNumber = 0;
 	}
 
 	for (int i = 0; i < 8; i++)
@@ -68,6 +70,8 @@ void				PPU::init()
 		_spritesDMGPalettes_translated[0][i] = 0;
 		_spritesDMGPalettes_translated[1][i] = 0;
 	}
+
+	translatePalettes();
 
 	_lcdc = 0x91;
 	_stat = 0;
@@ -479,20 +483,6 @@ void				PPU::setupBackgroundMemoryStart()
 }
 
 //------------------------------------------------------------------------------
-uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
-{
-	uint8_t		offset = 128;
-	uint8_t		tileMemorySize = 16;
-	uint16_t	tileDataAddress;
-
-	if (_unsignedTileNumbers == true)
-		tileDataAddress = _backgroundDataStart + (tileIdentifier * tileMemorySize);
-	else
-		tileDataAddress = _backgroundDataStart + ((tileIdentifier + offset) * tileMemorySize);
-	return (tileDataAddress);
-}
-
-//------------------------------------------------------------------------------
 void				PPU::setPixel(uint8_t y, uint8_t x, uint32_t value)
 {
 	_components.driver_screen->setRGBA(y, x, value);
@@ -518,6 +508,7 @@ void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and 
 			_spritesLine[_nbSprites].xPos = xPosTmp; // -8 !!!!
 			_spritesLine[_nbSprites].tileNumber = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 2); // the number of the tile data we have to read<Byte> for pixel values
 			_spritesLine[_nbSprites].flags = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 3); // for flips and other datas
+			_spritesLine[_nbSprites].objNumber = sprite;
 			_nbSprites++;
 		}
 		if (_nbSprites >= MAX_SPRITE_PER_LINE) // this allows to only take up to 10 sprites by default
@@ -526,40 +517,55 @@ void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and 
 }
 
 //------------------------------------------------------------------------------
+void				PPU::replacePixelSegment(t_pixelSegment &holder, t_pixelSegment &contender)
+{
+	holder.value = contender.value;
+	holder.isSprite = contender.isSprite;
+	holder.spriteInfo = contender.spriteInfo;
+}
+
+//------------------------------------------------------------------------------
 void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 {
 	// tmp
-	holder.value = contender.value;
-	holder.isSprite = contender.isSprite;
-	holder.spriteInfo.yPos = contender.spriteInfo.yPos;
-	holder.spriteInfo.xPos = contender.spriteInfo.xPos;
-	holder.spriteInfo.tileNumber = contender.spriteInfo.tileNumber;
-	holder.spriteInfo.flags = contender.spriteInfo.flags;
 
-	/* TODO : blending of pixels
-	   if (1)
-	   {
-	   if (holder.isSprite == false)
-	   {
-	   if (1)
-	   {
+	if (1) // is DMG
+	{
+		if (holder.isSprite == false) // VS background
+		{
+			if (contender.isSprite == true // contender is a sprite
+					&& testBit(contender.spriteInfo.flags, 7) == false // sprite has priority to BG
+					&& contender.value > 0) // == not transparent pixel
+			{
+				replacePixelSegment(holder, contender);
+			}
+			else if (contender.isSprite == true // contender is a sprite
+					&& testBit(contender.spriteInfo.flags, 7) == true // sprite does not have priority to BG
+					&& _backgroundDMGPalette[holder.value] == 0) // background is transparent;
+			{
+				replacePixelSegment(holder, contender);
+			}
+		}
+		else if (holder.isSprite == true) // VS sprite
+		{
+			if (holder.value == 0 && contender.value != 0) // transparent pixel vs not transparent
+				replacePixelSegment(holder, contender);
+			else if (holder.value != 0 && contender.value != 0) // neither sprites pixels are transparent
+			{
+				if (contender.spriteInfo.xPos < holder.spriteInfo.xPos // comparing xPos
+						|| (contender.spriteInfo.xPos == holder.spriteInfo.xPos // if still can't determine, use obj number instead
+							&& contender.spriteInfo.objNumber < holder.spriteInfo.objNumber))
+				{
+					replacePixelSegment(holder, contender);
+				}
+			}
+		}
+	}
 
-	   }
-	   if (2)
-	   {
+	else if (2) // is CGB
+	{
 
-	   }
-	   }
-	   else if (holder.isSprite == true)
-	   {
-
-	   }
-	   }
-
-	   else if (2)
-	   {
-
-	   }*/
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -592,18 +598,47 @@ void				PPU::renderSprites()
 			if (testBit(data2, linePixel) == true)
 				colorID += 1;
 
-			if (_spritesLine[sprite].xPos + pixel > 7)
+			if (_spritesLine[sprite].xPos + pixel > 7 && _spritesLine[sprite].xPos + pixel < LCD_WIDTH)
 			{
 				contender.value = colorID;
 				contender.isSprite = true;
-				contender.spriteInfo.yPos = _spritesLine[sprite].yPos;
-				contender.spriteInfo.xPos = _spritesLine[sprite].xPos;
-				contender.spriteInfo.tileNumber = _spritesLine[sprite].tileNumber;
-				contender.spriteInfo.flags = _spritesLine[sprite].flags;
+				contender.spriteInfo = _spritesLine[sprite];
+
 				blendPixels(_pixelPipeline[contender.spriteInfo.xPos], contender);
 			}
 		}
 	}
+}
+
+//------------------------------------------------------------------------------
+uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
+{
+	uint8_t		offset = 128;
+	uint8_t		tileMemorySize = 16;
+	uint16_t	tileDataAddress;
+
+	if (_unsignedTileNumbers == true)
+		tileDataAddress = _backgroundDataStart + (tileIdentifier * tileMemorySize);
+	else
+		tileDataAddress = _backgroundDataStart + ((tileIdentifier + offset) * tileMemorySize);
+	return (tileDataAddress);
+}
+
+//------------------------------------------------------------------------------
+uint16_t			PPU::determineTileNumberAddress(uint8_t yPos, uint8_t xPos, bool boiItsaWindow)
+{
+	uint16_t		tileRow; // 32 Tiles per line
+	uint16_t		tileCol; // add to Row  
+	uint16_t		tileNumberAddress; // where's the tile CHR number ?
+
+	tileRow = (((uint16_t)(yPos / 8)) * 32);		// (0-992) 32 tiles per 8 vertical pixels
+	tileCol = xPos / 8;								// (0-32) 1 tile per 8 horizontal pixel
+
+	if (boiItsaWindow == true)
+		tileNumberAddress = _windowChrAttrStart + tileRow + tileCol;	// 1 byte per tile number (uint8_t), just the tile number
+	tileNumberAddress = _backgroundChrAttrStart + tileRow + tileCol;
+
+	return (tileNumberAddress);
 }
 
 //------------------------------------------------------------------------------
@@ -612,18 +647,15 @@ void				PPU::renderTiles()
 	uint8_t			xPos;
 	uint8_t			yPos;
 	bool			boiItsaWindow = false;
+	uint16_t		tileNumberAddress; // from tileNumberAddress we get the tileNumber (in BG display Data)
+	uint8_t			tileNumber; // from BG display data we get tileNumber
+	uint16_t		tileLocation; // from tileNumber we deduce where the data for each pixel of the tile starts
+//	uint8_t			tileAttr; // needed for CGB, same location as tileNumberAddress in the BG display Data except in the Bank 1 
 
 	for (int i = 0; i < 160; i++)
 	{
 		if (_windowingOn == true && i >= _wx - 7 && _ly >= _wy) // are we in the window and is it enabled ?
 			boiItsaWindow = true;
-
-		int16_t			tileNumber;
-		uint16_t		tileCol;
-		uint16_t		tileRow; // which row of pixels in the tile ? (8 rows of 8 pixels per tile) position in the 256 * 256 area
-		uint16_t		tileLine;
-		uint16_t		tileNumberAddress;
-		uint16_t		tileLocation;
 
 		if (boiItsaWindow == true)
 		{
@@ -635,41 +667,47 @@ void				PPU::renderTiles()
 			xPos = _scx + i;
 			yPos = _scy + _ly;
 		}
+		tileNumberAddress = determineTileNumberAddress(yPos, xPos, boiItsaWindow);
+		//if (CGB)
+		//	tileAttr =
 
-		tileRow = (((uint8_t)(yPos / 8)) * 32);								// (0-992) add that to tiledata (0x9800 or 0x9C00) start address to get real memory address of first tile in the row
-		tileCol = xPos / 8;													// (0-32) 
-
-		if (boiItsaWindow == true)
-			tileNumberAddress = _windowChrAttrStart + tileRow + tileCol;	// 1 byte per tileData, just the tile number
-		tileCol = xPos / 8;
-		tileNumberAddress = _backgroundChrAttrStart + tileRow + tileCol;
 		if (_unsignedTileNumbers)
 		{
-			tileNumber = (uint8_t)_components.mem_bus->read<Byte>(tileNumberAddress);
-			// in CBG probably get the ATTR stuff from bank 1;
+			tileNumber = (uint8_t)read(tileNumberAddress);
 		}
 		else
 		{
-			tileNumber = (int8_t)_components.mem_bus->read<Byte>(tileNumberAddress);
-			// in CBG probably get the ATTR stuff from bank 1;
+			tileNumber = (int8_t)read(tileNumberAddress);
 		}
 
 		tileLocation = getTileDataAddress(tileNumber);
-		tileLine = ((yPos % 8) * 2);										// 16 bits (2 bytes) per 8 pixels
 
-		uint8_t firstByte = _components.mem_bus->read<Byte>(tileLocation + tileLine);
-		uint8_t secondByte = _components.mem_bus->read<Byte>(tileLocation + tileLine + 1);
+		uint8_t			pixelLineInTile = yPos % 8;
+		uint8_t			pixelInTileLine = xPos % 8;
+		//if (CGB)
+		//{
+		//	if (testBit(tileAttr, 6) == true) // we check the vertical flip flag, only in CGB
+		//		pixelLineInTile = 7 - pixelLineInTile;
+		//	if (testBit(tileAttr, 5) == true) // we check horizontal flip flag, only in CGB
+		//		pixelInTileLine = 7 - pixelInTileLine
+		//}
 
-		// some shenanigans for color palette here;
+		uint16_t		tileLine = (pixelLineInTile * 2);						// 16 bits (2 bytes) per 8 pixels, get the right horizontal line of pixels
+		uint8_t			firstByte = read(tileLocation + tileLine);
+		uint8_t			secondByte = read(tileLocation + tileLine + 1);
 
-		uint8_t colorID = 0;
-		if (testBit(firstByte, xPos % 8) == true)
+		//extract the color value
+		uint8_t			colorID = 0;
+		if (testBit(firstByte, pixelInTileLine) == true)
 			colorID += 2;
-		if (testBit(secondByte, xPos % 8) == true)
+		if (testBit(secondByte, pixelInTileLine) == true)
 			colorID += 1;
+
 		//put in pipeline
 		_pixelPipeline[i].value = colorID;
 		_pixelPipeline[i].isSprite = false;
+		_pixelPipeline[i].spriteInfo.tileNumber = tileNumber;
+		//_pixelPipeline[i].spriteinfo.flags = tileAttr;
 	}
 }
 
@@ -773,10 +811,27 @@ void					PPU::translatePalettes()
 {
 	if (1 /* IS_DMG */)
 	{
+		_backgroundDMGPalette[0] = extractValue(_bgp, 0, 1);
+		_backgroundDMGPalette[1] = extractValue(_bgp, 2, 3);
+		_backgroundDMGPalette[2] = extractValue(_bgp, 4, 5);
+		_backgroundDMGPalette[3] = extractValue(_bgp, 6, 7);
+
 		_backgroundDMGPalette_translated[0] = translateDMGColorValue(extractValue(_bgp, 0, 1));
 		_backgroundDMGPalette_translated[1] = translateDMGColorValue(extractValue(_bgp, 2, 3));
 		_backgroundDMGPalette_translated[2] = translateDMGColorValue(extractValue(_bgp, 4, 5));
 		_backgroundDMGPalette_translated[3] = translateDMGColorValue(extractValue(_bgp, 6, 7));
+
+
+		_spritesDMGPalettes[0][0] = extractValue(_obp0, 0, 1);
+		_spritesDMGPalettes[0][1] = extractValue(_obp0, 2, 3);
+		_spritesDMGPalettes[0][2] = extractValue(_obp0, 4, 5);
+		_spritesDMGPalettes[0][3] = extractValue(_obp0, 6, 7);
+
+		_spritesDMGPalettes[1][0] = extractValue(_obp1, 0, 1);
+		_spritesDMGPalettes[1][1] = extractValue(_obp1, 2, 3);
+		_spritesDMGPalettes[1][2] = extractValue(_obp1, 4, 5);
+		_spritesDMGPalettes[1][3] = extractValue(_obp1, 6, 7);
+
 
 		_spritesDMGPalettes_translated[0][0] = translateDMGColorValue(extractValue(_obp0, 0, 1));
 		_spritesDMGPalettes_translated[0][1] = translateDMGColorValue(extractValue(_obp0, 2, 3));
