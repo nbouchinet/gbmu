@@ -92,7 +92,9 @@ void DebuggerWindow::refresh_instr()
 	for (int i = 0; i < 6; i++){
 		ui->disassemblerWidget->setItem(i, 0, new QTableWidgetItem(QString::number(instr_pool[i].pc, 16)));
 		ui->disassemblerWidget->setItem(i, 1, new QTableWidgetItem(instr_pool[i].instr));
-		value = QString::number(instr_pool[i].value[0], 16) + " " + QString::number(instr_pool[i].value[1], 16) + " " + QString::number(instr_pool[i].value[2], 16);
+		value = QString::number(instr_pool[i].value[0], 16) + " " +
+			(instr_pool[i].size >= 2 ? QString::number(instr_pool[i].value[1], 16) : "") + " " +
+			(instr_pool[i].size == 3 ? QString::number(instr_pool[i].value[2], 16) : "");
 		ui->disassemblerWidget->setItem(i, 2, new QTableWidgetItem(value));
 	}
 }
@@ -100,7 +102,6 @@ void DebuggerWindow::refresh_instr()
 void DebuggerWindow::refresh_registers()
 {
 	std::vector<std::pair<int, uint16_t>> registers = g_gameboy.get_debugger().get_register_diffs();
-//	for (auto it = registers.begin(); it != registers.end();it++)
 	for (auto value: registers) {
 		if (value.first >= MAIN_REGISTERS_BEGIN && value.first <= MAIN_REGISTERS_END)
 			ui->registersWidget->setItem(value.first, 0, new QTableWidgetItem(QString::number(value.second, 16)));
