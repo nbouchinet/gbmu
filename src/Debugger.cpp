@@ -220,6 +220,12 @@ void Debugger::lock_game(const Core::Iterator &it, uint16_t pc) {
 }
 
 void Debugger::fetch(const Core::Iterator &it, uint16_t pc) {
+  static int first_time = 0;
+
+  if (first_time == 0) {
+    update_data(it, pc);
+    first_time = 1;
+  }
   lock_game(it, pc);
   while (_lock) {
   }
