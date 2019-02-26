@@ -30,7 +30,7 @@ public:
 
 private:
   ComponentsContainer &_components;
-  int _duration = 1;
+  int _duration;
   bool _enabled;
   bool _lock = true;
   bool _run_one_frame = false;
@@ -300,7 +300,7 @@ private:
 
 public:
   enum e_dbg_state {
-    run_duration,
+    RUN_DURATION,
     RUN_ONE_FRAME,
     RUN_ONE_STEP
 
