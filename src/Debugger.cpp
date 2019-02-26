@@ -237,8 +237,4 @@ void Debugger::update_data(const Core::Iterator &it, uint16_t pc) {
   set_instruction_pool(it, pc);
   current = construct_register_pool();
   _register_diffs = rdiff(_register_pool, current);
-  for (auto value : _register_diffs) {
-	  std::cerr << std::hex << +value.first << " : " << std::hex << +value.second << std::endl;
-  }
-  std::cout << std::endl;
 }
