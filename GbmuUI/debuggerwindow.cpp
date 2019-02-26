@@ -100,14 +100,14 @@ void DebuggerWindow::refresh_instr()
 void DebuggerWindow::refresh_registers()
 {
 	std::vector<std::pair<int, uint16_t>> registers = g_gameboy.get_debugger().get_register_diffs();
-	for (auto it = registers.begin(); it != registers.end();it++)
-	{
-		if ((*it).first >= MAIN_REGISTERS_BEGIN && (*it).first <= MAIN_REGISTERS_END)
-			ui->registersWidget->setItem((*it).first, 0, new QTableWidgetItem(QString::number((*it).second, 16)));
-		else if ((*it).first >= VIDEO_REGISTERS_BEGIN && (*it).first <= VIDEO_REGISTERS_END)
-			ui->videoRegistersWidget->setItem((*it).first - VIDEO_REGISTERS_BEGIN, 1, new QTableWidgetItem(QString::number((*it).second, 16)));
-		else if ((*it).first >= OTHER_REGISTERS_BEGIN && (*it).first <= OTHER_REGISTERS_END)
-			ui->otherRegistersWidget->setItem((*it).first - OTHER_REGISTERS_BEGIN, 1, new QTableWidgetItem(QString::number((*it).second, 16)));
+//	for (auto it = registers.begin(); it != registers.end();it++)
+	for (auto value: registers) {
+		if (value.first >= MAIN_REGISTERS_BEGIN && value.first <= MAIN_REGISTERS_END)
+			ui->registersWidget->setItem(value.first, 0, new QTableWidgetItem(QString::number(value.second, 16)));
+		else if (value.first >= VIDEO_REGISTERS_BEGIN && value.first <= VIDEO_REGISTERS_END)
+			ui->videoRegistersWidget->setItem(value.first - VIDEO_REGISTERS_BEGIN, 1, new QTableWidgetItem(QString::number(value.second, 16)));
+		else if (value.first >= OTHER_REGISTERS_BEGIN && value.first <= OTHER_REGISTERS_END)
+			ui->otherRegistersWidget->setItem(value.first - OTHER_REGISTERS_BEGIN, 1, new QTableWidgetItem(QString::number(value.second, 16)));
 	}
 }
 
