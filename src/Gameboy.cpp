@@ -5,8 +5,8 @@
 #include "src/MemoryBus.hpp"
 #include "src/UnitWorkingRAM.hpp"
 #include "src/cpu/Core.hpp"
-#include "src/cpu/InterruptController.hpp"
 #include "src/cpu/InputController.hpp"
+#include "src/cpu/InterruptController.hpp"
 #include "src/cpu/Timer.hpp"
 
 #include <exception>
@@ -37,22 +37,22 @@ Gameboy::Gameboy(const std::string &rom_path)
   _end = _components.cartridge->get_end();
 }
 
-void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration){
-	switch (state) {
-		case Debugger::RUN_DURATION:
-			_debugger.run_duration(duration);
-			break;
-		case Debugger::RUN_ONE_FRAME:
-			_debugger.run_one_frame();
-			break;
-		case Debugger::RUN_ONE_STEP:
-			_debugger.run_one_step();
-			break;
-	}
+void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
+  switch (state) {
+  case Debugger::RUN_DURATION:
+    _debugger.run_duration(duration);
+    break;
+  case Debugger::RUN_ONE_FRAME:
+    _debugger.run_one_frame();
+    break;
+  case Debugger::RUN_ONE_STEP:
+    _debugger.run_one_step();
+    break;
+  }
 }
 
-void Gameboy::handle_input_wraper(Byte val){
-	_components.input_controller->handle_input(val);
+void Gameboy::handle_input_wraper(Byte val) {
+  _components.input_controller->handle_input(val);
 }
 
 void Gameboy::step() {
