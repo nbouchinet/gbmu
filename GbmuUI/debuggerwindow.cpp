@@ -4,6 +4,8 @@
 #include "mainwindow.h"
 #include "src/Debugger.hpp"
 
+#include <QCheckBox>
+
 DebuggerWindow::DebuggerWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DebuggerWindow)
@@ -77,6 +79,10 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	ui->disassemblerWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui->disassemblerWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	refresh_instr();
+
+	//Breakpoints
+	ui->breakpointsWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	ui->breakpointsEdit->setMaxLength(4);
 }
 
 DebuggerWindow::~DebuggerWindow()
@@ -147,10 +153,24 @@ void DebuggerWindow::on_runDurationButton_clicked()
 
 void DebuggerWindow::on_addBreakpointButton_clicked()
 {
-
+//	g_gameboy.get_debugger().add_breakpoint()
+	QRegExp hexMatcher("^[0-9A-F]{4}$", Qt::CaseInsensitive);
+	if (hexMatcher.exactMatch(ui->breakpointsEdit->text()))
+	{
+		ui->breakpointsWidget->addItem(new QListWidgetItem(ui->breakpointsEdit->text()));
+	}
 }
 
 void DebuggerWindow::on_breakpointsEdit_editingFinished()
 {
+	ui->breakpointsWidget->addItem(new QListWidgetItem(ui->breakpointsEdit->text()));
+}
 
+void DebuggerWindow::on_deleteBreakpointButton_clicked()
+{
+	QList<QListWidgetItem*> items = ui->breakpointsWidget->selectedItems();
+	foreach(QListWidgetItem * item, items)
+	{
+	    delete ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item));
+	}
 }
