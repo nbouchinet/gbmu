@@ -333,7 +333,7 @@ public:
   bool is_enabled() const { return _enabled; }
 
   // getter
-  bool get_run_sec() const { return _run_duration; }
+  bool get_run_duration() const { return _run_duration; }
   bool get_run_frame() const { return _run_one_frame; }
   bool get_run_step() const { return _run_one_step; }
 

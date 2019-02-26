@@ -28,7 +28,8 @@ public:
 private slots:
     void on_stepButton_clicked();
     void on_runOneFrameButton_clicked();
-    void on_runOneSecondButton_clicked();
+    void on_runDurationButton_clicked();
+	void on_runDurationSpinBox_valueChanged(int arg1);
 
 private:
     Ui::DebuggerWindow *ui;

@@ -56,7 +56,7 @@ public:
   void load_save(std::string save_name);
   uint32_t get_pixel(uint8_t y, uint8_t x) { return (_components.driver_screen->get_rgba(y, x)); }
   void handle_input_wraper(Byte val);
-  void notify_debugger(Debugger::e_dbg_state state);
+  void notify_debugger(Debugger::e_dbg_state state, int duration = 0);
   Debugger &get_debugger() { return _debugger; }
 
   class BadChecksum : public std::exception {
