@@ -96,26 +96,71 @@ void Debugger::remove_breakpoint(uint16_t addr) {
       std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr));
 }
 
-void Debugger::add_watchpoint(uint16_t addr) {
-  uint16_t value = _components.mem_bus->read<Byte>(addr);
+uint16_t Debugger::get_register_value(uint16_t addr) {
+  uint16_t value;
 
-  auto compare = [&](const std::pair<uint16_t, uint16_t> &pair) -> bool {
-    return pair.first == addr && pair.second == value;
+  switch (addr) {
+  case 0:
+    value = _components.core->pc();
+  case 1:
+    value = _components.core->af().word;
+  case 2:
+    value = _components.core->bc().word;
+  case 3:
+    value = _components.core->de().word;
+  case 4:
+    value = _components.core->hl().word;
+  case 5:
+    value = _components.core->sp();
+  default:
+    value = _components.mem_bus->read<Byte>(addr);
+  }
+  return value;
+}
+
+void Debugger::add_watchpoint(uint16_t addr, int w_value) {
+  uint16_t value = get_register_value(addr);
+
+  auto compare =
+      [&](const std::pair<uint16_t, _watchpoint_value> &pair) -> bool {
+    return pair.first == addr && pair.second.r_value == value &&
+           pair.second.w_value == w_value;
   };
 
-  if (std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare) == _watchpoint_pool.end()) {
-    _watchpoint_pool.emplace_back(addr, _components.mem_bus->read<Byte>(addr));
+  if (std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare) ==
+      _watchpoint_pool.end()) {
+    _watchpoint_value s_w_value = {value, w_value};
+    _watchpoint_pool.emplace_back(addr, s_w_value);
   }
 }
 
-void Debugger::remove_watchpoint(uint16_t addr) {
-  uint16_t value = _components.mem_bus->read<Byte>(addr);
+void Debugger::remove_watchpoint(uint16_t addr, int w_value) {
+  uint16_t value = get_register_value(addr);
 
-  auto compare = [&](const std::pair<uint16_t, uint16_t> &pair) -> bool {
-    return pair.first == addr && pair.second == value;
+  auto compare =
+      [&](const std::pair<uint16_t, _watchpoint_value> &pair) -> bool {
+    return pair.first == addr && pair.second.r_value == value &&
+           pair.second.w_value == w_value;
   };
 
-  _watchpoint_pool.erase( std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare));
+  _watchpoint_pool.erase(
+      std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare));
+}
+
+bool Debugger::watchpoint_changed() {
+  bool find = false;
+
+  for (auto value : _watchpoint_pool) {
+    auto register_value = get_register_value(value.first);
+
+    if ((value.second.w_value != -1 &&
+         value.second.r_value != register_value) ||
+        (value.second.w_value == register_value)) {
+      value.second.r_value = register_value;
+      find = true;
+    }
+  }
+  return find;
 }
 
 std::vector<uint16_t> Debugger::construct_register_pool() {
@@ -185,8 +230,6 @@ bool Debugger::on_breakpoint(uint16_t pc) {
   return false;
 }
 
-bool Debugger::on_watchpoint() { return false; }
-
 bool Debugger::is_frame_passed() {
   if (_run_one_frame && _components.ppu->isScreenFilled()) {
     _run_one_frame = false;
@@ -239,7 +282,7 @@ bool Debugger::is_sec_passed() {
 
 void Debugger::lock_game(const Core::Iterator &it, uint16_t pc) {
   if (on_breakpoint(pc) || is_sec_passed() || is_frame_passed() ||
-      is_step_passed()) {
+      is_step_passed() || watchpoint_changed()) {
     update_data(it, pc);
     _lock = true;
   }

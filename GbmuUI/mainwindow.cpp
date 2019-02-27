@@ -11,7 +11,7 @@
 #include <QKeyEvent>
 #include <QThread>
 
-Gameboy g_gameboy("/Users/hublanc/Documents/gbInput/tools/Tetris.gb");
+Gameboy g_gameboy("/Users/nbouchin/Documents/gbmu/tools/Tetris.gb");
 QMutex mutexGb;
 
 #include <iostream>
@@ -49,7 +49,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    QDesktopServices::openUrl( QUrl::fromLocalFile( "/Users/hublanc/" ) );
+    QDesktopServices::openUrl( QUrl::fromLocalFile( "/Users/nbouchin/" ) );
 }
 
 void MainWindow::on_actionPlay_triggered()
