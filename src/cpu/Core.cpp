@@ -5,7 +5,6 @@
 #include "src/cpu/InterruptController.hpp"
 
 #include <cassert>
-#include <iostream>
 
 // ----------------------------------------------------------------------------
 // ld
