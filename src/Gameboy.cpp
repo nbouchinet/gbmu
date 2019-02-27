@@ -69,11 +69,11 @@ void Gameboy::step() {
 }
 
 int Gameboy::run() {
-  _components.bios->compare_logo();
+  _components.bios->start();
   do_checksum();
-  while (_begin + _components.core->pc() != _end) {
-    step();
-  }
+  //while (_begin + _components.core->pc() != _end) {
+  //  step();
+  //}
   return (0);
 }
 
