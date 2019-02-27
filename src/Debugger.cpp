@@ -160,6 +160,9 @@ bool Debugger::watchpoint_changed() {
       find = true;
     }
   }
+  if (find == true) {
+    reset_flags();
+  }
   return find;
 }
 
@@ -222,9 +225,16 @@ const std::vector<Byte> Debugger::get_memory_dump(Byte address) const {
   return memory_dump;
 }
 
+void Debugger::reset_flags() {
+  _run_one_step = false;
+  _run_duration = false;
+  _run_one_frame = false;
+}
+
 bool Debugger::on_breakpoint(uint16_t pc) {
   if (std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), pc) !=
       _breakpoint_pool.end()) {
+    reset_flags();
     return true;
   }
   return false;
@@ -232,7 +242,7 @@ bool Debugger::on_breakpoint(uint16_t pc) {
 
 bool Debugger::is_frame_passed() {
   if (_run_one_frame && _components.ppu->isScreenFilled()) {
-    _run_one_frame = false;
+    reset_flags();
     return true;
   }
   return false;
@@ -260,7 +270,7 @@ void Debugger::run_one_step() {
 
 bool Debugger::is_step_passed() {
   if (_run_one_step) {
-    _run_one_step = false;
+    reset_flags();
     return true;
   }
   return false;
@@ -273,7 +283,7 @@ bool Debugger::is_sec_passed() {
 
   if (_run_duration) {
     if (elapsed_seconds.count() >= _duration) {
-      _run_duration = false;
+      reset_flags();
       return true;
     }
   }

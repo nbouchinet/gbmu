@@ -346,6 +346,7 @@ public:
   bool get_run_step() const { return _run_one_step; }
 
 private:
+  void reset_flags();
   bool is_step_passed();
   bool is_sec_passed();
   bool is_frame_passed();
