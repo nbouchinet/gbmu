@@ -33,7 +33,6 @@ private slots:
     void on_stepButton_clicked();
     void on_runOneFrameButton_clicked();
     void on_runDurationButton_clicked();
-	void on_runDurationSpinBox_valueChanged(int arg1);
 	void on_addBreakpointButton_clicked();
 	void on_breakpointsEdit_editingFinished();
 	void on_deleteBreakpointButton_clicked();
