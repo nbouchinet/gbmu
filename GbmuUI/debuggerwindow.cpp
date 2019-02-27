@@ -5,6 +5,8 @@
 #include "src/Debugger.hpp"
 
 #include <QCheckBox>
+#include <QInputDialog>
+#include <QDebug>
 
 DebuggerWindow::DebuggerWindow(QWidget *parent) :
     QDialog(parent),
@@ -83,6 +85,24 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	//Breakpoints
 	ui->breakpointsWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	ui->breakpointsEdit->setMaxLength(4);
+
+	//Watchpoints
+	ui->watchpointsWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	connect(ui->registersWidget->verticalHeader(), &QHeaderView::sectionClicked, [this](int logicalIndex){
+		QString label = ui->registersWidget->verticalHeaderItem(logicalIndex)->text();
+		bool ok;
+    	QString text = QInputDialog::getText(this, tr("Add Watchpoint"), tr("Value:"), QLineEdit::Normal, "", &ok);
+	});
+	connect(ui->videoRegistersWidget->verticalHeader(), &QHeaderView::sectionClicked, [this](int logicalIndex){
+		QString label = ui->videoRegistersWidget->verticalHeaderItem(logicalIndex)->text();
+		bool ok;
+    	QString text = QInputDialog::getText(this, tr("Add Watchpoint"), tr("Value:"), QLineEdit::Normal, "", &ok);
+	});
+	connect(ui->otherRegistersWidget->verticalHeader(), &QHeaderView::sectionClicked, [this](int logicalIndex){
+		QString label = ui->otherRegistersWidget->verticalHeaderItem(logicalIndex)->text();
+		bool ok;
+    	QString text = QInputDialog::getText(this, tr("Add Watchpoint"), tr("Value:"), QLineEdit::Normal, "", &ok);
+	});
 }
 
 DebuggerWindow::~DebuggerWindow()
@@ -137,7 +157,7 @@ void DebuggerWindow::addBreakpoint()
 	{
 		if (!duplicateInListWidgetItem(ui->breakpointsEdit->text(), ui->breakpointsWidget))
 		{
-			QRegExp hexMatcher("^[0-9A-F]{4}$", Qt::CaseInsensitive);
+			QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
 			if (hexMatcher.exactMatch(ui->breakpointsEdit->text()))
 			{
 				bool ok;
@@ -208,4 +228,32 @@ void DebuggerWindow::on_deleteBreakpointButton_clicked()
 void DebuggerWindow::on_DebuggerWindow_rejected()
 {
 	g_gameboy.get_debugger().toggle();
+}
+
+void DebuggerWindow::on_registersWidget_cellClicked(int row, int column)
+{
+	(void)row;
+	(void)column;
+}
+
+void DebuggerWindow::on_registersWidget_itemClicked(QTableWidgetItem *item)
+{
+	qDebug("%s", qUtf8Printable(item->text()));
+}
+
+void DebuggerWindow::on_deleteWatchpointButton_clicked()
+{
+	/*
+	QList<QListWidgetItem*> items = ui->watchpointsWidget->selectedItems();
+	foreach(QListWidgetItem * item, items)
+	{
+		bool ok;
+		uint16_t addr = ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item))->text().toUInt(&ok, 16);
+		if (ok)
+		{
+			g_gameboy.get_debugger().remove_breakpoint(addr);
+			delete ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item));
+		}
+	}
+	*/
 }

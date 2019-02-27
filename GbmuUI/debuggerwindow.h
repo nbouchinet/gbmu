@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QListWidgetItem>
+#include <QTableWidgetItem>
 #include <QListWidget>
 
 #define MAIN_REGISTERS_BEGIN 0
@@ -37,6 +38,9 @@ private slots:
 	void on_breakpointsEdit_editingFinished();
 	void on_deleteBreakpointButton_clicked();
 	void on_DebuggerWindow_rejected();
+    void on_registersWidget_cellClicked(int row, int column);
+    void on_registersWidget_itemClicked(QTableWidgetItem *item);
+	void on_deleteWatchpointButton_clicked();
 
 private:
     Ui::DebuggerWindow *ui;
