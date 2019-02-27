@@ -5,6 +5,10 @@
 #include <cassert>
 #include <iostream>
 
+static constexpr Word compute_timer(Word freq) noexcept {
+  return (2048 - freq) * 4;
+}
+
 namespace sound {
 const std::array<Byte, 4> SquareChannel::s_waveforms{
     {0b00000001, 0b10000001, 0b10000111, 0b01111110}};
@@ -12,8 +16,7 @@ const std::array<Byte, 4> SquareChannel::s_waveforms{
 void SquareChannel::do_update() {
   if (_timer == 0) {
     assert(_frequency);
-    _timer = (2048 - _frequency) *
-             4;  // ??? this fucking formula is different in every doc i read.
+    _timer = compute_timer(_frequency);
     if (++_waveform_step >= 8) _waveform_step = 0;
   }
   Byte waveform = s_waveforms[_waveform_selected];
@@ -24,8 +27,9 @@ void SquareChannel::do_update() {
   --_timer;
 }
 
+void SquareChannel::do_trigger() { _timer = compute_timer(_frequency); }
+
 void SquareChannel::write(Word addr, Byte v) {
-  assert((addr & 0xfff0) == 0xff10);
   switch ((addr & 0xf) % 5) {
     case 0x0:
       assert(_sweep_enabled);
@@ -41,18 +45,17 @@ void SquareChannel::write(Word addr, Byte v) {
       _envelope.set_period(v & 0x7);
       break;
     case 0x3:
-      _frequency = (static_cast<Word>(v) << 3) | (_frequency & 0x7);
+      _frequency = v | ((static_cast<Word>(_frequency) & 0x7) << 8);
       break;
     case 0x4:
       _length.enable((v & 0x40) >> 6);
-      _frequency |= v & 0x7;
+      _frequency |= static_cast<Word>(v & 0x7) << 8;
       if (v & 0x80) trigger();
       break;
   }
 }
 
 Byte SquareChannel::read(Word addr) const {
-  assert((addr & 0xfff0) == 0xff10);
   switch ((addr & 0xf) % 5) {
     case 0x0:
       assert(_sweep_enabled);
@@ -65,13 +68,11 @@ Byte SquareChannel::read(Word addr) const {
       return (_volume << 4) | (_envelope.does_negate() << 3) |
              (_envelope.period() & 0x7);
     case 0x3:
-      return _frequency & 0x7f8;
+      return _frequency & 0xff;
     case 0x4:
-      return _length.is_enabled() << 6;
+      return (_length.is_enabled() << 6) | ((_frequency & 0x700) >> 8);
   }
   assert(false);  // TODO throw some exception
 }
-
-void SquareChannel::do_trigger() { _timer = _frequency; }
 
 }  // namespace sound

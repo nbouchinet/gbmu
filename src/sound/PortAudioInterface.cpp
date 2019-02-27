@@ -1,6 +1,7 @@
 #include "src/sound/PortAudioInterface.hpp"
 
 #include <cassert>
+#include <vector>
 
 #include <iostream>
 namespace sound {
@@ -56,6 +57,14 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   _cursor = 0;
   _lock = false;
   return true;
+}
+
+float PortAudioInterface::mix(const std::vector<float>& samples, float ) const {
+  float ret = 0.f;
+  for (const auto &sample : samples) {
+    ret += sample / samples.size();
+  }
+  return ret;
 }
 
 void PortAudioInterface::start() { _stream->start(); }

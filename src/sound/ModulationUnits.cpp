@@ -1,5 +1,7 @@
 #include "src/sound/ModulationUnits.hpp"
+#include "src/sound/SoundChannel.hpp"
 
+#include <iostream>
 namespace sound {
 
 bool SweepUnit::call() {
@@ -18,6 +20,7 @@ void SweepUnit::trigger() {
 
 bool LengthUnit::call() {
   if (not _enabled) return true;
+  std::cerr<< +_length<<"\n";
   if (_length == 0) return false;
   --_length;
   return true;
@@ -31,7 +34,7 @@ bool EnvelopeUnit::call() {
   if (not _enabled) return true;
   if (_current_period-- != 0 or _period == 0) return true;
   _current_period = _period;
-  if (_volume < 0 or _volume > 15)
+  if (_volume > SoundChannel::MaxVolume)
     _enabled = false;
   else
     _volume += (_negate) ? -1 : 1;

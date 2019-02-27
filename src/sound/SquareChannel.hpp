@@ -14,7 +14,7 @@ class SquareChannel : public SoundChannel {
   Byte _waveform_selected = 2;
   Byte _waveform_step = 0;
   Word _frequency = 0;
-  int _volume = 0;
+  Byte _volume = 0;
   Word _timer = 0;
 
   SweepUnit _sweep;
@@ -26,7 +26,7 @@ class SquareChannel : public SoundChannel {
  public:
   SquareChannel(bool sweep_enabled = true)
       : _sweep(_timer),
-        _length(64),
+        _length(63),
         _envelope(_volume),
         _sweep_enabled(sweep_enabled) {
     if (sweep_enabled) bind_module(&_sweep);
@@ -34,11 +34,11 @@ class SquareChannel : public SoundChannel {
     bind_module(&_envelope);
   }
 
+  void do_update() override;
+  void do_trigger() override;
+
   void write(Word addr, Byte v) override;
   Byte read(Word addr) const override;
-
-  void do_trigger() override;
-  void do_update() override;
 };
 
 }  // namespace sound

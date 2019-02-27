@@ -29,7 +29,7 @@ class PortAudioInterface : public AudioInterface {
   PortAudioInterface();
   ~PortAudioInterface();
   bool queue_stereo_samples(const MonoSamples&, const MonoSamples&) override;
-  void mix(Sample&, Sample, float) const override {}
+  float mix(const std::vector<float>&, float volume) const override;
   void start() override;
   void terminate() override;
 };

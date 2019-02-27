@@ -1,7 +1,7 @@
 #include "src/sound/APU.hpp"
 
-#include "src/sound/SoundChannel.hpp"
 #include "src/sound/SquareChannel.hpp"
+#include "src/sound/WaveChannel.hpp"
 #include "utils/Operations_utils.hpp"
 
 #include <algorithm>
@@ -21,7 +21,7 @@ APU::APU(AudioInterface* interface)
       _channels{{
           {0xff10, 0xff14, std::make_unique<SquareChannel>(true)},
           {0xff15, 0xff19, std::make_unique<SquareChannel>(false)},
-          {0xff1a, 0xff1e, std::make_unique<SquareChannel>(false)},
+          {0xff1a, 0xff1e, std::make_unique<WaveChannel>(_wave_ram)},
           {0xff1f, 0xff23, std::make_unique<SquareChannel>(false)},
       }} {}
 
@@ -40,25 +40,37 @@ void APU::update_clock() {
 
   if (--_sampling_countdown <= 0) {
     _sampling_countdown = (CPU_FREQ / SAMPLING_FREQ);
-    auto get_output = [&](Byte b) -> float {
-      return (test_bit(b, _channel_to_terminal_output))
-                 ? _channels[0].channel->get_output()
-                 : 0;
-    };
-    _right_output[_output_index] = std::min(1.f, get_output(0));
-    _left_output[_output_index++] = std::min(1.f, get_output(0));
+    float rvol = (static_cast<float>(_right_volume) + 1.f) / 8.f;
+    float lvol = (static_cast<float>(_left_volume) + 1.f) / 8.f;
+
+    _right_output[_output_index] =
+        fetch_and_mix_samples(_channel_to_terminal_output, rvol);
+
+    _left_output[_output_index++] =
+        fetch_and_mix_samples((_channel_to_terminal_output & 0xf0) >> 4, lvol);
+
     if (_output_index >= AudioInterface::SamplesTableSize) {
       //std::cerr << "---------\n";
-      //for (auto& e : _right_output) {
+      //for (auto& e : _left_output) {
       //  std::cerr << e << ", ";
       //}
-      //(void)_audio_interface;
+      //exit(1);
       while (not _audio_interface->queue_stereo_samples(_right_output,
                                                         _left_output))
         ;
-     _output_index = 0;
+      _output_index = 0;
     }
   }
+}
+
+float APU::fetch_and_mix_samples(Byte enabled_channels, float vol) const {
+  std::vector<float> to_mix;
+  Byte b = 0;
+  for (const auto& chan : _channels) {
+    if (chan.channel->is_enabled() and test_bit(b++, enabled_channels))
+      to_mix.push_back(chan.channel->get_output());
+  }
+  return _audio_interface->mix(to_mix, vol);
 }
 
 void APU::update_clock(Word cycles) {
@@ -85,6 +97,7 @@ Byte APU::read(Word addr) const {
       return ret;
     }
   }
+  if (addr >= 0xff30 and addr <= 0xff3f) return _wave_ram[addr & 0xf];
   assert(false);
 }
 
@@ -97,7 +110,7 @@ void APU::write(Word addr, Byte v) {
   }
   switch (addr) {
     case 0xff24:
-      _left_volume = v & 0x70;
+      _left_volume = (v & 0x70) >> 4;
       _right_volume = v & 0x07;
       return;
     case 0xff25:
@@ -108,6 +121,10 @@ void APU::write(Word addr, Byte v) {
       for (auto i = 0; i < 4; ++i) _channels[i].channel->enable(v & (1 << i));
       return;
     }
+  }
+  if (addr >= 0xff30 and addr <= 0xff3f) {
+    _wave_ram[addr & 0xf] = v; 
+    return;
   }
   assert(false);
 }

@@ -29,7 +29,7 @@ class SweepUnit : public IModulationUnit {
   SweepUnit(Word& frequency)
       : _sweep_period(0), _negate(0), _shift(0), _frequency(frequency) {}
 
-  Byte trigger_steps() const override { return 0x44; /* 00100010 */ }
+  Byte trigger_steps() const override { return 0b00100010; }
 
   Byte get_register() const {
     return (_sweep_period << 5) | (_negate << 3) | _shift;
@@ -47,15 +47,15 @@ class SweepUnit : public IModulationUnit {
 
 class LengthUnit : public IModulationUnit {
  private:
-  Word _max_length;
-  Word _length = 0;
+  Byte _max_length;
+  Byte _length = 0;
   bool _enabled = false;
 
  public:
-  LengthUnit(Word max_len) : _max_length(max_len) {}
-  Byte trigger_steps() const override { return 0x55; /* 01010101 */ }
+  LengthUnit(Byte max_len) : _max_length(max_len) {}
+  Byte trigger_steps() const override { return 0b01010101; }
 
-  void set_length(Word l) { _length = l; }
+  void set_length(Byte l) { _length = l; }
   void enable(bool enable = true) { _enabled = enable; }
   auto length() const { return _length; }
   bool is_enabled() const { return _enabled; }
@@ -70,13 +70,13 @@ class EnvelopeUnit : public IModulationUnit {
   Byte _period : 3;
   bool _enabled = false;
   Byte _current_period = 0;
-  int& _volume;
+  Byte& _volume;
 
  public:
   EnvelopeUnit() = delete;
-  EnvelopeUnit(int& volume) : _negate(0), _period(0), _volume(volume) {}
+  EnvelopeUnit(Byte& volume) : _negate(0), _period(0), _volume(volume) {}
 
-  Byte trigger_steps() const override { return 0x80; /* 10000000 */ }
+  Byte trigger_steps() const override { return 0b10000000; }
 
   void set_negate(bool v) { _negate = v; }
   void set_period(Byte v) { _period = v; }

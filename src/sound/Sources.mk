@@ -4,6 +4,7 @@ OBJ_FILES_src/sound := APU.o \
                        ModulationUnits.o \
                        PortAudioInterface.o \
                        SoundChannel.o \
-                       SquareChannel.o
+                       SquareChannel.o \
+                       WaveChannel.o
 
 OBJECTS += $(patsubst %, src/sound/$(OBJECT_DIR)/%, $(OBJ_FILES_src/sound))
