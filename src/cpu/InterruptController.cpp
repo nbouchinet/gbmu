@@ -56,18 +56,18 @@ void InterruptController::ExecuteInterrupt(Byte interrupt) {
   _rIF = (_rIF & ~interrupt);
   switch (interrupt) {
     case 0:
-      _components.core->instr_call(Core::JumpCondition::None, VBI);
+      _components.core->instr_call(VBI);
       break;
     case 1:
-      _components.core->instr_call(Core::JumpCondition::None, LCDCSI);
+      _components.core->instr_call(LCDCSI);
       break;
     case 2:
-      _components.core->instr_call(Core::JumpCondition::None, TOI);
+      _components.core->instr_call(TOI);
       break;
     case 3:
       break;
     case 4:
-      _components.core->instr_call(Core::JumpCondition::None, JOYI);
+      _components.core->instr_call(JOYI);
       break;
   }
 }
