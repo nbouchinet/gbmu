@@ -89,7 +89,7 @@ public:
   void instr_di();
   void instr_ei();
 
-  enum class JumpCondition { None, NonZero, Zero, NonCarry, Carry };
+  enum class JumpCondition { NonZero, Zero, NonCarry, Carry };
   bool can_jump(JumpCondition);
   void instr_jp(JumpCondition, Word);
   void instr_jp(Word);
