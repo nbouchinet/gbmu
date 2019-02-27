@@ -192,9 +192,6 @@ void Core::instr_ei() { _components.interrupt_controller->SetIME(1); }
 
 bool Core::can_jump(JumpCondition jc) {
   switch (jc) {
-  case JumpCondition::None:
-    return true;
-    break;
   case JumpCondition::NonZero:
     return !get_flag(Flags::Z);
   case JumpCondition::Zero:
@@ -274,7 +271,7 @@ void Core::instr_ret() {
 // ----------------------------------------------------------------------------
 
 void Core::instr_reti() {
-  instr_ret(JumpCondition::None);
+  instr_ret();
   _components.interrupt_controller->SetIME(1);
 }
 
