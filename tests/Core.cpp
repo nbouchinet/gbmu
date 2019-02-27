@@ -53,36 +53,34 @@ class TestCoreFixture : public ::testing::Test {
 };
 
 using Tuple = std::tuple<Core::Flags, bool>;
-const Tuple& get_flag_tuple(Core::JumpCondition jc) {
-  static Tuple refs[4] = {Tuple{Core::Flags::Z, false},
-                          Tuple{Core::Flags::Z, true},
-                          Tuple{Core::Flags::C, false},
-                          Tuple{Core::Flags::C, true}};
-  assert(jc != Core::JumpCondition::None);
-  return refs[static_cast<int>(jc) - 1];
+const Tuple &get_flag_tuple(Core::JumpCondition jc) {
+  static Tuple refs[4] = {
+      Tuple{Core::Flags::Z, false}, Tuple{Core::Flags::Z, true},
+      Tuple{Core::Flags::C, false}, Tuple{Core::Flags::C, true}};
+  return refs[static_cast<int>(jc)];
 }
 
-void test_jp(Accessor& access, Core::JumpCondition jc) {
+void test_jp(Accessor &access) {
+  access.core.instr_jp(0x4242);
+  EXPECT_EQ(access.getPc().word, 0x4242u);
+}
+
+void test_jp(Accessor &access, Core::JumpCondition jc) {
   Word orig_pc = access.getPc().word;
   access.core.instr_jp(jc, 0x4242);
-  if (jc != Core::JumpCondition::None) {
-    const auto& flag_tuple = get_flag_tuple(jc);
-    if (not std::get<1>(flag_tuple))
-      EXPECT_EQ(access.getPc().word, 0x4242u);
-    else
-      EXPECT_EQ(access.getPc().word, orig_pc);
-    access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
-  } else {
+  const auto &flag_tuple = get_flag_tuple(jc);
+  if (not std::get<1>(flag_tuple))
     EXPECT_EQ(access.getPc().word, 0x4242u);
-    return;
-  }
+  else
+    EXPECT_EQ(access.getPc().word, orig_pc);
+  access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
   access.core.instr_jp(jc, 0xaabb);
   EXPECT_EQ(access.getPc().word, 0xaabb);
 }
 
 TEST_F(TestCoreFixture, jp_none) {
   SCOPED_TRACE("Jump no conditions fail");
-  test_jp(accessor, Core::JumpCondition::None);
+  test_jp(accessor);
 }
 
 TEST_F(TestCoreFixture, jp_nz) {
@@ -105,19 +103,27 @@ TEST_F(TestCoreFixture, jp_c) {
   test_jp(accessor, Core::JumpCondition::Carry);
 }
 
-void test_jr(Accessor& access, Core::JumpCondition jc) {
+void test_jr(Accessor &access) {
+  Word orig_pc = access.getPc().word;
+  access.core.instr_jr(1);
+  EXPECT_EQ(access.getPc().word, orig_pc + 1);
+  access.getPc().word = orig_pc;
+  access.core.instr_jr(0x42);
+  EXPECT_EQ(access.getPc().word, orig_pc + 0x42);
+  access.getPc().word = orig_pc;
+  access.core.instr_jr(0x85);
+  EXPECT_EQ(access.getPc().word, orig_pc - 123);
+}
+
+void test_jr(Accessor &access, Core::JumpCondition jc) {
   Word orig_pc = access.getPc().word;
   access.core.instr_jr(jc, 1);
-  if (jc != Core::JumpCondition::None) {
-    const auto& flag_tuple = get_flag_tuple(jc);
-    if (not std::get<1>(flag_tuple))
-      EXPECT_EQ(access.getPc().word, orig_pc + 1);
-    else
-      EXPECT_EQ(access.getPc().word, orig_pc);
-    access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
-  } else {
+  const auto &flag_tuple = get_flag_tuple(jc);
+  if (not std::get<1>(flag_tuple))
     EXPECT_EQ(access.getPc().word, orig_pc + 1);
-  }
+  else
+    EXPECT_EQ(access.getPc().word, orig_pc);
+  access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
   access.getPc().word = orig_pc;
   access.core.instr_jr(jc, 0x42);
   EXPECT_EQ(access.getPc().word, orig_pc + 0x42);
@@ -128,7 +134,7 @@ void test_jr(Accessor& access, Core::JumpCondition jc) {
 
 TEST_F(TestCoreFixture, jr_none) {
   SCOPED_TRACE("Relative jump no conditions fail");
-  test_jr(accessor, Core::JumpCondition::None);
+  test_jr(accessor);
 }
 
 TEST_F(TestCoreFixture, jr_nz) {
@@ -200,26 +206,29 @@ TEST_F(TestCoreFixture, push) {
   EXPECT_EQ(b2, (value & 0x00ff));
 }
 
-void test_call(Accessor& access, Core::JumpCondition jc) {
+void test_call(Accessor &access) {
+  Word orig_pc = access.getPc().word;
+  Word orig_sp = access.getSp().word;
+
+  access.core.instr_call(0x4242);
+  EXPECT_EQ(access.getPc().word, 0x4242);
+  Byte b1 = access.core.read(orig_sp - 1);
+  Byte b2 = access.core.read(orig_sp - 2);
+  EXPECT_EQ(b1, (((orig_pc + 3) & 0xff00) >> 8));
+  EXPECT_EQ(b2, ((orig_pc + 3) & 0x00ff));
+}
+
+void test_call(Accessor &access, Core::JumpCondition jc) {
   Word orig_pc = access.getPc().word;
   Word orig_sp = access.getSp().word;
 
   access.core.instr_call(jc, 0x4242);
-  if (jc != Core::JumpCondition::None) {
-    const auto& flag_tuple = get_flag_tuple(jc);
-    if (not std::get<1>(flag_tuple))
-      EXPECT_EQ(access.getPc().word, 0x4242);
-    else
-      EXPECT_EQ(access.getPc().word, orig_pc);
-    access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
-  } else {
+  const auto &flag_tuple = get_flag_tuple(jc);
+  if (not std::get<1>(flag_tuple))
     EXPECT_EQ(access.getPc().word, 0x4242);
-    Byte b1 = access.core.read(orig_sp - 1);
-    Byte b2 = access.core.read(orig_sp - 2);
-    EXPECT_EQ(b1, (((orig_pc + 3) & 0xff00) >> 8));
-    EXPECT_EQ(b2, ((orig_pc + 3) & 0x00ff));
-    return;
-  }
+  else
+    EXPECT_EQ(access.getPc().word, orig_pc);
+  access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
   access.core.instr_call(jc, 0xaabb);
   EXPECT_EQ(access.getPc().word, 0xaabb);
   Byte b1 = access.core.read(orig_sp - 1);
@@ -230,7 +239,7 @@ void test_call(Accessor& access, Core::JumpCondition jc) {
 
 TEST_F(TestCoreFixture, call_none) {
   SCOPED_TRACE("Call jump no conditions fail");
-  test_call(accessor, Core::JumpCondition::None);
+  test_call(accessor);
 }
 
 TEST_F(TestCoreFixture, call_nz) {
@@ -268,24 +277,26 @@ TEST_F(TestCoreFixture, pop) {
   EXPECT_EQ(ret, value);
 }
 
-void test_ret(Accessor& access, Core::JumpCondition jc) {
-  Word orig_pc = access.getPc().word;
+void test_ret(Accessor &access) {
   Word orig_sp = access.getSp().word;
 
   access.core.instr_push(0x4242);
+  access.core.instr_ret();
+  EXPECT_EQ(access.getPc().word, 0x4242);
+  EXPECT_EQ(access.getSp().word, orig_sp);
+}
+
+void test_ret(Accessor &access, Core::JumpCondition jc) {
+  Word orig_pc = access.getPc().word;
+
+  access.core.instr_push(0x4242);
   access.core.instr_ret(jc);
-  if (jc != Core::JumpCondition::None) {
-    const auto& flag_tuple = get_flag_tuple(jc);
-    if (not std::get<1>(flag_tuple))
-      EXPECT_EQ(access.getPc().word, 0x4242);
-    else
-      EXPECT_EQ(access.getPc().word, orig_pc);
-    access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
-  } else {
+  const auto &flag_tuple = get_flag_tuple(jc);
+  if (not std::get<1>(flag_tuple))
     EXPECT_EQ(access.getPc().word, 0x4242);
-    EXPECT_EQ(access.getSp().word, orig_sp);
-    return;
-  }
+  else
+    EXPECT_EQ(access.getPc().word, orig_pc);
+  access.core.set_flag(std::get<0>(flag_tuple), std::get<1>(flag_tuple));
   access.core.instr_push(0xaabb);
   access.core.instr_ret(jc);
   EXPECT_EQ(access.getPc().word, 0xaabb);
@@ -293,27 +304,27 @@ void test_ret(Accessor& access, Core::JumpCondition jc) {
 
 TEST_F(TestCoreFixture, ret_none) {
   SCOPED_TRACE("ret no condition fail");
-  test_call(accessor, Core::JumpCondition::None);
+  test_ret(accessor);
 }
 
 TEST_F(TestCoreFixture, ret_nz) {
   SCOPED_TRACE("ret non-zero fail");
-  test_call(accessor, Core::JumpCondition::NonZero);
+  test_ret(accessor, Core::JumpCondition::NonZero);
 }
 
 TEST_F(TestCoreFixture, ret_z) {
   SCOPED_TRACE("ret zero fail");
-  test_call(accessor, Core::JumpCondition::Zero);
+  test_ret(accessor, Core::JumpCondition::Zero);
 }
 
 TEST_F(TestCoreFixture, ret_nc) {
   SCOPED_TRACE("ret non-carry fail");
-  test_call(accessor, Core::JumpCondition::NonCarry);
+  test_ret(accessor, Core::JumpCondition::NonCarry);
 }
 
 TEST_F(TestCoreFixture, ret_c) {
   SCOPED_TRACE("ret carry fail");
-  test_call(accessor, Core::JumpCondition::Carry);
+  test_ret(accessor, Core::JumpCondition::Carry);
 }
 
 template <typename T>
