@@ -103,7 +103,8 @@ void Debugger::add_watchpoint(uint16_t addr) {
     return pair.first == addr && pair.second == value;
   };
 
-  if (std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare) == _watchpoint_pool.end()) {
+  if (std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare) ==
+      _watchpoint_pool.end()) {
     _watchpoint_pool.emplace_back(addr, _components.mem_bus->read<Byte>(addr));
   }
 }
@@ -115,19 +116,22 @@ void Debugger::remove_watchpoint(uint16_t addr) {
     return pair.first == addr && pair.second == value;
   };
 
-  _watchpoint_pool.erase( std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare));
+  _watchpoint_pool.erase(
+      std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare));
 }
 
 bool Debugger::watchpoint_changed() {
-	bool find = false;
+  bool find = false;
 
-	for (auto value : _watchpoint_pool) {
-		if (value.second != _components.mem_bus->read<Byte>(value.first)) {
-			value.second = _components.mem_bus->read<Byte>(value.first);
-			find = true;
-		}
-	}
-	return find;
+  for (auto value : _watchpoint_pool) {
+    auto r_value = _components.mem_bus->read<Byte>(value.first);
+
+    if (value.second != r_value) {
+      value.second = r_value;
+      find = true;
+    }
+  }
+  return find;
 }
 
 std::vector<uint16_t> Debugger::construct_register_pool() {
