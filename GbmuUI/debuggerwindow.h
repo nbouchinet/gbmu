@@ -36,6 +36,7 @@ private slots:
 	void on_addBreakpointButton_clicked();
 	void on_breakpointsEdit_editingFinished();
 	void on_deleteBreakpointButton_clicked();
+	void on_DebuggerWindow_rejected();
 
 private:
     Ui::DebuggerWindow *ui;
