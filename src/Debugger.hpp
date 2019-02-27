@@ -28,6 +28,11 @@ public:
     uint8_t size = 0x00;
   };
 
+  struct _watchpoint_value {
+    uint16_t r_value;
+    int w_value;
+  };
+
 private:
   ComponentsContainer &_components;
   int _duration;
@@ -41,7 +46,7 @@ private:
 
   std::vector<_debug_info> _instr_pool;
   std::vector<uint16_t> _breakpoint_pool;
-  std::vector<std::pair<uint16_t, uint16_t>> _watchpoint_pool;
+  std::vector<std::pair<uint16_t, _watchpoint_value>> _watchpoint_pool;
   std::vector<uint16_t> _register_pool;
   std::vector<std::pair<int, uint16_t>> _register_diffs;
 
@@ -325,8 +330,8 @@ public:
   // event trigger
   void add_breakpoint(uint16_t addr);
   void remove_breakpoint(uint16_t addr);
-  void add_watchpoint(uint16_t addr);
-  void remove_watchpoint(uint16_t addr);
+  void add_watchpoint(uint16_t addr, int w_value);
+  void remove_watchpoint(uint16_t addr, int w_value);
   void toggle() { _enabled = _enabled ? false : true; }
   void run_duration(int duration);
   void run_one_frame();
@@ -349,6 +354,7 @@ private:
   void lock_game(const Core::Iterator &it, uint16_t pc);
   bool on_breakpoint(uint16_t pc);
   bool watchpoint_changed();
+  uint16_t get_register_value(uint16_t addr);
   using it = std::vector<uint16_t>::const_iterator;
   const std::vector<std::pair<int, uint16_t>>
   rdiff(const std::vector<uint16_t> &prev,
