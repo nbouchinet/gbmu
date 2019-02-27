@@ -8,38 +8,42 @@
 #define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
 class Accessor {
- public:
+public:
   ComponentsContainer container;
   Core &core;
-  Register& getPc(void) { return core._pc; }
-  Register& getSp(void) { return core._sp; }
-  Register& getAf(void) { return core._af; }
-  Register& getBc(void) { return core._bc; }
-  Register& getDe(void) { return core._de; }
-  Register& getHl(void) { return core._hl; }
+  Register &getPc(void) { return core._pc; }
+  Register &getSp(void) { return core._sp; }
+  Register &getAf(void) { return core._af; }
+  Register &getBc(void) { return core._bc; }
+  Register &getDe(void) { return core._de; }
+  Register &getHl(void) { return core._hl; }
 
   Accessor() : container("tools/Tetris.gb"), core(*container.core) {}
 };
 
 class TestCoreFixture : public ::testing::Test {
- public:
+public:
   struct s_flags {
     int c, z, n, h;
   };
   Accessor accessor;
   uint8_t reg = 0;
 
-  void test_instr(std::function<void(Core&, Byte&)> instr, uint8_t base,
+  void test_instr(std::function<void(Core &, Byte &)> instr, uint8_t base,
                   uint8_t expected) {
     instr(accessor.core, base);
     EXPECT_EQ(base, expected);
   }
 
   void test_flags_base(struct s_flags f) {
-    if (f.c != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), f.c);
-    if (f.z != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), f.z);
-    if (f.n != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), f.n);
-    if (f.h != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), f.h);
+    if (f.c != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), f.c);
+    if (f.z != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), f.z);
+    if (f.n != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), f.n);
+    if (f.h != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), f.h);
   }
 
   void reset_flags() {
@@ -195,7 +199,7 @@ TEST_F(TestCoreFixture, daa) {
 }
 
 TEST_F(TestCoreFixture, push) {
-  Register& spSaved = accessor.getSp();
+  Register &spSaved = accessor.getSp();
   Word addrSaved = spSaved.word;
   Word value = 0x4245;
 
@@ -263,7 +267,7 @@ TEST_F(TestCoreFixture, call_c) {
 }
 
 TEST_F(TestCoreFixture, pop) {
-  Register& spSaved = accessor.getSp();
+  Register &spSaved = accessor.getSp();
   Word addrSaved = spSaved.word;
   Word value = 0x4242;
   Word ret;
@@ -328,7 +332,7 @@ TEST_F(TestCoreFixture, ret_c) {
 }
 
 template <typename T>
-void test_add(Accessor& access, T loop_begin, T nibble_mask) {
+void test_add(Accessor &access, T loop_begin, T nibble_mask) {
   constexpr T max = std::numeric_limits<T>::max();
   for (T a = loop_begin; a < max; ++a) {
     for (T b = loop_begin; b < max; ++b) {
@@ -402,20 +406,20 @@ TEST_F(TestCoreFixture, sbc) {
   }
 }
 
-#define TEST_OPERAND(OPNAME, OP, _C, _H, _N)                 \
-  constexpr Byte max = std::numeric_limits<Byte>::max();     \
-  for (Byte a = 0u; a < max; ++a) {                          \
-    for (Byte b = 0u; b < max; ++b) {                        \
-      Byte a_save = a;                                       \
-      accessor.core.OPNAME(a_save, b);                       \
-      Byte res = a OP b;                                     \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), _C); \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), _H); \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), _N); \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z),      \
-                static_cast<Byte>(res) == 0);                \
-      EXPECT_EQ(static_cast<Byte>(a_save), res);             \
-    }                                                        \
+#define TEST_OPERAND(OPNAME, OP, _C, _H, _N)                                   \
+  constexpr Byte max = std::numeric_limits<Byte>::max();                       \
+  for (Byte a = 0u; a < max; ++a) {                                            \
+    for (Byte b = 0u; b < max; ++b) {                                          \
+      Byte a_save = a;                                                         \
+      accessor.core.OPNAME(a_save, b);                                         \
+      Byte res = a OP b;                                                       \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), _C);                   \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), _H);                   \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), _N);                   \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z),                        \
+                static_cast<Byte>(res) == 0);                                  \
+      EXPECT_EQ(static_cast<Byte>(a_save), res);                               \
+    }                                                                          \
   }
 
 TEST_F(TestCoreFixture, and) {
@@ -529,23 +533,23 @@ TEST_F(TestCoreFixture, program_1) {
 
   auto it = opcodes.begin();
 
-  accessor.core.execute(it);  // ld a, 0x42
-  accessor.core.execute(it);  // ld b, 0xF0
+  accessor.core.execute(it); // ld a, 0x42
+  accessor.core.execute(it); // ld b, 0xF0
 
   while (it + accessor.getPc().word != opcodes.end()) {
     accessor.core.execute(it);
     switch (i) {
-      case 0:
-        EXPECT_EQ(accessor.getAf().high, 0);
-        break;
-      case 1:
-        EXPECT_EQ(accessor.getAf().high, 0xF0);
-        break;
-      case 2:
-        EXPECT_EQ(accessor.getAf().high, 0);
-        break;
-      default:
-        break;
+    case 0:
+      EXPECT_EQ(accessor.getAf().high, 0);
+      break;
+    case 1:
+      EXPECT_EQ(accessor.getAf().high, 0xF0);
+      break;
+    case 2:
+      EXPECT_EQ(accessor.getAf().high, 0);
+      break;
+    default:
+      break;
     }
     i++;
   }
@@ -616,7 +620,7 @@ TEST_F(TestCoreFixture, srl) {
   }
 }
 
-int main(int ac, char* av[]) {
+int main(int ac, char *av[]) {
   ::testing::InitGoogleTest(&ac, av);
   return RUN_ALL_TESTS();
 }
