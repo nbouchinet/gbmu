@@ -95,7 +95,8 @@ void DebuggerWindow::refresh_instr()
 	g_gameboy.get_debugger().set_instruction_pool_size(6);
 	std::vector<Debugger::_debug_info> instr_pool = g_gameboy.get_debugger().get_instruction_pool();
 	QString value;
-	for (int i = 0; i < 6; i++){
+	int pool_size = instr_pool.size();
+	for (int i = 0; i < pool_size; i++){
 		ui->disassemblerWidget->setItem(i, 0, new QTableWidgetItem(QString::number(instr_pool[i].pc, 16)));
 		ui->disassemblerWidget->setItem(i, 1, new QTableWidgetItem(instr_pool[i].instr));
 		value = QString::number(instr_pool[i].value[0], 16) + " " +
@@ -158,12 +159,9 @@ void DebuggerWindow::refresh_info()
 	refresh_instr();
 }
 
-#include <iostream>
-#include <unistd.h>
 void DebuggerWindow::on_stepButton_clicked()
 {
 	g_gameboy.notify_debugger(Debugger::RUN_ONE_STEP);
-	//while (g_gameboy.get_debugger().get_run_step());
 	while (!g_gameboy.get_debugger().get_lock()){}
 	refresh_info();
 }
@@ -171,7 +169,6 @@ void DebuggerWindow::on_stepButton_clicked()
 void DebuggerWindow::on_runOneFrameButton_clicked()
 {
 	g_gameboy.notify_debugger(Debugger::RUN_ONE_FRAME);
-	//while (g_gameboy.get_debugger().get_run_duration());
 	while (!g_gameboy.get_debugger().get_lock()){}
 	refresh_info();
 }
@@ -179,7 +176,6 @@ void DebuggerWindow::on_runOneFrameButton_clicked()
 void DebuggerWindow::on_runDurationButton_clicked()
 {
 	g_gameboy.notify_debugger(Debugger::RUN_DURATION, ui->runDurationSpinBox->value());
-	//while (g_gameboy.get_debugger().get_run_frame());
 	while (!g_gameboy.get_debugger().get_lock()){}
 	refresh_info();
 }
