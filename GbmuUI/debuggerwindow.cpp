@@ -118,6 +118,40 @@ void DebuggerWindow::refresh_registers()
 	}
 }
 
+bool DebuggerWindow::duplicateInListWidgetItem(const QString &value, const QListWidget *list)
+{
+	int nbItem = list->count();
+	for (int i = 0; i < nbItem; i++)
+	{
+		QListWidgetItem *item = list->item(i);
+		if (item->text() == value)
+			return (true);
+	}
+	return (false);
+}
+
+void DebuggerWindow::addBreakpoint()
+{
+	if (ui->breakpointsEdit->text().length() == 4)
+	{
+		if (!duplicateInListWidgetItem(ui->breakpointsEdit->text(), ui->breakpointsWidget))
+		{
+			QRegExp hexMatcher("^[0-9A-F]{4}$", Qt::CaseInsensitive);
+			if (hexMatcher.exactMatch(ui->breakpointsEdit->text()))
+			{
+				bool ok;
+				uint16_t addr = ui->breakpointsEdit->text().toUInt(&ok, 16);
+				if (ok)
+				{
+					g_gameboy.get_debugger().add_breakpoint(addr);
+					ui->breakpointsWidget->addItem(new QListWidgetItem(ui->breakpointsEdit->text()));
+				}
+			}
+		}
+		ui->breakpointsEdit->clear();
+	}
+}
+
 void DebuggerWindow::refresh_info()
 {
 	refresh_registers();
@@ -153,17 +187,12 @@ void DebuggerWindow::on_runDurationButton_clicked()
 
 void DebuggerWindow::on_addBreakpointButton_clicked()
 {
-//	g_gameboy.get_debugger().add_breakpoint()
-	QRegExp hexMatcher("^[0-9A-F]{4}$", Qt::CaseInsensitive);
-	if (hexMatcher.exactMatch(ui->breakpointsEdit->text()))
-	{
-		ui->breakpointsWidget->addItem(new QListWidgetItem(ui->breakpointsEdit->text()));
-	}
+	addBreakpoint();
 }
 
 void DebuggerWindow::on_breakpointsEdit_editingFinished()
 {
-	ui->breakpointsWidget->addItem(new QListWidgetItem(ui->breakpointsEdit->text()));
+	addBreakpoint();
 }
 
 void DebuggerWindow::on_deleteBreakpointButton_clicked()
@@ -171,6 +200,12 @@ void DebuggerWindow::on_deleteBreakpointButton_clicked()
 	QList<QListWidgetItem*> items = ui->breakpointsWidget->selectedItems();
 	foreach(QListWidgetItem * item, items)
 	{
-	    delete ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item));
+		bool ok;
+		uint16_t addr = ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item))->text().toUInt(&ok, 16);
+		if (ok)
+		{
+			g_gameboy.get_debugger().remove_breakpoint(addr);
+			delete ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item));
+		}
 	}
 }

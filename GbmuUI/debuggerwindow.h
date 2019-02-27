@@ -2,6 +2,8 @@
 #define DEBUGGERWINDOW_H
 
 #include <QDialog>
+#include <QListWidgetItem>
+#include <QListWidget>
 
 #define MAIN_REGISTERS_BEGIN 0
 #define MAIN_REGISTERS_END 5
@@ -24,6 +26,8 @@ public:
 	void refresh_info();
 	void refresh_registers();
 	void refresh_instr();
+	void addBreakpoint();
+	bool duplicateInListWidgetItem(const QString &value, const QListWidget *list);
 
 private slots:
     void on_stepButton_clicked();
