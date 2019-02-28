@@ -48,6 +48,9 @@ void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration){
 		case Debugger::RUN_ONE_STEP:
 			_debugger.run_one_step();
 			break;
+		case Debugger::RUN_CPU_SEC:
+			_debugger.run_cpu_sec();
+			break;
 	}
 }
 

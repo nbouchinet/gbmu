@@ -238,6 +238,7 @@ void Debugger::reset_flags() {
   _run_one_step = false;
   _run_duration = false;
   _run_one_frame = false;
+  _run_cpu_sec = false;
 }
 
 bool Debugger::on_breakpoint(uint16_t pc) {
@@ -265,6 +266,13 @@ void Debugger::run_duration(int duration) {
   _lock.store(false);
 }
 
+void Debugger::run_cpu_sec() {
+  _register_pool = construct_register_pool();
+  _run_cpu_sec = true;
+  _lock.store(false);
+  _cpu_duration = 4000000;
+}
+
 void Debugger::run_one_frame() {
   _register_pool = construct_register_pool();
   _run_one_frame = true;
@@ -285,7 +293,18 @@ bool Debugger::is_step_passed() {
   return false;
 }
 
-bool Debugger::is_sec_passed() {
+bool Debugger::is_cpu_sec_passed() {
+  if (_run_cpu_sec) {
+    _cpu_duration -= _components.core->cycles() / 4;
+    if (_cpu_duration <= 0) {
+      reset_flags();
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Debugger::is_duration_passed() {
   std::chrono::time_point<std::chrono::high_resolution_clock> current =
       std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed_seconds = current - _past;
@@ -300,8 +319,8 @@ bool Debugger::is_sec_passed() {
 }
 
 void Debugger::lock_game(const Core::Iterator &it, uint16_t pc) {
-  if (on_breakpoint(pc) || is_sec_passed() || is_frame_passed() ||
-      is_step_passed() || watchpoint_changed()) {
+  if (on_breakpoint(pc) || is_duration_passed() || is_frame_passed() ||
+      is_step_passed() || watchpoint_changed() || is_cpu_sec_passed()) {
     update_data(it, pc);
     _lock = true;
   }
