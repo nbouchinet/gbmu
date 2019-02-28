@@ -36,10 +36,12 @@ public:
 private:
   ComponentsContainer &_components;
   int _duration;
+  int _cpu_duration;
   bool _enabled;
   std::atomic_bool _lock;
   bool _run_one_frame = false;
   bool _run_duration = false;
+  bool _run_cpu_sec = false;
   bool _run_one_step = false;
   int _frame_size = 10;
   std::chrono::time_point<std::chrono::high_resolution_clock> _past;
@@ -307,6 +309,7 @@ private:
 public:
   enum e_dbg_state {
     RUN_DURATION,
+	RUN_CPU_SEC,
     RUN_ONE_FRAME,
     RUN_ONE_STEP
 
@@ -334,6 +337,7 @@ public:
   void remove_watchpoint(uint16_t addr, int w_value);
   void toggle() { _enabled = _enabled ? false : true; }
   void run_duration(int duration);
+  void run_cpu_sec();
   void run_one_frame();
   void run_one_step();
 
@@ -349,7 +353,8 @@ public:
 private:
   void reset_flags();
   bool is_step_passed();
-  bool is_sec_passed();
+  bool is_duration_passed();
+  bool is_cpu_sec_passed();
   bool is_frame_passed();
   void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
   void update_data(const Core::Iterator &it, uint16_t pc);
