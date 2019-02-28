@@ -40,8 +40,8 @@ src/$(OBJECT_DIR)/Gameboy.o: src/Gameboy.cpp src/Gameboy.hpp \
   utils/Operations_utils.hpp src/AMemoryBankController.hpp \
   src/Debugger.hpp src/MemoryBus.hpp src/Cartridge.hpp \
   src/MemoryBankController1.hpp src/PPU.class.h src/ScreenOutput.class.h \
-  src/LCDRegisters.hpp src/UnitWorkingRAM.hpp \
-  src/cpu/InterruptController.hpp src/cpu/Timer.hpp src/Bios.hpp
+  src/Bios.hpp src/LCDRegisters.hpp src/UnitWorkingRAM.hpp \
+  src/cpu/InterruptController.hpp src/cpu/Timer.hpp
 src/LCDRegisters.hpp:
 src/UnitWorkingRAM.hpp:
 src/cpu/Timer.hpp:
@@ -61,6 +61,7 @@ src/$(OBJECT_DIR)/PPU.class.o: src/PPU.class.cpp src/PPU.class.h \
   src/ScreenOutput.class.h src/Fwd.hpp src/IReadWrite.hpp \
   src/Gameboy.hpp src/cpu/Core.hpp utils/Operations_utils.hpp \
   src/AMemoryBankController.hpp src/Debugger.hpp src/MemoryBus.hpp \
-  src/Cartridge.hpp src/MemoryBankController1.hpp
+  src/Cartridge.hpp src/MemoryBankController1.hpp \
+  src/cpu/InterruptController.hpp
 src/$(OBJECT_DIR)/ScreenOutput.class.o: src/ScreenOutput.class.cpp \
   src/ScreenOutput.class.h
