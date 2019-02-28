@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <utility>
+#include <ctime>
 
 Logger::Logger() : _level(Error) {
 	_logFilename = std::string("gbmu.log");
