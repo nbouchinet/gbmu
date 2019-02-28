@@ -17,7 +17,7 @@ endif
 ## Sources directories
 #
 TEST_DIRS	:= tests
-SRC_DIRS	:= src src/cpu
+SRC_DIRS	:= src src/cpu utils
 #
 
 ## Colors
