@@ -22,9 +22,9 @@ def get_deref(mnemonic, operand1, operand2):
     operand     = operand[1:-1]
     registers   = {
         "HL": "_hl.word", "DE": "_de.word",
-        "C": "_bc.low", "BC": "_bc.word",
-        "a16": "fetch_word()", "a8": "*it++",
-        "d8": "*it++", "d16": "fetch_word()"
+        "C": "0xFF00 + _bc.low", "BC": "_bc.word",
+        "a16": "fetch_word()", "a8": "0xFF00 + *it++",
+        "d8": "0xFF00 + *it++", "d16": "fetch_word()"
     }
     return registers.get(operand)
 
