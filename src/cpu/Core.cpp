@@ -128,11 +128,15 @@ void Core::instr_inc(Byte &b) {
 void Core::instr_inc(Word &b) { ++b; }
 
 void Core::instr_dec(Byte &b) {
-  set_flag(Flags::N, true);
-  Byte overflowing_nibbles = check_sub_overflows(b, Byte(1u));
-  set_flag(Flags::H, test_bit(4, overflowing_nibbles));
+
+  Byte before = b;
+
   --b;
+
   set_flag(Flags::Z, b == 0u);
+  set_flag(Flags::N, true);
+  set_flag(Flags::H, (before & 0x0F) == 0);
+
 }
 
 // ----------------------------------------------------------------------------
