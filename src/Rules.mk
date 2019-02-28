@@ -41,10 +41,11 @@ src/$(OBJECT_DIR)/Gameboy.o: src/Gameboy.cpp src/Gameboy.hpp \
   src/Debugger.hpp src/MemoryBus.hpp src/Cartridge.hpp \
   src/MemoryBankController1.hpp src/PPU.class.h src/ScreenOutput.class.h \
   src/Bios.hpp src/LCDRegisters.hpp src/UnitWorkingRAM.hpp \
-  src/cpu/InterruptController.hpp src/cpu/Timer.hpp
+  src/cpu/InterruptController.hpp src/cpu/Timer.hpp utils/Logger.hpp
 src/LCDRegisters.hpp:
 src/UnitWorkingRAM.hpp:
 src/cpu/Timer.hpp:
+utils/Logger.hpp:
 src/$(OBJECT_DIR)/main.o: src/main.cpp src/Gameboy.hpp src/cpu/Core.hpp \
   src/Fwd.hpp src/IReadWrite.hpp utils/Operations_utils.hpp \
   src/AMemoryBankController.hpp src/Debugger.hpp src/MemoryBus.hpp \
