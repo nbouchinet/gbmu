@@ -48,9 +48,32 @@ public:
 	static void				switchPPUDebug(bool status);
 	bool					isScreenFilled(); // pr toi nico :3
 	bool					testBit(uint32_t byte, uint8_t bit_number) const;
-	uint8_t					setBit(uint8_t src, uint8_t bit_number);
-	uint8_t					unsetBit(uint8_t src, uint8_t bit_number);
+	void					setBit(uint8_t & src, uint8_t bit_number);
+	void					unsetBit(uint8_t & src, uint8_t bit_number);
 	void					updateGraphics(Word cycles);
+
+	static constexpr Word	LCDC = 0xFF40;
+	static constexpr Word	STAT = 0xFF41;
+	static constexpr Word	SCY = 0xFF42;
+	static constexpr Word	SCX = 0xFF43;
+	static constexpr Word	LY = 0xFF44;
+	static constexpr Word	LYC = 0xFF45;
+	static constexpr Word	DMA = 0xFF46;
+	static constexpr Word	BGP = 0xFF47;
+	static constexpr Word	OBP0 = 0xFF48;
+	static constexpr Word	OBP1 = 0xFF49;
+	static constexpr Word	WY = 0xFF4A;
+	static constexpr Word	WX = 0xFF4B;
+	static constexpr Word	VBK = 0xFF4F;
+	static constexpr Word	HDMA1 = 0xFF51;
+	static constexpr Word	HDMA2 = 0xFF52;
+	static constexpr Word	HDMA3 = 0xFF53;
+	static constexpr Word	HDMA4 = 0xFF54;
+	static constexpr Word	HDMA5 = 0xFF55;
+	static constexpr Word	BCPS = 0xFF68;
+	static constexpr Word	BCPD = 0xFF69;
+	static constexpr Word	OCPS = 0xFF6A;
+	static constexpr Word	OCPD = 0xFF6B;
 
 private:
 	void					init();
@@ -90,7 +113,8 @@ private:
 	uint8_t					_obp1;					// (0xFF49) 
 	uint8_t					_wy;					// (0xFF4A) windowY Same as above (0-143)
 	uint8_t					_wx;					// (0xFF4B) windowX Coordinates of the start of the window IN the screen (7-166)
-	uint8_t					_hdma1;					// (0xFF51) hdma1-5 are probably unused in the emulator
+	uint8_t					_vbk;					// (0xFF4F)
+	uint8_t					_hdma1;					// (0xFF51) hdma1-5 are probably unused in the emulator // maybe not
 	uint8_t					_hdma2;					// (0xFF52)
 	uint8_t					_hdma3;					// (0xFF53)
 	uint8_t					_hdma4;					// (0xFF54)
@@ -127,7 +151,7 @@ private:
 
 	std::array<Byte, 8192>		_lcdMemoryBank_0; // (0x8000-0x97FF) Tiles RAM bank 0
 	std::array<Byte, 8192>		_lcdMemoryBank_1;
-	std::array<Byte, LCD_WIDTH>	_lcdOamRam; // (0xFE00 - 0xFE9F) Sprite RAM
+	std::array<Byte, 160>		_lcdOamRam; // (0xFE00 - 0xFE9F) Sprite attr RAM
 
 
 

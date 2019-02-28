@@ -74,28 +74,29 @@ void				PPU::init()
 	translatePalettes();
 
 	_lcdc = 0x91;
-	_stat = 0;
+	_stat = 0x80;
 	_scy = 0;
 	_scx = 0;
 	_ly = 0;
 	_lyc = 0;
-	_dma = 0;
+	_dma = 0xFF;
 	_bgp = 0xFC;
 	_obp0 = 0xFF;
 	_obp1 = 0xFF;
 	_wy = 0;
 	_wx = 0;
-	_hdma1 = 0;
-	_hdma2 = 0;
-	_hdma3 = 0;
-	_hdma4 = 0;
-	_hdma5 = 0;
-	_bcps = 0;
-	_ocps = 0;
-	_bcpd = 0;
-	_bcpd = 0;
+	_vbk = 0;
+	_hdma1 = 0xFF;
+	_hdma2 = 0xFF;
+	_hdma3 = 0xFF;
+	_hdma4 = 0xFF;
+	_hdma5 = 0xFF;
+	_bcps = 0xFF;
+	_ocps = 0xFF;
+	_bcpd = 0xFF;
+	_bcpd = 0xFF;
 
-	_scanlineCounter = 0;
+	_scanlineCounter = 456;
 	_backgroundDataStart = 0;
 	_backgroundChrAttrStart = 0;
 	_spriteDataStart = 0;
@@ -115,17 +116,15 @@ bool				PPU::testBit(uint32_t byte, uint8_t bit_number) const
 }
 
 //------------------------------------------------------------------------------
-uint8_t					PPU::setBit(uint8_t src, uint8_t bit_number)
+void					PPU::setBit(uint8_t & src, uint8_t bit_number)
 {
 	src |= 1UL << bit_number;
-	return (src);
 }
 
 //------------------------------------------------------------------------------
-uint8_t					PPU::unsetBit(uint8_t src, uint8_t bit_number)
+void					PPU::unsetBit(uint8_t & src, uint8_t bit_number)
 {
 	src &= ~(1UL << bit_number);
-	return (src);
 }
 
 //------------------------------------------------------------------------------
@@ -151,16 +150,16 @@ void				PPU::write(Word address, Byte value)
 
 	if (address >= 0x8000 && address < 0xA000)
 	{
-		//		if (VEBEKA == 1)
-		//		{
-		//			_lcdMemoryBank_1[address - 0x8000] = value;
-		//			return ;
-		//		}
-		//		else
-		//		{
-		_lcdMemoryBank_0[address - 0x8000] = value;
-		return ;
-		//		}
+		if (_vbk == 0)
+		{
+			_lcdMemoryBank_0[address - 0x8000] = value;
+			return ;
+		}
+		else if (_vbk == 1)
+		{
+			_lcdMemoryBank_1[address - 0x8000] = value;
+			return ;
+		}
 	}
 	if (address >= 0xFE00 && address < 0xFEA0)
 	{
@@ -183,7 +182,7 @@ void				PPU::write(Word address, Byte value)
 			_scx = value;
 			break;
 		case 0xFF44:
-			_ly = value;
+			_ly = 0;
 			break;
 		case 0xFF45:
 			_lyc = value;
@@ -198,7 +197,7 @@ void				PPU::write(Word address, Byte value)
 					write(0xFE00 + i, _components.mem_bus->read<Byte>(dmaAddr + i));
 				}
 			}
-			else if (2) // IS CGB
+			else if (2) // IS CGB oh boi its the hdma stuff yay
 			{
 
 			}
@@ -293,16 +292,16 @@ Byte				PPU::read(Word address) const
 
 	if (address >= 0x8000 && address < 0xA000)
 	{
-		//		if (VEBEKA == 1)
-		//		{
-		//			ret = _lcdMemoryBank_1[address - 0x8000];
-		//			return (ret) ;
-		//		}
-		//		else
-		//		{
-		ret = _lcdMemoryBank_0[address - 0x8000];
-		return (ret);
-		//		}
+		if (testBit(_vbk, 0) == false)
+		{
+				ret = _lcdMemoryBank_0[address - 0x8000];
+				return (ret) ;
+		}
+		else if (testBit(_vbk, 0) == true)
+		{
+			ret = _lcdMemoryBank_1[address - 0x8000];
+			return (ret);
+		}
 	}
 	if (address >= 0xFE00 && address < 0xFEA0)
 	{
@@ -414,13 +413,13 @@ uint8_t				PPU::readMemBank(uint8_t bank, uint16_t address)
 
 	if (bank == 0)
 	{
-		_components.mem_bus->write(0xFF4F, 0);
-		ret = _components.mem_bus->read<Byte>(address); // in screen !!
+		_vbk = 0;
+		ret = read(address); // in screen !!
 	}
 	else if (bank == 1)
 	{
-		_components.mem_bus->write(0xFF4F, 1);
-		ret = _components.mem_bus->read<Byte>(address); // in screen !!
+		_vbk = 1;
+		ret = read(address); // in screen !!
 	}
 	return (ret);
 }
@@ -428,7 +427,7 @@ uint8_t				PPU::readMemBank(uint8_t bank, uint16_t address)
 //------------------------------------------------------------------------------
 bool				PPU::isLCDEnabled()
 {
-	if (testBit(_components.mem_bus->read<Byte>(0xFF40), 7))
+	if (testBit(_lcdc, 7))
 		return (true);
 	return (false);
 }
@@ -500,14 +499,14 @@ void				PPU::getSpritesForLine() // takes up to MAX_SPRITE_PER_LINE sprites and 
 	for (int sprite = 0; sprite < 40; sprite++)
 	{
 		spriteAttributesOffset = sprite * 4; // 4 bytes of attributes data per sprite;
-		yPosTmp = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset); // in screen !!
-		xPosTmp = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 1); // in screen !!
+		yPosTmp = read(spriteAttributesTableStart + spriteAttributesOffset); // in screen !!
+		xPosTmp = read(spriteAttributesTableStart + spriteAttributesOffset + 1); // in screen !!
 		if (_ly >= yPosTmp && (_ly < (yPosTmp + _spriteSize)) && xPosTmp != 0) // IMPORTANT : _spriteSize here might be a flat 16 instead !
 		{
 			_spritesLine[_nbSprites].yPos = yPosTmp; // -16 !!!!
 			_spritesLine[_nbSprites].xPos = xPosTmp; // -8 !!!!
-			_spritesLine[_nbSprites].tileNumber = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 2); // the number of the tile data we have to read<Byte> for pixel values
-			_spritesLine[_nbSprites].flags = _components.mem_bus->read<Byte>(spriteAttributesTableStart + spriteAttributesOffset + 3); // for flips and other datas
+			_spritesLine[_nbSprites].tileNumber = read(spriteAttributesTableStart + spriteAttributesOffset + 2); // the number of the tile data we have to read for pixel values
+			_spritesLine[_nbSprites].flags = read(spriteAttributesTableStart + spriteAttributesOffset + 3); // for flips and other datas
 			_spritesLine[_nbSprites].objNumber = sprite;
 			_nbSprites++;
 		}
@@ -527,26 +526,24 @@ void				PPU::replacePixelSegment(t_pixelSegment &holder, t_pixelSegment &contend
 //------------------------------------------------------------------------------
 void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 {
-	// tmp
+	// note : we assume that contender is always a sprite because we first render all tiles (which cannot intersect)
 
 	if (1) // is DMG
 	{
-		if (holder.isSprite == false) // VS background
+		if (holder.isSprite == false) // sprite VS background
 		{
-			if (contender.isSprite == true // contender is a sprite
-					&& testBit(contender.spriteInfo.flags, 7) == false // sprite has priority to BG
-					&& contender.value > 0) // == not transparent pixel
+			if (testBit(contender.spriteInfo.flags, 7) == false // contender sprite has priority to BG
+					&& contender.value > 0) // == not transparent pixel | value 0 is always transparent for sprites
 			{
 				replacePixelSegment(holder, contender);
 			}
-			else if (contender.isSprite == true // contender is a sprite
-					&& testBit(contender.spriteInfo.flags, 7) == true // sprite does not have priority to BG
+			else if (testBit(contender.spriteInfo.flags, 7) == true // contender sprite does not have priority to BG
 					&& _backgroundDMGPalette[holder.value] == 0) // background is transparent;
 			{
 				replacePixelSegment(holder, contender);
 			}
 		}
-		else if (holder.isSprite == true) // VS sprite
+		else if (holder.isSprite == true) // sprite VS sprite
 		{
 			if (holder.value == 0 && contender.value != 0) // transparent pixel vs not transparent
 				replacePixelSegment(holder, contender);
@@ -564,7 +561,7 @@ void				PPU::blendPixels(t_pixelSegment &holder, t_pixelSegment &contender)
 
 	else if (2) // is CGB
 	{
-
+		
 	}
 }
 
@@ -579,11 +576,12 @@ void				PPU::renderSprites()
 
 		int		spriteLine = _ly - _spritesLine[sprite].yPos; // which line of the sprite does the scanline go through ?
 		if (yFlip == true)
-			spriteLine = (spriteLine - _spriteSize) * (-1);
+			spriteLine = (spriteLine - (_spriteSize - 1)) * (-1);
 		uint16_t	tileLineDataAddress = (_spriteDataStart + (_spritesLine[sprite].tileNumber * 16)) + spriteLine;
 
-		uint8_t data1 = _components.mem_bus->read<Byte>(tileLineDataAddress);
-		uint8_t data2 = _components.mem_bus->read<Byte>(tileLineDataAddress + 1);
+		_vbk = testBit(_spritesLine[sprite].flags, 3) == true ? 1 : 0;
+		uint8_t data1 = read(tileLineDataAddress);
+		uint8_t data2 = read(tileLineDataAddress + 1);
 
 		for (int pixel = 0; pixel < 8; pixel++)
 		{
@@ -603,7 +601,6 @@ void				PPU::renderSprites()
 				contender.value = colorID;
 				contender.isSprite = true;
 				contender.spriteInfo = _spritesLine[sprite];
-
 				blendPixels(_pixelPipeline[contender.spriteInfo.xPos], contender);
 			}
 		}
@@ -614,13 +611,19 @@ void				PPU::renderSprites()
 uint16_t			PPU::getTileDataAddress(uint8_t tileIdentifier)
 {
 	uint8_t		offset = 128;
-	uint8_t		tileMemorySize = 16;
+	uint8_t		tileMemorySize = 16; // 2 bytes per line of pixels
 	uint16_t	tileDataAddress;
+
+	if (_spriteSize == 16)
+		unsetBit(tileIdentifier, 0);
 
 	if (_unsignedTileNumbers == true)
 		tileDataAddress = _backgroundDataStart + (tileIdentifier * tileMemorySize);
 	else
-		tileDataAddress = _backgroundDataStart + ((tileIdentifier + offset) * tileMemorySize);
+	{
+		tileIdentifier += offset; // overflow dat shitzlle
+		tileDataAddress = _backgroundDataStart + (tileIdentifier * tileMemorySize);
+	}
 	return (tileDataAddress);
 }
 
@@ -650,7 +653,7 @@ void				PPU::renderTiles()
 	uint16_t		tileNumberAddress; // from tileNumberAddress we get the tileNumber (in BG display Data)
 	uint8_t			tileNumber; // from BG display data we get tileNumber
 	uint16_t		tileLocation; // from tileNumber we deduce where the data for each pixel of the tile starts
-//	uint8_t			tileAttr; // needed for CGB, same location as tileNumberAddress in the BG display Data except in the Bank 1 
+	uint8_t			tileAttr = 0; // needed for CGB, same location as tileNumberAddress in the BG display Data except in the Bank 1 
 
 	for (int i = 0; i < 160; i++)
 	{
@@ -668,17 +671,14 @@ void				PPU::renderTiles()
 			yPos = _scy + _ly;
 		}
 		tileNumberAddress = determineTileNumberAddress(yPos, xPos, boiItsaWindow);
-		//if (CGB)
-		//	tileAttr =
+		_vbk = 0;
+		tileNumber = read(tileNumberAddress);
 
-		if (_unsignedTileNumbers)
-		{
-			tileNumber = (uint8_t)read(tileNumberAddress);
-		}
-		else
-		{
-			tileNumber = (int8_t)read(tileNumberAddress);
-		}
+		//if (CGB)
+		//{
+		//	_vbk = 1
+		//	tileAttr = read(tileNumberAddress);
+		//}
 
 		tileLocation = getTileDataAddress(tileNumber);
 
@@ -693,6 +693,10 @@ void				PPU::renderTiles()
 		//}
 
 		uint16_t		tileLine = (pixelLineInTile * 2);						// 16 bits (2 bytes) per 8 pixels, get the right horizontal line of pixels
+		if (testBit(tileAttr, 3) == true)
+			_vbk = 1;
+		else
+			_vbk = 0;
 		uint8_t			firstByte = read(tileLocation + tileLine);
 		uint8_t			secondByte = read(tileLocation + tileLine + 1);
 
@@ -707,7 +711,7 @@ void				PPU::renderTiles()
 		_pixelPipeline[i].value = colorID;
 		_pixelPipeline[i].isSprite = false;
 		_pixelPipeline[i].spriteInfo.tileNumber = tileNumber;
-		//_pixelPipeline[i].spriteinfo.flags = tileAttr;
+		_pixelPipeline[i].spriteInfo.flags = tileAttr;
 	}
 }
 
@@ -811,37 +815,16 @@ void					PPU::translatePalettes()
 {
 	if (1 /* IS_DMG */)
 	{
-		_backgroundDMGPalette[0] = extractValue(_bgp, 0, 1);
-		_backgroundDMGPalette[1] = extractValue(_bgp, 2, 3);
-		_backgroundDMGPalette[2] = extractValue(_bgp, 4, 5);
-		_backgroundDMGPalette[3] = extractValue(_bgp, 6, 7);
+		for (int i = 0; i < 4; i++)
+		{
+			_backgroundDMGPalette[i] = extractValue(_bgp, i * 2, i * 2 + 1);
+			_backgroundDMGPalette_translated[i] = translateDMGColorValue(extractValue(_bgp, i * 2, i * 2 + 1));
 
-		_backgroundDMGPalette_translated[0] = translateDMGColorValue(extractValue(_bgp, 0, 1));
-		_backgroundDMGPalette_translated[1] = translateDMGColorValue(extractValue(_bgp, 2, 3));
-		_backgroundDMGPalette_translated[2] = translateDMGColorValue(extractValue(_bgp, 4, 5));
-		_backgroundDMGPalette_translated[3] = translateDMGColorValue(extractValue(_bgp, 6, 7));
-
-
-		_spritesDMGPalettes[0][0] = extractValue(_obp0, 0, 1);
-		_spritesDMGPalettes[0][1] = extractValue(_obp0, 2, 3);
-		_spritesDMGPalettes[0][2] = extractValue(_obp0, 4, 5);
-		_spritesDMGPalettes[0][3] = extractValue(_obp0, 6, 7);
-
-		_spritesDMGPalettes[1][0] = extractValue(_obp1, 0, 1);
-		_spritesDMGPalettes[1][1] = extractValue(_obp1, 2, 3);
-		_spritesDMGPalettes[1][2] = extractValue(_obp1, 4, 5);
-		_spritesDMGPalettes[1][3] = extractValue(_obp1, 6, 7);
-
-
-		_spritesDMGPalettes_translated[0][0] = translateDMGColorValue(extractValue(_obp0, 0, 1));
-		_spritesDMGPalettes_translated[0][1] = translateDMGColorValue(extractValue(_obp0, 2, 3));
-		_spritesDMGPalettes_translated[0][2] = translateDMGColorValue(extractValue(_obp0, 4, 5));
-		_spritesDMGPalettes_translated[0][3] = translateDMGColorValue(extractValue(_obp0, 6, 7));
-
-		_spritesDMGPalettes_translated[1][0] = translateDMGColorValue(extractValue(_obp1, 0, 1));
-		_spritesDMGPalettes_translated[1][1] = translateDMGColorValue(extractValue(_obp1, 2, 3));
-		_spritesDMGPalettes_translated[1][2] = translateDMGColorValue(extractValue(_obp1, 4, 5));
-		_spritesDMGPalettes_translated[1][3] = translateDMGColorValue(extractValue(_obp1, 6, 7));
+			_spritesDMGPalettes[0][i] = extractValue(_obp0, i * 2, i * 2 + 1);
+			_spritesDMGPalettes[1][i] = extractValue(_obp1, i * 2, i * 2 + 1);
+			_spritesDMGPalettes_translated[0][i] = translateDMGColorValue(extractValue(_obp0, i, i * 2 + 1));
+			_spritesDMGPalettes_translated[1][i] = translateDMGColorValue(extractValue(_obp1, i, i * 2 + 1));
+		}
 	}
 
 	if (2 /* IS_CGB */)
@@ -855,13 +838,13 @@ void					PPU::setLCDstatus()
 {
 	uint8_t				statusTmp;
 
-	statusTmp = read(0xFF41);
+	statusTmp = read(STAT);
 	if (isLCDEnabled() == false)
 	{
 		_scanlineCounter = 456;
-		write(0xFF44, 0);
+		_ly = 0;
 		statusTmp &= 252;
-		statusTmp = setBit(statusTmp, 0);
+		setBit(statusTmp, 0);
 		write(0xFF41, statusTmp);
 		return ;
 	}
@@ -870,11 +853,11 @@ void					PPU::setLCDstatus()
 	uint8_t				mode = 0;
 	bool				requestInterruptFlag = false;
 
-	if (read(0xFF44) >= 144)
+	if (_ly >= 144)
 	{
 		mode = 1;
-		statusTmp = setBit(statusTmp, 0);
-		statusTmp = unsetBit(statusTmp, 1);
+		setBit(statusTmp, 0);
+		unsetBit(statusTmp, 1);
 		requestInterruptFlag = testBit(statusTmp, 4);
 	}
 	else
@@ -885,37 +868,37 @@ void					PPU::setLCDstatus()
 		if (_scanlineCounter >= mode2Bounds)
 		{
 			mode = 2;
-			statusTmp = setBit(statusTmp, 1);
-			statusTmp = unsetBit(statusTmp, 0);
+			setBit(statusTmp, 1);
+			unsetBit(statusTmp, 0);
 			requestInterruptFlag = testBit(statusTmp, 5);
 		}
 		else if (_scanlineCounter >= mode3Bounds)
 		{
 			mode = 3;
-			statusTmp = setBit(statusTmp, 1);
-			statusTmp = setBit(statusTmp, 0);
+			setBit(statusTmp, 1);
+			setBit(statusTmp, 0);
 		}
 		else
 		{
 			mode = 0;
-			statusTmp = unsetBit(statusTmp, 1);
-			statusTmp = unsetBit(statusTmp, 0);
+			unsetBit(statusTmp, 1);
+			unsetBit(statusTmp, 0);
 			requestInterruptFlag = testBit(statusTmp, 3);
 		}
 	}
 
 	if (requestInterruptFlag == true && mode != currentMode)
-		_components.interrupt_controller->request_interrupt(0x0048);
+		_components.interrupt_controller->request_interrupt(InterruptController::LCDCSI);
 
-	if (read(0xFF45))
+	if (_ly == _lyc)
 	{
-		statusTmp = setBit(statusTmp, 2);
+		setBit(statusTmp, 2);
 		if (testBit(statusTmp, 6))
-			_components.interrupt_controller->request_interrupt(0x0048);
+			_components.interrupt_controller->request_interrupt(InterruptController::LCDCSI);
 	}
 	else
 	{
-		statusTmp = unsetBit(statusTmp, 2);
+		unsetBit(statusTmp, 2);
 	}
 	write(0xFF41, statusTmp);
 }
@@ -942,7 +925,7 @@ void					PPU::updateGraphics(Word cycles)
 		currentScanline = _ly;
 		_scanlineCounter = 456;
 		if (currentScanline == 144)
-			_components.interrupt_controller->request_interrupt(0x0040);
+			_components.interrupt_controller->request_interrupt(InterruptController::VBI);
 		if (currentScanline > 153)
 			_ly = 0;
 		else if (currentScanline < 144)
