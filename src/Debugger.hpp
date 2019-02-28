@@ -37,7 +37,7 @@ private:
   ComponentsContainer &_components;
   int _duration;
   bool _enabled;
-  bool _lock = true;
+  std::atomic_bool _lock;
   bool _run_one_frame = false;
   bool _run_duration = false;
   bool _run_one_step = false;
