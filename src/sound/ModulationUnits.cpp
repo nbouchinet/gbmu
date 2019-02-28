@@ -5,10 +5,12 @@
 namespace sound {
 
 bool SweepUnit::call() {
-  if (not _enabled or _current_period-- != 0 or _sweep_period == 0) return true;
+  if (not _enabled or --_current_period != 0 or _sweep_period == 0) {
+    return true;
+  }
   _current_period = _sweep_period;
   unsigned int new_freq = _frequency + (_frequency >> _shift) * -_negate;
-  if (new_freq > 0x7f) return false;
+  if (new_freq > 0x7ff) return false;
   _frequency = new_freq;
   return true;
 }
@@ -20,9 +22,7 @@ void SweepUnit::trigger() {
 
 bool LengthUnit::call() {
   if (not _enabled) return true;
-  std::cerr<< +_length<<"\n";
-  if (_length == 0) return false;
-  --_length;
+  if (--_length == 0) return false;
   return true;
 }
 
@@ -32,17 +32,19 @@ void LengthUnit::trigger() {
 
 bool EnvelopeUnit::call() {
   if (not _enabled) return true;
-  if (_current_period-- != 0 or _period == 0) return true;
+  if (--_current_period != 0 or _period == 0) return true;
   _current_period = _period;
-  if (_volume > SoundChannel::MaxVolume)
+  Byte new_vol = _volume + ((_negate) ? -1 : 1);
+  if (new_vol > SoundChannel::MaxVolume)
     _enabled = false;
   else
-    _volume += (_negate) ? -1 : 1;
+    _volume = new_vol;
   return true;
 }
 
 void EnvelopeUnit::trigger()  {
   _current_period = _period;
+  _enabled = _period != 0;
 }
 
 }  // namespace sound

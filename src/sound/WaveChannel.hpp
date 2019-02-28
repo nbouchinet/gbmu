@@ -24,14 +24,14 @@ class WaveChannel : public SoundChannel {
 
   LengthUnit _length;
 
+  void do_update() override;
+  void do_trigger() override;
+
  public:
   WaveChannel(VolumeTable& table) : _table(table), _length(255) {
     bind_module(&_length);
   }
   WaveChannel() = delete;
-
-  void do_update() override;
-  void do_trigger() override;
 
   void write(Word addr, Byte v) override;
   Byte read(Word addr) const override;

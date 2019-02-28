@@ -23,6 +23,9 @@ class SquareChannel : public SoundChannel {
 
   bool _sweep_enabled;
 
+  void do_update() override;
+  void do_trigger() override;
+
  public:
   SquareChannel(bool sweep_enabled = true)
       : _sweep(_timer),
@@ -33,9 +36,6 @@ class SquareChannel : public SoundChannel {
     bind_module(&_length);
     bind_module(&_envelope);
   }
-
-  void do_update() override;
-  void do_trigger() override;
 
   void write(Word addr, Byte v) override;
   Byte read(Word addr) const override;

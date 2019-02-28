@@ -32,14 +32,20 @@ class SweepUnit : public IModulationUnit {
   Byte trigger_steps() const override { return 0b00100010; }
 
   Byte get_register() const {
-    return (_sweep_period << 5) | (_negate << 3) | _shift;
+    return (_sweep_period << 4) | (_negate << 3) | _shift;
   }
 
   void set_register(Byte v) {
-    _sweep_period = v & 0x70;
-    _negate = v & 0x08;
+    _sweep_period = (v & 0x70) >> 4;
+    _negate = (v & 0x08) >> 3;
     _shift = v & 0x07;
   }
+
+  auto sweep_period() const { return _sweep_period; }
+  auto negate() const { return _negate; }
+  auto shift() const { return _shift; }
+  auto current_period() const { return _current_period; }
+  auto is_enabled() const { return _enabled; }
 
   bool call() override;
   void trigger() override;
@@ -81,6 +87,8 @@ class EnvelopeUnit : public IModulationUnit {
   void set_negate(bool v) { _negate = v; }
   void set_period(Byte v) { _period = v; }
   bool does_negate() const { return _negate; }
+  
+  auto is_enabled() const { return _enabled; }
   auto period() const { return _period; }
 
   bool call() override;

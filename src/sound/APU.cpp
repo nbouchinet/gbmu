@@ -50,11 +50,6 @@ void APU::update_clock() {
         fetch_and_mix_samples((_channel_to_terminal_output & 0xf0) >> 4, lvol);
 
     if (_output_index >= AudioInterface::SamplesTableSize) {
-      //std::cerr << "---------\n";
-      //for (auto& e : _left_output) {
-      //  std::cerr << e << ", ";
-      //}
-      //exit(1);
       while (not _audio_interface->queue_stereo_samples(_right_output,
                                                         _left_output))
         ;

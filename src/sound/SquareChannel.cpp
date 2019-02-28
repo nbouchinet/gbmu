@@ -49,7 +49,7 @@ void SquareChannel::write(Word addr, Byte v) {
       break;
     case 0x4:
       _length.enable((v & 0x40) >> 6);
-      _frequency |= static_cast<Word>(v & 0x7) << 8;
+      _frequency = (static_cast<Word>(v & 0x7) << 8) | (_frequency & 0xff);
       if (v & 0x80) trigger();
       break;
   }

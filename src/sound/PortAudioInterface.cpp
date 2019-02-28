@@ -16,7 +16,7 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
                                  const PaStreamCallbackTimeInfo*,
                                  PaStreamCallbackFlags) {
   if (_lock) return paContinue;
- // std::cerr << "b\n";
+  // std::cerr << "b\n";
   _lock = true;
   assert(output_buffer != nullptr);
   float** out = static_cast<float**>(output_buffer);
@@ -50,8 +50,8 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
                                               const MonoSamples& left) {
   if (_lock or _cursor < SamplesTableSize) return false;
   _lock = true;
- // for (auto & e : right)
- //   std::cerr << e << ", ";
+  // for (auto & e : right)
+  //   std::cerr << e << ", ";
   _right_output = right;
   _left_output = left;
   _cursor = 0;
@@ -59,9 +59,9 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   return true;
 }
 
-float PortAudioInterface::mix(const std::vector<float>& samples, float ) const {
+float PortAudioInterface::mix(const std::vector<float>& samples, float) const {
   float ret = 0.f;
-  for (const auto &sample : samples) {
+  for (const auto& sample : samples) {
     ret += sample / samples.size();
   }
   return ret;
