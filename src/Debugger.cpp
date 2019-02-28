@@ -9,7 +9,8 @@
 #include <unistd.h>
 #include <vector>
 
-Debugger::Debugger(ComponentsContainer &components) : _components(components) {
+Debugger::Debugger(ComponentsContainer &components)
+    : _components(components), _lock(true) {
   _enabled = false;
   _register_pool = construct_register_pool();
 }
@@ -102,18 +103,25 @@ uint16_t Debugger::get_register_value(uint16_t addr) {
   switch (addr) {
   case 0:
     value = _components.core->pc();
+    break;
   case 1:
     value = _components.core->af().word;
+    break;
   case 2:
     value = _components.core->bc().word;
+    break;
   case 3:
     value = _components.core->de().word;
+    break;
   case 4:
     value = _components.core->hl().word;
+    break;
   case 5:
     value = _components.core->sp();
+    break;
   default:
     value = _components.mem_bus->read<Byte>(addr);
+    break;
   }
   return value;
 }
@@ -122,9 +130,9 @@ void Debugger::add_watchpoint(uint16_t addr, int w_value) {
   uint16_t value = get_register_value(addr);
 
   auto compare =
-      [&](const std::pair<uint16_t, _watchpoint_value> &pair) -> bool {
-    return pair.first == addr && pair.second.r_value == value &&
-           pair.second.w_value == w_value;
+      [&](const std::pair<uint16_t, _watchpoint_value> pair) -> bool {
+    return ((pair.first == addr && w_value == -1) ||
+            (pair.first == addr && pair.second.w_value == w_value));
   };
 
   if (std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare) ==
@@ -135,16 +143,17 @@ void Debugger::add_watchpoint(uint16_t addr, int w_value) {
 }
 
 void Debugger::remove_watchpoint(uint16_t addr, int w_value) {
-  uint16_t value = get_register_value(addr);
-
   auto compare =
-      [&](const std::pair<uint16_t, _watchpoint_value> &pair) -> bool {
-    return pair.first == addr && pair.second.r_value == value &&
-           pair.second.w_value == w_value;
+      [&](const std::pair<uint16_t, _watchpoint_value> pair) -> bool {
+    return ((pair.first == addr && w_value == -1) ||
+            (pair.first == addr && pair.second.w_value == w_value));
   };
 
-  _watchpoint_pool.erase(
-      std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare));
+  auto it =
+      std::find_if(_watchpoint_pool.begin(), _watchpoint_pool.end(), compare);
+  if (it != _watchpoint_pool.end()) {
+    _watchpoint_pool.erase(it);
+  }
 }
 
 bool Debugger::watchpoint_changed() {
@@ -153,7 +162,7 @@ bool Debugger::watchpoint_changed() {
   for (auto value : _watchpoint_pool) {
     auto register_value = get_register_value(value.first);
 
-    if ((value.second.w_value != -1 &&
+    if ((value.second.w_value == -1 &&
          value.second.r_value != register_value) ||
         (value.second.w_value == register_value)) {
       value.second.r_value = register_value;
@@ -253,19 +262,19 @@ void Debugger::run_duration(int duration) {
   _duration = duration;
   _past = std::chrono::high_resolution_clock::now();
   _run_duration = true;
-  _lock = false;
+  _lock.store(false);
 }
 
 void Debugger::run_one_frame() {
   _register_pool = construct_register_pool();
   _run_one_frame = true;
-  _lock = false;
+  _lock.store(false);
 }
 
 void Debugger::run_one_step() {
   _register_pool = construct_register_pool();
   _run_one_step = true;
-  _lock = false;
+  _lock.store(false);
 }
 
 bool Debugger::is_step_passed() {
