@@ -665,7 +665,7 @@ case 0xe1:
   exec_instruction([&] () { instr_pop(_hl.word); }, 12);
   break;
 case 0xe2:
-  exec_instruction([&] (Byte &v) { instr_ld(v, _af.high); }, _bc.low, 8);
+  exec_instruction([&] (Byte &v) { instr_ld(v, _af.high); }, 0xFF00 + _bc.low, 8);
   break;
 case 0xe5:
   exec_instruction([&] () { instr_push(_hl.word); }, 16);
@@ -698,7 +698,7 @@ case 0xf1:
   exec_instruction([&] () { instr_pop(_af.word); }, 12);
   break;
 case 0xf2:
-  exec_instruction([&] (Byte &v) { instr_ld(_af.high, v); }, _bc.low, 8);
+  exec_instruction([&] (Byte &v) { instr_ld(_af.high, v); }, 0xFF00 + _bc.low, 8);
   break;
 case 0xf3:
   exec_instruction([&] () { instr_di(); }, 4);
