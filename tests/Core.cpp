@@ -456,7 +456,7 @@ TEST_F(TestCoreFixture, dec) {
     accessor.core.instr_dec(a);
     EXPECT_TRUE(accessor.core.get_flag(Core::Flags::N));
     EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), a == 0);
-    EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), (tmp & 0xf0u) == 0xfu);
+    EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), (tmp & 0x0f) == 0);
     ASSERT_EQ(a, tmp - 1);
   }
 }
