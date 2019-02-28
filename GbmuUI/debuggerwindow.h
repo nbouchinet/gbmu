@@ -27,7 +27,9 @@ public:
 	void refresh_info();
 	void refresh_registers();
 	void refresh_instr();
+	void refresh_memory_map();
 	void addBreakpoint();
+	void add_watchpoint(const QString &label, const QString &addrText);
 	bool duplicateInListWidgetItem(const QString &value, const QListWidget *list);
 
 private slots:
@@ -38,12 +40,12 @@ private slots:
 	void on_breakpointsEdit_editingFinished();
 	void on_deleteBreakpointButton_clicked();
 	void on_DebuggerWindow_rejected();
-    void on_registersWidget_cellClicked(int row, int column);
-    void on_registersWidget_itemClicked(QTableWidgetItem *item);
 	void on_deleteWatchpointButton_clicked();
+	void on_memoryLineEdit_editingFinished();
 
 private:
     Ui::DebuggerWindow *ui;
+	uint16_t			_addr_memory_map;
 };
 
 #endif // DEBUGGERWINDOW_H
