@@ -344,7 +344,7 @@ public:
   bool get_run_duration() const { return _run_duration; }
   bool get_run_frame() const { return _run_one_frame; }
   bool get_run_step() const { return _run_one_step; }
-  bool get_lock() const { return _lock; }
+  bool get_lock() const { return _lock.load(); }
 
 private:
   void reset_flags();
