@@ -109,8 +109,26 @@ void Core::instr_xor(Byte &a, Byte b) {
 }
 
 void Core::instr_cp(Byte &a, Byte b) {
-  Byte tmp = a;
-  instr_sub(tmp, b);
+  Byte reg = a;
+  Byte before = reg;
+  Byte to_substract = b;
+
+  reg -= to_substract;
+
+  _af.low = 0;
+
+  if (reg == 0)
+    set_flag(Flags::Z, true);
+
+  set_flag(Flags::N, true);
+
+  if (before < to_substract)
+    set_flag(Flags::C, true);
+
+  int16_t htest = before & 0xF;
+  htest -= (to_substract & 0xF);
+  if (htest < 0)
+    set_flag(Flags::H, true);
 }
 
 // ----------------------------------------------------------------------------
