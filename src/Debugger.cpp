@@ -223,11 +223,11 @@ std::vector<uint16_t> Debugger::construct_register_pool() {
   return rpool;
 }
 
-const std::vector<Byte> Debugger::get_memory_dump(Byte address) const {
+const std::vector<Byte> Debugger::get_memory_dump(Word address) const {
   std::vector<Byte> memory_dump;
 
   for (int i = 0; i < 160; i++) {
-    if (address + i < 0xFFFF) {
+    if (address + i <= 0xFFFF) {
       memory_dump.push_back(_components.mem_bus->read<Byte>(address + i));
     }
   }

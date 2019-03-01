@@ -328,7 +328,7 @@ public:
   const std::vector<uint16_t> &get_register_pool() const {
     return _register_pool;
   }
-  const std::vector<Byte> get_memory_dump(Byte address) const;
+  const std::vector<Byte> get_memory_dump(Word address) const;
 
   // event trigger
   void add_breakpoint(uint16_t addr);

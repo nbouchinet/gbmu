@@ -31,6 +31,8 @@ public:
 	void addBreakpoint();
 	void add_watchpoint(const QString &label, const QString &addrText);
 	bool duplicateInListWidgetItem(const QString &value, const QListWidget *list);
+	void reset_color(QTableWidget *widget, int column);
+	inline QString qstring_hex_pad(uint32_t value, int padding);
 
 private slots:
     void on_stepButton_clicked();
