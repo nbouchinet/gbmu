@@ -12,6 +12,7 @@ class IReadWrite;
 class Core;
 class Cartridge;
 class InterruptController;
+class InputController;
 class Timer;
 class LCDRegisters;
 class UnitWorkingRAM;
