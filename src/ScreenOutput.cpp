@@ -1,23 +1,33 @@
-#include "ScreenOutput.class.h"
+#include "ScreenOutput.hpp"
 
 //------------------------------------------------------------------------------
 ScreenOutput::ScreenOutput()
 {
-	if (_debug_ScreenOutput == true)
-		std::cerr << "[ScreenOutput default constructor called]" << std::endl;
+	reset_screen();
 	return;
 }
 
 //------------------------------------------------------------------------------
 ScreenOutput::~ScreenOutput()
 {
-	if (_debug_ScreenOutput == true)
-		std::cerr << "[ScreenOutput destructor called]" << std::endl;
 	return;
 }
 
 //==============================================================================
-uint8_t					ScreenOutput::getR(uint8_t y, uint8_t x) const
+void					ScreenOutput::reset_screen()
+{
+	for (int y = 0; y < LCD_HEIGHT; y++)
+	{
+		for (int x = 0; x < LCD_WIDTH; x++)
+		{
+			set_rgba(y, x, 0xFFFFFFFF);
+		}
+	}
+	return;
+}
+
+//------------------------------------------------------------------------------
+uint8_t					ScreenOutput::get_r(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -26,13 +36,13 @@ uint8_t					ScreenOutput::getR(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = screen[y][x] & 0xFF000000;
+	tmp = _screen[y][x] & 0xFF000000;
 	tmp = tmp >> 24;
 	return (static_cast<uint8_t>(tmp));
 }
 
 //------------------------------------------------------------------------------
-uint8_t					ScreenOutput::getG(uint8_t y, uint8_t x) const
+uint8_t					ScreenOutput::get_g(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -41,13 +51,13 @@ uint8_t					ScreenOutput::getG(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = screen[y][x] & 0x00FF0000;
+	tmp = _screen[y][x] & 0x00FF0000;
 	tmp = tmp >> 16;
 	return (static_cast<uint8_t>(tmp));
 }
 
 //------------------------------------------------------------------------------
-uint8_t					ScreenOutput::getB(uint8_t y, uint8_t x) const
+uint8_t					ScreenOutput::get_b(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -56,14 +66,14 @@ uint8_t					ScreenOutput::getB(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = screen[y][x] & 0x0000FF00;
+	tmp = _screen[y][x] & 0x0000FF00;
 	tmp = tmp >> 8;
 
 	return (static_cast<uint8_t>(tmp));
 }
 
 //------------------------------------------------------------------------------
-uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x) const
+uint8_t					ScreenOutput::get_a(uint8_t y, uint8_t x) const
 {
 	uint32_t			tmp;
 
@@ -72,52 +82,48 @@ uint8_t					ScreenOutput::getA(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = screen[y][x] & 0x000000FF;
+	tmp = _screen[y][x] & 0x000000FF;
 
 	return (static_cast<uint8_t>(tmp));
 }
 
 //------------------------------------------------------------------------------
-uint32_t				ScreenOutput::getRGBA(uint8_t y, uint8_t x) const
+uint32_t				ScreenOutput::get_rgba(uint8_t y, uint8_t x) const
 {
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
 		throw (OutOfScreenException());
 	}
-	return (screen[y][x]);
+	return (_screen[y][x]);
 }
 
 //------------------------------------------------------------------------------
-void					ScreenOutput::setRGBA(uint8_t y, uint8_t x, uint32_t rgba)
+void					ScreenOutput::set_rgba(uint8_t y, uint8_t x, uint32_t rgba)
 {
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
 		throw (OutOfScreenException());
 	}
-	screen[y][x] = rgba;
+	_screen[y][x] = rgba;
 }
 
 //------------------------------------------------------------------------------
-void					ScreenOutput::setRGBA(uint8_t y, uint8_t x, uint8_t R, uint8_t G, uint8_t B, uint8_t A)
+void					ScreenOutput::set_rgba(uint8_t y, uint8_t x, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
 {
-	uint32_t			rPart;
-	uint32_t			gPart;
-	uint32_t			bPart;
+	uint32_t			r_part;
+	uint32_t			g_part;
+	uint32_t			b_part;
 
 	if (y >= LCD_HEIGHT && x >= LCD_WIDTH)
 	{
 		throw (OutOfScreenException());
 	}
 
-	rPart = ((static_cast<uint32_t>(R)) << 24);
-	gPart = ((static_cast<uint32_t>(G)) << 16);
-	bPart = ((static_cast<uint32_t>(B)) << 8);
+	r_part = ((static_cast<uint32_t>(r)) << 24);
+	g_part = ((static_cast<uint32_t>(g)) << 16);
+	b_part = ((static_cast<uint32_t>(b)) << 8);
 
-	screen[y][x] = (rPart + gPart + bPart + A);
+	_screen[y][x] = (r_part + g_part + b_part + a);
 }
 
 //==============================================================================
-void					ScreenOutput::switchScreenOutputDebug(bool status) { ScreenOutput::_debug_ScreenOutput = status; }
-
-//------------------------------------------------------------------------------
-bool					ScreenOutput::_debug_ScreenOutput = false;

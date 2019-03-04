@@ -6,7 +6,7 @@ OBJ_FILES_src := Bios.o \
                  Gameboy.o \
                  main.o \
                  MemoryBus.o \
-                 PPU.class.o \
-                 ScreenOutput.class.o
+                 PPU.o \
+                 ScreenOutput.o
 
 OBJECTS += $(patsubst %, src/$(OBJECT_DIR)/%, $(OBJ_FILES_src))

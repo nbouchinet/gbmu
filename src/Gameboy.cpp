@@ -42,7 +42,7 @@ void Gameboy::step() {
   _components.core->execute(_begin);
   _components.interrupt_controller->parse_interrupt();
   _components.timer->update(_components.core->cycles());
-  _components.ppu->updateGraphics(_components.core->cycles());
+  _components.ppu->update_graphics(_components.core->cycles());
 }
 
 int Gameboy::run() {
