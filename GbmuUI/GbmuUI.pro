@@ -58,9 +58,10 @@ SOURCES += \
 	src/Debugger.cpp \
 	src/Gameboy.cpp \
 	src/MemoryBus.cpp \
-	src/PPU.class.cpp \
-	src/ScreenOutput.class.cpp \
+	src/PPU.cpp \
+	src/ScreenOutput.cpp \
 	src/cpu/Core.cpp \
+	src/cpu/CoreExecute.cpp \
 	src/cpu/InputController.cpp \
 	src/cpu/InterruptController.cpp \
 	src/cpu/Timer.cpp
@@ -79,9 +80,9 @@ HEADERS += \
 	src/MemoryBankController3.hpp \
 	src/MemoryBankController5.hpp \
 	src/MemoryBus.hpp \
-	src/PPU.class.h \
+	src/PPU.hpp \
 	src/RealTimeClock.hpp \
-	src/ScreenOutput.class.h \
+	src/ScreenOutput.hpp \
 	src/UnitWorkingRAM.hpp \
 	src/cpu/Core.hpp \
 	src/cpu/InputController.hpp \

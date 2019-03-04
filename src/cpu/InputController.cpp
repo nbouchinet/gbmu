@@ -26,6 +26,6 @@ Byte InputController::read(Word addr) const{
 void InputController::handle_input(Byte val)
 {
 	this->write(0xFF00, val);
-	_components.interrupt_controller->RequestInterrupt(InterruptController::JOYI);
-	_components.interrupt_controller->ExecuteInterrupt(InterruptController::JOYI);
+	_components.interrupt_controller->request_interrupt(InterruptController::JOYI);
+	_components.interrupt_controller->request_interrupt(InterruptController::JOYI);
 }

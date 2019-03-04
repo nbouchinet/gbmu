@@ -251,7 +251,7 @@ bool Debugger::on_breakpoint(uint16_t pc) {
 }
 
 bool Debugger::is_frame_passed() {
-  if (_run_one_frame && _components.ppu->isScreenFilled()) {
+  if (_run_one_frame && _components.ppu->is_screen_filled()) {
     reset_flags();
     return true;
   }

@@ -11,7 +11,7 @@
 #include <QKeyEvent>
 #include <QThread>
 
-Gameboy g_gameboy("/Users/hublanc/Documents/gbInput/tools/Tetris.gb");
+Gameboy g_gameboy("./tools/Tetris.gb");
 QMutex mutexGb;
 
 #include <iostream>
