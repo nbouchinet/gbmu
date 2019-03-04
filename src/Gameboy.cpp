@@ -40,8 +40,8 @@ void Gameboy::step() {
     _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
   }
   _components.core->execute(_begin);
-  _components.interrupt_controller->ParseInterrupt();
-  _components.timer->Update(_components.core->cycles());
+  _components.interrupt_controller->parse_interrupt();
+  _components.timer->update(_components.core->cycles());
   _components.ppu->updateGraphics(_components.core->cycles());
 }
 

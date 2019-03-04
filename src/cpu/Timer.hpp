@@ -26,13 +26,13 @@ class Timer : public IReadWrite {
   Byte read(Word addr) const override;
   void write(Word addr, Byte val) override;
 
-  auto GetFrequence() const { return read(TAC) & 0x3; }
-  auto GetCounter() const { return _counter; }
-  void UpdateDivider(Word cycles);
-  bool TimerEnabled() const { return (_rTAC & 0x4); }
-  void EnableTimer() { _rTAC |= 0x4; }
-  void SetFrequence();
-  void Update(Word cycles);
+  auto get_frequence() const { return read(TAC) & 0x3; }
+  auto get_counter() const { return _counter; }
+  void update_divider(Word cycles);
+  bool timer_enabled() const { return (_rTAC & 0x4); }
+  void enable_timer() { _rTAC |= 0x4; }
+  void set_frequence();
+  void update(Word cycles);
 };
 
 #endif /* TIMER_H */

@@ -35,19 +35,19 @@ void Timer::write(Word addr, uint8_t val) {
       _rTMA = val;
       break;
     case TAC:
-      currentFrequence = GetFrequence();
+      currentFrequence = get_frequence();
       _rTAC = val & 0x7;
-      newFrequence = GetFrequence();
+      newFrequence = get_frequence();
       if (currentFrequence !=
           newFrequence) {  // Check if game try to change frequence
-        SetFrequence();
+        set_frequence();
       }
       break;
   }
 }
 
-void Timer::SetFrequence() {
-  switch (GetFrequence() & 0x3) {
+void Timer::set_frequence() {
+  switch (get_frequence() & 0x3) {
     case 0x0:
       _counter = 0x400;
       break;  // 4
@@ -63,11 +63,11 @@ void Timer::SetFrequence() {
   }
 }
 
-void Timer::Update(Word cycles) {
-  UpdateDivider(cycles);
-  if (TimerEnabled()) {
+void Timer::update(Word cycles) {
+  update_divider(cycles);
+  if (timer_enabled()) {
     _counter -= cycles;
-    if (_counter <= 0) SetFrequence();
+    if (_counter <= 0) set_frequence();
     if (_rTIMA == 255) {  // Check if Timer Counter will overflow
       _rTIMA = _rTMA;     // Load Timer modulator value
       _components.interrupt_controller->RequestInterrupt(
@@ -78,10 +78,10 @@ void Timer::Update(Word cycles) {
   }
 }
 
-void Timer::UpdateDivider(Word cycles) {
+void Timer::update_divider(Word cycles) {
   _rDIVCounter += cycles;
   if (_rDIVCounter >= 255) {
-    _rDIVCounter = 0;
+    _rDIVCounter = _rDIVCounter - 255;
     _rDIV++;
   }
 }
