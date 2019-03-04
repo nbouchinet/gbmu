@@ -60,8 +60,7 @@ public:
   void instr_ldd(Byte &, Byte);
   void instr_ldi(Byte &, Byte);
   void instr_ldhl(Byte a);
-  void instr_ldh_a_v(Byte, Byte &v);
-  void instr_ldh_v_a(Byte &v, Byte);
+  void instr_ldh(Byte &v, Byte b) { instr_ld(v, b); }
   void instr_push(Word v);
   void instr_pop(Word &dest);
 
