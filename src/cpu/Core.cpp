@@ -38,12 +38,6 @@ void Core::instr_ldhl(Byte n) {
   set_flag(Flags::N, false);
 }
 
-// ldh A,(a8)
-void Core::instr_ldh_a_v(Byte, Byte &v) { _af.high = v; }
-
-// ldh (a8),A
-void Core::instr_ldh_v_a(Byte &v, Byte) { v = _af.high; }
-
 // ----------------------------------------------------------------------------
 // Push/pop
 // ----------------------------------------------------------------------------
