@@ -850,13 +850,13 @@ void					PPU::setLCDstatus()
 	}
 
 	if (requestInterruptFlag == true && mode != currentMode)
-		_components.interrupt_controller->RequestInterrupt(0x0048);
+		_components.interrupt_controller->request_interrupt(0x0048);
 
 	if (read(0xFF45))
 	{
 		statusTmp = setBit(statusTmp, 2);
 		if (testBit(statusTmp, 6))
-			_components.interrupt_controller->RequestInterrupt(0x0048);
+			_components.interrupt_controller->request_interrupt(0x0048);
 	}
 	else
 	{
@@ -887,7 +887,7 @@ void					PPU::updateGraphics(Word cycles)
 		currentScanline = _ly;
 		_scanlineCounter = 456;
 		if (currentScanline == 144)
-			_components.interrupt_controller->RequestInterrupt(0x0040);
+			_components.interrupt_controller->request_interrupt(0x0040);
 		if (currentScanline > 153)
 			_ly = 0;
 		else if (currentScanline < 144)

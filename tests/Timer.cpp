@@ -48,11 +48,11 @@ namespace {
 		}
 	}
 
-	TEST(Timer, Update) {
+	TEST(Timer, update) {
 		t.enable_timer();
 		int cycles = 0;
 		for (int i = 0; i <= 42000; i++) {
-			t.Update(cycles);
+			t.update(cycles);
 			cycles += 4;
 		}
 	}

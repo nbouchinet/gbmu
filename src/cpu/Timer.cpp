@@ -70,7 +70,7 @@ void Timer::update(Word cycles) {
     if (_counter <= 0) set_frequence();
     if (_rTIMA == 255) {  // Check if Timer Counter will overflow
       _rTIMA = _rTMA;     // Load Timer modulator value
-      _components.interrupt_controller->RequestInterrupt(
+      _components.interrupt_controller->request_interrupt(
           InterruptController::TOI);  // Request timer overflow interrupt
     } else {
       ++_rTIMA;  // Increment Timer counter
