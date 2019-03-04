@@ -5,8 +5,8 @@
 #include "src/AMemoryBankController.hpp"
 #include "src/Debugger.hpp"
 #include "src/Fwd.hpp"
-#include "PPU.class.h"
-#include "ScreenOutput.class.h"
+#include "src/PPU.hpp"
+#include "src/ScreenOutput.hpp"
 
 #include <memory>
 
@@ -53,7 +53,7 @@ public:
   void init();
   void save(std::string save_name);
   void load_save(std::string save_name);
-  uint32_t get_pixel(uint8_t y, uint8_t x) { return (_components.driver_screen->getRGBA(y, x)); }
+  uint32_t get_pixel(uint8_t y, uint8_t x) { return (_components.driver_screen->get_rgba(y, x)); }
 
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
