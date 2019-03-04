@@ -9,6 +9,27 @@ FORMAT_DOUBLE           = "exec_instruction([&] () {{ instr_{}({}, {}); }}, {})"
 FORMAT_DOUBLE_BYTE      = "exec_instruction([&] (Byte &v) {{ instr_{}({}, {}); }}, {}, {})"
 FORMAT_DOUBLE_WORD      = "exec_instruction([&] (Word &v) {{ instr_{}({}, {}); }}, {}, {})"
 
+def get_deref_right(mnemonic, operand1, operand2):
+    if "(" in operand1:
+        operand = operand1
+    elif "(" in operand2:
+        operand = operand2
+    else:
+        # Should not happen
+        abort()
+        return None
+
+    prefix      = "_components.mem_bus->read<Byte>("
+    suffix      = ")"
+    operand     = operand[1:-1]
+    registers   = {
+        "HL": "_hl.word", "DE": "_de.word",
+        "C": "0xFF00 + _bc.low", "BC": "_bc.word",
+        "a16": "fetch_word()", "a8": "0xFF00 + *it++",
+        "d8": "0xFF00 + *it++", "d16": "fetch_word()"
+    }
+    return prefix + registers.get(operand) + suffix
+
 def get_deref(mnemonic, operand1, operand2):
     if "(" in operand1:
         operand = operand1
@@ -42,7 +63,7 @@ def get_reg(mnemonic, operand):
         "SP+r8": "static_cast<Word>(_sp.word + *it++)"
     }
 
-    if mnemonic == "jr" or mnemonic == "jp" or mnemonic == "call" or mnemonic == "ret":
+    if mnemonic in ("jr", "jp", "call", "ret"):
         condprefix = "JumpCondition::"
         conditionals = {
             "C": "Carry", "NC": "NonCarry", "Z": "Zero", "NZ": "NonZero",
@@ -94,38 +115,48 @@ def gen_code(opcodes):
         cpp_op2 = get_reg(mnemonic, operand2)
 
         # Introducing annoying instruction #1: LDH
-        if mnemonic == "ldh":
-            if operand1 == "A":
-                exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic + "_a_v", "_af.high", "v", "0xFF00 + *it++", cycles)
-            else:
-                exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic + "_v_a", "v", "_af.high", "0xFF00 + *it++", cycles)
+        # if mnemonic == "ldh":
+            # if operand1 == "A":
+                # exec_instruction = FORMAT_DOUBLE.format(mnemonic, "_af.high", "_components.mem_bus->read(0xFF00 + *it++)", cycles)
+            # else:
+                # exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic, "v", "_af.high", "0xFF00 + *it++", cycles)
         # Annoying instruction #2 #3 #4 #5 #6
         # Thanks to Alaric's way of handling these instructions the following elif is necessary
-        elif mnemonic == "sub" or mnemonic == "and" or mnemonic == "or" or mnemonic == "xor" or mnemonic == "cp":
+        if mnemonic in ("sub", "and", "or", "xor", "cp"):
             cpp_op1 = "_af.high"
-            cpp_op2 = get_reg(mnemonic, operand1)
-            first_is_deref = False
             if deref:
-                cpp_op1 = "v" if first_is_deref else cpp_op1
-                cpp_op2 = "v" if not first_is_deref else cpp_op2
-                exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic.lower(), cpp_op1, cpp_op2, deref, cycles)
+                cpp_op2 = get_deref_right(mnemonic, cpp_op1, operand1)
+                exec_instruction = FORMAT_DOUBLE.format(mnemonic.lower(), cpp_op1, cpp_op2, cycles)
             else:
+                cpp_op2 = get_reg(mnemonic, operand1)
                 exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
         elif operand1 and operand2:
             _format = None
-            if deref:
+            if mnemonic in ("bit", "res", "set"):
+                if deref:
+                    cpp_op2 = get_deref(mnemonic, operand1, operand2)
+                    exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic, cpp_op1, "v", deref, cycles)
+                else:
+                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
+            elif deref:
                 if operand2 == "SP":
                     _format = FORMAT_DOUBLE_WORD
                 else:
                     _format = FORMAT_DOUBLE_BYTE
-                cpp_op1 = "v" if first_is_deref else cpp_op1
-                cpp_op2 = "v" if not first_is_deref else cpp_op2
-                exec_instruction = _format.format( mnemonic.lower(), cpp_op1, cpp_op2, deref, cycles)
+                if first_is_deref:
+                    exec_instruction = _format.format(mnemonic.lower(), "v", cpp_op2, deref, cycles)
+                else:
+                    cpp_op2 = get_deref_right(mnemonic, operand1, operand2)
+                    exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
             else:
                 exec_instruction = FORMAT_DOUBLE.format(mnemonic, cpp_op1, cpp_op2, cycles)
         elif operand1:
             if deref:
-                exec_instruction = FORMAT_SINGLE_BYTE.format(mnemonic, "v", deref, cycles)
+                if mnemonic in ("and", "or", "xor"):
+                    cpp_op1 = get_deref_right(mnemonic, operand1)
+                    exec_instruction = FORMAT_SINGLE.format(mnemonic, cpp_op1, cycles)
+                else:
+                    exec_instruction = FORMAT_SINGLE_BYTE.format(mnemonic, "v", deref, cycles)
             else:
                 exec_instruction = FORMAT_SINGLE.format(mnemonic, cpp_op1, cycles)
         else:

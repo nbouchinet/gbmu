@@ -1,4 +1,5 @@
 #include "Core.hpp"
+#include "src/Gameboy.hpp"
 
 void Core::execute(Core::Iterator it) {
   if (_halt)
