@@ -16,7 +16,7 @@ class Timer : public IReadWrite {
   Byte _rTMA = 0x00;
   Byte _rTAC : 3;
   Word _counter = 0x00;
-  Byte _rDIVCounter = 0x00;
+  Word _rDIVCounter = 0x00;
 
   ComponentsContainer& _components;
 

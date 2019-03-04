@@ -79,7 +79,7 @@ void Timer::Update(Word cycles) {
 }
 
 void Timer::UpdateDivider(Word cycles) {
-  _rDIV += cycles;
+  _rDIVCounter += cycles;
   if (_rDIVCounter >= 255) {
     _rDIVCounter = 0;
     _rDIV++;
