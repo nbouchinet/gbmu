@@ -2,6 +2,7 @@
 
 OBJ_FILES_src/sound := APU.o \
                        ModulationUnits.o \
+                       NoiseChannel.o \
                        PortAudioInterface.o \
                        SoundChannel.o \
                        SquareChannel.o \

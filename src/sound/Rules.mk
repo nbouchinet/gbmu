@@ -19,6 +19,10 @@ utils/Operations_utils.hpp:
 src/sound/$(OBJECT_DIR)/ModulationUnits.o: src/sound/ModulationUnits.cpp \
   src/sound/ModulationUnits.hpp src/Fwd.hpp src/sound/SoundChannel.hpp \
   src/IReadWrite.hpp
+src/sound/$(OBJECT_DIR)/NoiseChannel.o: src/sound/NoiseChannel.cpp \
+  src/sound/NoiseChannel.hpp src/sound/SoundChannel.hpp src/Fwd.hpp \
+  src/IReadWrite.hpp src/sound/ModulationUnits.hpp
+src/sound/NoiseChannel.hpp:
 src/sound/$(OBJECT_DIR)/PortAudioInterface.o: \
   src/sound/PortAudioInterface.cpp src/sound/PortAudioInterface.hpp \
   src/sound/AudioInterface.hpp

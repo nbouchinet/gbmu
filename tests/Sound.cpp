@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "src/sound/ModulationUnits.hpp"
+#include "src/sound/NoiseChannel.hpp"
 #include "src/sound/SquareChannel.hpp"
 #include "src/sound/VolumeTable.hpp"
 #include "src/sound/WaveChannel.hpp"
@@ -166,9 +167,8 @@ TEST(SquareChannel, io) {
   SquareChannel chan(true);
 
   SCOPED_TRACE("SquareChannel read/write null values");
-  test_channel_io(
-      &chan, 0xff10,
-      {0b00000000, 0b00000000, 0b00000000, 0b000000000, 0b00000000});
+  test_channel_io(&chan, 0xff10,
+                  {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000});
   SCOPED_TRACE("SquareChannel read/write full values");
   test_channel_io(&chan, 0xff10,
                   {0b01111111, 0b11111111, 0b11111111, 0b11111111, 0b00000111});
@@ -219,9 +219,8 @@ TEST(WaveChannel, io) {
   WaveChannel chan(table);
 
   SCOPED_TRACE("WaveChannel read/write null values");
-  test_channel_io(
-      &chan, 0xffa,
-      {0b00000000, 0b00000000, 0b00000000, 0b000000000, 0b00000000});
+  test_channel_io(&chan, 0xffa,
+                  {0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000});
   SCOPED_TRACE("WaveChannel read/write full values");
   test_channel_io(&chan, 0xffa,
                   {0b10000000, 0b11111111, 0b01100000, 0b11111111, 0b00000111});
@@ -248,6 +247,7 @@ void wave_chan_test(Word freq, VolumeTable &table) {
   }
   chan.update();
 }
+
 TEST(WaveChannel, step) {
   {
     SCOPED_TRACE("WaveChannel null test");
@@ -277,6 +277,56 @@ TEST(WaveChannel, step) {
                             0x89, 0x9a, 0xab, 0xbc, 0xcd, 0xde, 0xef, 0x00}});
     wave_chan_test(0x600, sawtooth);
   }
+}
+
+// -----------------------------------------------------------------------------
+// NoiseChannel
+// -----------------------------------------------------------------------------
+
+TEST(NoiseChannel, io) {
+  NoiseChannel chan;
+
+  SCOPED_TRACE("NoiseChannel read/write null values");
+  test_channel_io(&chan, 0xff20,
+                  {0b00000000, 0b00000000, 0b00000000, 0b00000000});
+  SCOPED_TRACE("NoiseChannel read/write full values");
+  test_channel_io(&chan, 0xff20,
+                  {0b00111111, 0b11111111, 0b11111111, 0b00000000});
+  SCOPED_TRACE("NoiseChannel read/write random values");
+  test_channel_io(&chan, 0xff20,
+                  {0b00101101, 0b01101011, 0b11101101, 0b00000000});
+}
+
+void noise_chan_test(NoiseChannel &chan, Byte shift, bool mode,
+                     Byte divider_code) {
+  constexpr Byte vol = 4;
+  chan.write(0xff21, vol << 4);
+  chan.write(0xff22, (shift << 4) | (mode << 3) | (divider_code));
+  chan.write(0xff23, 0x80);
+  const Word timer = NoiseChannel::get_divider(divider_code) << shift;
+  Word reg = 0xffff;
+  for (auto i = 0; i < 20; ++i) {
+    for (auto y = 0; y < timer; ++y) chan.update();
+    Byte xored = (reg & 1) ^ ((reg & 2) >> 1);
+    reg >>= 1;
+    reg |= xored << 15;
+    if (mode) reg |= xored << 6;
+    ASSERT_EQ(chan.get_raw_volume(), (~reg & 1) * vol);
+  }
+}
+
+TEST(NoiseChannel, step) {
+  NoiseChannel chan;
+
+  chan.enable(true);
+  SCOPED_TRACE("No shift, mode: false, code: 0");
+  noise_chan_test(chan, 0, false, 0);
+  SCOPED_TRACE("No shift, mode: true, code: 0");
+  noise_chan_test(chan, 0, true, 0);
+  SCOPED_TRACE("shift: 2, mode: true, code: 3");
+  noise_chan_test(chan, 2, true, 3);
+  SCOPED_TRACE("shift: 2, mode: false, code: 3");
+  noise_chan_test(chan, 2, false, 3);
 }
 
 int main(int ac, char *av[]) {
