@@ -184,9 +184,9 @@ void Core::instr_scf() {
   set_flag(Flags::C, true);
 }
 
-void Core::instr_di() { _components.interrupt_controller->SetIME(0); }
+void Core::instr_di() { _components.interrupt_controller->set_IME(0); }
 
-void Core::instr_ei() { _components.interrupt_controller->SetIME(1); }
+void Core::instr_ei() { _components.interrupt_controller->set_IME(1); }
 
 bool Core::can_jump(JumpCondition jc) {
   switch (jc) {
@@ -270,7 +270,7 @@ void Core::instr_ret() {
 
 void Core::instr_reti() {
   instr_ret();
-  _components.interrupt_controller->SetIME(1);
+  _components.interrupt_controller->set_IME(1);
 }
 
 void Core::instr_rst(Byte addr) {

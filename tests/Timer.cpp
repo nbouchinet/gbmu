@@ -15,44 +15,44 @@ namespace {
 		EXPECT_EQ(t.read(0xFF06), 0x42);
 	}
 
-	TEST(Timer, EnableTimer) {
-		t.EnableTimer();
-		EXPECT_EQ(t.TimerEnabled(), 1);
+	TEST(Timer, enable_timer) {
+		t.enable_timer();
+		EXPECT_EQ(t.timer_enabled(), 1);
 	}
 
 	TEST(Timer, GetFrequence) {
 		for (int i = 0; i <= 3; i++) {
 			t.write(0xFF07, i);
 			EXPECT_EQ(t.read(0xFF07), i);
-			EXPECT_EQ(t.GetFrequence() & 0x3, i);
+			EXPECT_EQ(t.get_frequence() & 0x3, i);
 		}
 	}
 
-	TEST(Timer, GetCounter) {
+	TEST(Timer, get_counter) {
 		for (int i = 0; i <= 3; i++) {
 			t.write(0xFF07, i);
 			switch (i) {
 				case 0x0:
-					EXPECT_EQ(t.GetCounter(), 0x400);
+					EXPECT_EQ(t.get_counter(), 0x400);
 					break ;
 				case 0x1:
-					EXPECT_EQ(t.GetCounter(), 0x10);
+					EXPECT_EQ(t.get_counter(), 0x10);
 					break ;
 				case 0x2:
-					EXPECT_EQ(t.GetCounter(), 0x40);
+					EXPECT_EQ(t.get_counter(), 0x40);
 					break ;
 				case 0x3:
-					EXPECT_EQ(t.GetCounter(), 0x100);
+					EXPECT_EQ(t.get_counter(), 0x100);
 					break ;
 			}
 		}
 	}
 
-	TEST(Timer, Update) {
-		t.EnableTimer();
+	TEST(Timer, update) {
+		t.enable_timer();
 		int cycles = 0;
 		for (int i = 0; i <= 42000; i++) {
-			t.Update(cycles);
+			t.update(cycles);
 			cycles += 4;
 		}
 	}
