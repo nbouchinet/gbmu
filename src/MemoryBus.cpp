@@ -19,6 +19,7 @@ MemoryBus::MemoryBus(ComponentsContainer &components) {
   push_component(0xFF04, 0xFF08, components.timer.get());
   push_component(0xFF0F, 0xFF0F, components.interrupt_controller.get());
   push_component(0xFF40, 0xFF4B, components.ppu.get());
+  push_component(0xFF4F, 0xFF4F, components.ppu.get());
   push_component(0xFF51, 0xFF55, components.ppu.get());
   push_component(0xFF68, 0xFF6B, components.ppu.get());
   push_component(0xFF70, 0xFF70, components.unit_working_ram.get());
