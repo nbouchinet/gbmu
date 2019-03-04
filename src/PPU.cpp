@@ -882,13 +882,13 @@ void					PPU::update_lcd_status()
 	}
 
 	if (RequestInterrupt_flag == true && mode != current_mode)
-		_components.interrupt_controller->RequestInterrupt(_components.interrupt_controller->LCDCSI);
+		_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
 
 	if (_ly == _lyc)
 	{
 		set_bit(status_tmp, 2);
 		if (test_bit(status_tmp, 6))
-			_components.interrupt_controller->RequestInterrupt(_components.interrupt_controller->LCDCSI);
+			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
 	}
 	else
 	{
@@ -920,7 +920,7 @@ void					PPU::update_graphics(Word cycles)
 		current_scanline = _ly;
 		_scanline_counter = 456;
 		if (current_scanline == 144)
-			_components.interrupt_controller->RequestInterrupt(_components.interrupt_controller->VBI);
+			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->VBI);
 		if (current_scanline > 153)
 			_ly = 0;
 		else if (current_scanline < 144)
