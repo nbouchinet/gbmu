@@ -1,7 +1,6 @@
 #include "src/sound/ModulationUnits.hpp"
 #include "src/sound/SoundChannel.hpp"
 
-#include <iostream>
 namespace sound {
 
 bool SweepUnit::call() {
@@ -20,6 +19,14 @@ void SweepUnit::trigger() {
   _enabled = (_sweep_period or _shift);
 }
 
+void SweepUnit::clear() {
+  _sweep_period = 0;
+  _negate = 0;
+  _shift = 0;
+  _current_period = 0;
+  _enabled = false;
+}
+
 bool LengthUnit::call() {
   if (not _enabled) return true;
   if (--_length == 0) return false;
@@ -28,6 +35,11 @@ bool LengthUnit::call() {
 
 void LengthUnit::trigger() {
   if (not _length) _length = _max_length;
+}
+
+void LengthUnit::clear() {
+  _length = 0;
+  _enabled = false;
 }
 
 bool EnvelopeUnit::call() {
@@ -45,6 +57,13 @@ bool EnvelopeUnit::call() {
 void EnvelopeUnit::trigger()  {
   _current_period = _period;
   _enabled = _period != 0;
+}
+
+void EnvelopeUnit::clear() {
+  _negate = 0;
+  _period = 0;
+  _enabled = false;
+  _current_period = 0;
 }
 
 }  // namespace sound

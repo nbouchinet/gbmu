@@ -3,7 +3,6 @@
 #include <cassert>
 #include <vector>
 
-#include <iostream>
 namespace sound {
 
 portaudio::System& PortAudioInterface::get_system() {

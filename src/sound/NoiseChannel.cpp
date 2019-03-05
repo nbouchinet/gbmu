@@ -21,6 +21,15 @@ void NoiseChannel::do_trigger() {
   _lsfr = 0xffff;
 }
 
+void NoiseChannel::do_clear() {
+  _timer = 0;
+  _lsfr = 0;
+  _shift = 0;
+  _width_mode = false;
+  _divisor_code = 0;
+  _volume = 0;
+}
+
 void NoiseChannel::write(Word addr, Byte v) {
   switch (addr) {
     case 0xff20:

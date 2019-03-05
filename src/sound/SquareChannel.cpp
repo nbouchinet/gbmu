@@ -3,7 +3,6 @@
 #include "utils/Operations_utils.hpp"
 
 #include <cassert>
-#include <iostream>
 
 static constexpr Word compute_timer(Word freq) noexcept {
   return (2048 - freq) * 4;
@@ -28,6 +27,14 @@ void SquareChannel::do_update() {
 }
 
 void SquareChannel::do_trigger() { _timer = compute_timer(_frequency); }
+
+void SquareChannel::do_clear() {
+  _waveform_selected = 0;
+  _waveform_step = 0;
+  _frequency = 0;
+  _volume = 0;
+  _timer = 0;
+}
 
 void SquareChannel::write(Word addr, Byte v) {
   switch ((addr & 0xf) % 5) {

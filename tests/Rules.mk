@@ -19,7 +19,7 @@ TEST_FILES		:= 	sample.cpp \
 				Timer.cpp \
 				Interrupt.cpp \
 				Sound.cpp \
-				RealTimeClock.cp
+				RealTimeClock.cpp
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
 RUN_TEST_RULES	:= $(addprefix test_, $(TEST_FILES:.cpp=))

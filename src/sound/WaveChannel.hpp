@@ -15,17 +15,18 @@ class WaveChannel : public SoundChannel {
   static constexpr std::size_t VolumeShiftCount = 4;
   static const Byte s_volume_shifts[VolumeShiftCount];
 
-  Word _frequency = 0;
-  Word _timer = 0;
-  Byte _volume_code = 0;
+  Word _frequency;
+  Word _timer;
+  Byte _volume_code;
 
   VolumeTable& _table;
-  Byte _table_index = 0;
+  Byte _table_index;
 
   LengthUnit _length;
 
   void do_update() override;
   void do_trigger() override;
+  void do_clear() override;
 
  public:
   WaveChannel(VolumeTable& table) : _table(table), _length(255) {

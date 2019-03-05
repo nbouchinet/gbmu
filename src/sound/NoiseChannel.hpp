@@ -9,18 +9,19 @@ namespace sound {
 
 class NoiseChannel : public SoundChannel {
  private:
-  Word _timer = 0;
-  Word _lsfr = 0;  // Linear feedback feed register
-  Byte _shift = 0;
-  bool _width_mode = false;
-  Byte _divisor_code = 0;
-  Byte _volume = 0;
+  Word _timer;
+  Word _lsfr;  // Linear feedback feed register
+  Byte _shift;
+  bool _width_mode;
+  Byte _divisor_code;
+  Byte _volume;
 
   LengthUnit _length;
   EnvelopeUnit _envelope;
 
   void do_update() override;
   void do_trigger() override;
+  void do_clear() override;
 
  public:
   NoiseChannel() : _length(63), _envelope(_volume) {

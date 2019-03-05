@@ -12,6 +12,7 @@ class IModulationUnit {
   virtual Byte trigger_steps() const = 0;
   virtual bool call() = 0;
   virtual void trigger() = 0;
+  virtual void clear() = 0;
 };
 
 class SweepUnit : public IModulationUnit {
@@ -20,14 +21,13 @@ class SweepUnit : public IModulationUnit {
   Byte _negate : 1;
   Byte _shift : 3;
 
-  Byte _current_period = 0;
-  bool _enabled = false;
+  Byte _current_period;
+  bool _enabled;
   Word& _frequency;
 
  public:
   SweepUnit() = delete;
-  SweepUnit(Word& frequency)
-      : _sweep_period(0), _negate(0), _shift(0), _frequency(frequency) {}
+  SweepUnit(Word& frequency) : _frequency(frequency) { clear(); }
 
   Byte trigger_steps() const override { return 0b00100010; }
 
@@ -49,16 +49,17 @@ class SweepUnit : public IModulationUnit {
 
   bool call() override;
   void trigger() override;
+  void clear() override;
 };
 
 class LengthUnit : public IModulationUnit {
  private:
   Byte _max_length;
-  Byte _length = 0;
-  bool _enabled = false;
+  Byte _length;
+  bool _enabled;
 
  public:
-  LengthUnit(Byte max_len) : _max_length(max_len) {}
+  LengthUnit(Byte max_len) : _max_length(max_len) { clear(); }
   Byte trigger_steps() const override { return 0b01010101; }
 
   void set_length(Byte l) { _length = l; }
@@ -68,31 +69,33 @@ class LengthUnit : public IModulationUnit {
 
   bool call() override;
   void trigger() override;
+  void clear() override;
 };
 
 class EnvelopeUnit : public IModulationUnit {
  private:
   bool _negate : 1;
   Byte _period : 3;
-  bool _enabled = false;
-  Byte _current_period = 0;
+  bool _enabled; 
+  Byte _current_period;
   Byte& _volume;
 
  public:
   EnvelopeUnit() = delete;
-  EnvelopeUnit(Byte& volume) : _negate(0), _period(0), _volume(volume) {}
+  EnvelopeUnit(Byte& volume) : _volume(volume) { clear(); }
 
   Byte trigger_steps() const override { return 0b10000000; }
 
   void set_negate(bool v) { _negate = v; }
   void set_period(Byte v) { _period = v; }
   bool does_negate() const { return _negate; }
-  
+
   auto is_enabled() const { return _enabled; }
   auto period() const { return _period; }
 
   bool call() override;
   void trigger() override;
+  void clear() override;
 };
 }  // namespace sound
 

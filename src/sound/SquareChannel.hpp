@@ -11,11 +11,11 @@ namespace sound {
 class SquareChannel : public SoundChannel {
  private:
   static const std::array<Byte, 4> s_waveforms;
-  Byte _waveform_selected = 2;
-  Byte _waveform_step = 0;
-  Word _frequency = 0;
-  Byte _volume = 0;
-  Word _timer = 0;
+  Byte _waveform_selected;
+  Byte _waveform_step;
+  Word _frequency;
+  Byte _volume;
+  Word _timer;
 
   SweepUnit _sweep;
   LengthUnit _length;
@@ -25,6 +25,7 @@ class SquareChannel : public SoundChannel {
 
   void do_update() override;
   void do_trigger() override;
+  void do_clear() override;
 
  public:
   SquareChannel(bool sweep_enabled = true)

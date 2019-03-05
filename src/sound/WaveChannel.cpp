@@ -2,7 +2,6 @@
 #include "src/sound/VolumeTable.hpp"
 
 #include <cassert>
-#include <iostream>
 
 static constexpr Word compute_timer(Word freq) noexcept {
   return (2048 - freq) * 2;
@@ -26,6 +25,13 @@ void WaveChannel::do_update() {
 
 void WaveChannel::do_trigger() {
   _timer = compute_timer(_frequency);
+  _table_index = 0;
+}
+
+void WaveChannel::do_clear() {
+  _frequency = 0;
+  _timer = 0;
+  _volume_code = 0;
   _table_index = 0;
 }
 

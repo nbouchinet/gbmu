@@ -1,13 +1,11 @@
 #include "src/sound/APU.hpp"
 
+#include "src/sound/NoiseChannel.hpp"
 #include "src/sound/SquareChannel.hpp"
 #include "src/sound/WaveChannel.hpp"
 #include "utils/Operations_utils.hpp"
 
-#include <algorithm>
 #include <cassert>
-#include <chrono>
-#include <iostream>
 
 namespace sound {
 
@@ -22,11 +20,10 @@ APU::APU(AudioInterface* interface)
           {0xff10, 0xff14, std::make_unique<SquareChannel>(true)},
           {0xff15, 0xff19, std::make_unique<SquareChannel>(false)},
           {0xff1a, 0xff1e, std::make_unique<WaveChannel>(_wave_ram)},
-          {0xff1f, 0xff23, std::make_unique<SquareChannel>(false)},
+          {0xff1f, 0xff23, std::make_unique<NoiseChannel>()},
       }} {}
 
 void APU::update_clock() {
-  if (not _APU_on) return;
   if (--_update_countdown <= 0) {
     _update_countdown = (CPU_FREQ / UPDATE_FREQ);
     for (auto& ranged_channel : _channels) {
@@ -69,6 +66,7 @@ float APU::fetch_and_mix_samples(Byte enabled_channels, float vol) const {
 }
 
 void APU::update_clock(Word cycles) {
+  if (not _APU_on) return;
   while (--cycles) {
     update_clock();
   }
@@ -112,13 +110,18 @@ void APU::write(Word addr, Byte v) {
       _channel_to_terminal_output = v;
       return;
     case 0xff26: {
-      _APU_on = v & 0x80;
-      for (auto i = 0; i < 4; ++i) _channels[i].channel->enable(v & (1 << i));
+      _APU_on = (v & 0x80) >> 7;
+      if (not _APU_on)
+        _modulation_units_steps = 0;
+      for (auto i = 0; i < 4; ++i) {
+        _channels[i].channel->enable(v & (1 << i));
+        if (not _APU_on) _channels[i].channel->clear();
+      }
       return;
     }
   }
   if (addr >= 0xff30 and addr <= 0xff3f) {
-    _wave_ram[addr & 0xf] = v; 
+    _wave_ram[addr & 0xf] = v;
     return;
   }
   assert(false);

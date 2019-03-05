@@ -3,7 +3,6 @@
 #include "src/sound/ModulationUnits.hpp"
 #include "utils/Operations_utils.hpp"
 
-#include <iostream>
 namespace sound {
 
 void SoundChannel::update_modules(unsigned int modulation_unit_step) {
@@ -27,6 +26,13 @@ void SoundChannel::trigger() {
   for (auto* modulation_unit : _modulation_units) {
     modulation_unit->trigger();
   }
+}
+
+void SoundChannel::clear() {
+  p_output_volume = 0;
+  for (auto & unit : _modulation_units)
+    unit->clear();
+  do_clear();
 }
 
 }  // namespace sound
