@@ -75,7 +75,8 @@ void Gameboy::boot() {
   auto begin = _components.bios->get_rom().cbegin();
   while (_components.core->pc() <= _components.bios->get_rom().size()) {
     if (_debugger.is_enabled()) {
-      _debugger.fetch(begin + _components.core->pc(), _components.core->pc());
+		_debugger.fetch(begin + _components.core->pc(),
+                                  _components.core->pc());
     }
     _components.core->execute(begin);
     _components.interrupt_controller->parse_interrupt();

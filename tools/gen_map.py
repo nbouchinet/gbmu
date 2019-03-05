@@ -8,6 +8,8 @@ jsontable = json.loads(s)
 
 i = 1
 for key,value in jsontable['unprefixed'].items():
+    if value['mnemonic'] == 'PREFIX':
+        continue
     if 'operand2' in value:
         print ('{0x' + value['addr'].upper()[2:] + ', {"' + value['mnemonic'] + " " + value['operand1'] + ' ' + value['operand2'] + '", ' + str(value['length']) + '}}, ', end="")
     elif 'operand1' in value:
