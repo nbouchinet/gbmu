@@ -18,7 +18,7 @@ public:
   Register &getDe(void) { return core._de; }
   Register &getHl(void) { return core._hl; }
 
-  Accessor() : container("tools/Tetris.gb"), core(*container.core) {}
+  Accessor() : container("../tools/Tetris.gb"), core(*container.core) {}
 };
 
 class TestCoreFixture : public ::testing::Test {
