@@ -71,7 +71,7 @@ void Debugger::set_instruction_pool(const Core::Iterator &it, uint16_t pc) {
     mit_cb = _instr_map.find((*(it + 1 + pc_add)) | 0xCB00);
 
     if (*(it + pc_add) == 0xCB && mit_next != _instr_map.end()) {
-      _instr_pool.emplace_back(pc + pc_add, mit->second, it + pc_add,
+      _instr_pool.emplace_back(pc + pc_add, mit_cb->second, it + pc_add,
                                mit_cb->second.size);
       pc_add += mit_cb->second.size;
     } else if (mit != _instr_map.end()) {
