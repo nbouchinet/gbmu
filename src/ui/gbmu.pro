@@ -59,7 +59,6 @@ RESOURCES += \
 ICON = gbmu.png
 
 SOURCES += \
-	src/Bios.cpp \
 	src/Cartridge.cpp \
 	src/Debugger.cpp \
 	src/Gameboy.cpp \
