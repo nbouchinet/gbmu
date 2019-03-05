@@ -70,9 +70,7 @@ void Gameboy::step() {
 
 void Gameboy::boot() {
   _components.core->instr_jp(0x0000);
-
   _begin = _components.bios->get_begin();
-  
   while (_components.core->pc() < 0x0100) {
     if (_debugger.is_enabled()) {
       _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
