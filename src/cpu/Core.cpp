@@ -363,7 +363,7 @@ void Core::instr_swap(Byte &reg) { reg = (reg >> 4) | (reg << 4); }
 // ----------------------------------------------------------------------------
 
 void Core::instr_bit(Byte bit, Byte &reg) {
-  set_flag(Flags::Z, test_bit(bit, reg));
+  set_flag(Flags::Z, !test_bit(bit, reg));
   set_flag(Flags::N, false);
   set_flag(Flags::H, true);
 }
