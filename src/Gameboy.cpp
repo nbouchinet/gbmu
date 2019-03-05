@@ -69,25 +69,24 @@ void Gameboy::step() {
 }
 
 void Gameboy::boot() {
-  auto old_pc = _components.core->pc();
   _components.core->instr_jp(0x0000);
 
-  auto begin = _components.bios->get_rom().cbegin();
-  while (_components.core->pc() <= _components.bios->get_rom().size()) {
+  _begin = _components.cartridge->get_begin();
+  
+  while (_components.core->pc() < 0x0100) {
     if (_debugger.is_enabled()) {
-		_debugger.fetch(begin + _components.core->pc(),
-                                  _components.core->pc());
+      _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
     }
-    _components.core->execute(begin);
+    _components.core->execute(_begin);
     _components.interrupt_controller->parse_interrupt();
     _components.timer->update(_components.core->cycles());
     _components.ppu->update_graphics(_components.core->cycles());
   }
-  _components.core->instr_jp(old_pc);
 }
 
 int Gameboy::run() {
   boot();
+  _begin = _components.cartridge->get_begin();
   do_checksum();
   //while (_begin + _components.core->pc() != _end) {
   //  step();
