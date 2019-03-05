@@ -11,6 +11,8 @@ addons:
     - gcc-5
     - g++-5
     - clang-3.6
+    - qtbase5-dev-tools
+    - qt5-qmake
 
   matrix:
   include:
@@ -49,9 +51,11 @@ addons:
             - clang-3.7
       env: COMPILER=clang++-3.7
 
-install:
+before_install:
   - git clone https://github.com/google/googletest.git && pushd googletest && mkdir build && pushd build && cmake .. && make && sudo make install && popd && popd
+install:
+  - ./configure
+  - make 
 
 script:
-  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "script -qec \"make test_all\" out && (grep KO out && exit 1 || exit 0)"; fi'
-
+  - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash -c "script -qec \"make -k -C tests\" out && (grep KO out && exit 1 || exit 0)"; fi'

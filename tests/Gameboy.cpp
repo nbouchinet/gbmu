@@ -7,7 +7,7 @@ class Accessor {
 public:
   Gameboy gb;
 
-  Accessor() : gb("tools/Tetris.gb") {}
+  Accessor() : gb("../tools/Tetris.gb") {}
 
   Cartridge &getCartridge() { return *gb._components.cartridge.get(); };
   AMemoryBankController::RAMContainer &getCartridgeRam() {
