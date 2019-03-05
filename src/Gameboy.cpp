@@ -24,7 +24,7 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
   unit_working_ram = std::make_unique<UnitWorkingRAM>();
   ppu = std::make_unique<PPU>(*this);
   driver_screen = std::make_unique<ScreenOutput>();
-  bios = std::make_unique<Bios>(*this);
+  bios = std::make_unique<Bios>();
   mem_bus = std::make_unique<MemoryBus>(*this);
 }
 
@@ -37,21 +37,21 @@ Gameboy::Gameboy(const std::string &rom_path)
   _end = _components.cartridge->get_end();
 }
 
-void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration){
-	switch (state) {
-		case Debugger::RUN_DURATION:
-			_debugger.run_duration(duration);
-			break;
-		case Debugger::RUN_ONE_FRAME:
-			_debugger.run_one_frame();
-			break;
-		case Debugger::RUN_ONE_STEP:
-			_debugger.run_one_step();
-			break;
-		case Debugger::RUN_CPU_SEC:
-			_debugger.run_cpu_sec();
-			break;
-	}
+void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
+  switch (state) {
+  case Debugger::RUN_DURATION:
+    _debugger.run_duration(duration);
+    break;
+  case Debugger::RUN_ONE_FRAME:
+    _debugger.run_one_frame();
+    break;
+  case Debugger::RUN_ONE_STEP:
+    _debugger.run_one_step();
+    break;
+  case Debugger::RUN_CPU_SEC:
+    _debugger.run_cpu_sec();
+    break;
+  }
 }
 
 void Gameboy::handle_input_wraper(Byte val) {
@@ -68,8 +68,25 @@ void Gameboy::step() {
   _components.ppu->update_graphics(_components.core->cycles());
 }
 
+void Gameboy::boot() {
+  auto old_pc = _components.core->pc();
+  _components.core->instr_jp(0x0000);
+
+  auto begin = _components.bios->get_rom().cbegin();
+  while (_components.core->pc() <= _components.bios->get_rom().size()) {
+    if (_debugger.is_enabled()) {
+      _debugger.fetch(begin + _components.core->pc(), _components.core->pc());
+    }
+    _components.core->execute(begin);
+    _components.interrupt_controller->parse_interrupt();
+    _components.timer->update(_components.core->cycles());
+    _components.ppu->update_graphics(_components.core->cycles());
+  }
+  _components.core->instr_jp(old_pc);
+}
+
 int Gameboy::run() {
-  _components.bios->start();
+  boot();
   do_checksum();
   //while (_begin + _components.core->pc() != _end) {
   //  step();

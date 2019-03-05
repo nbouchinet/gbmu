@@ -59,6 +59,8 @@ public:
   void notify_debugger(Debugger::e_dbg_state state, int duration = 0);
   Debugger &get_debugger() { return _debugger; }
 
+  void boot();
+
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
   };
