@@ -15,9 +15,13 @@ private:
     IReadWrite *component;
   };
   std::vector<RangedComponent> _ranged_components;
+  bool _bios_is_enabled = true;
+  Cartridge *_cartridge;
 
 public:
   MemoryBus(ComponentsContainer &components);
+
+  void disable_bios();
 
   template <typename T> T read(Word addr) const {
     T ret = 0;
@@ -28,6 +32,7 @@ public:
         while (i-- > 0) {
           ret |= range.component->read(addr + i) >> (i * 8);
         }
+        break;
       }
     }
     return ret;
@@ -36,11 +41,16 @@ public:
   template <typename T> void write(Word addr, T v) {
     auto i = sizeof(T);
 
+    if (addr == 0xFF50) {
+      disable_bios();
+    }
+
     for (const auto &range : _ranged_components) {
       if (addr >= range.begin and addr <= range.end) {
         while (i-- > 0) {
           range.component->write(addr + i, v >> (i * 8));
         }
+        break;
       }
     }
   }
