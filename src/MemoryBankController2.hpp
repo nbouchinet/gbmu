@@ -50,9 +50,13 @@ public:
   uint8_t read(uint16_t addr) const {
     switch (addr & 0xF000) {
     case 0x0000:
+    case 0x1000:
+    case 0x2000:
     case 0x3000:
       return romData[addr];
     case 0x4000:
+    case 0x5000:
+    case 0x6000:
     case 0x7000:
       return romData[(addr - 0x4000) + romBank * 0x4000];
     case 0xA000:
