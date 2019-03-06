@@ -62,7 +62,7 @@ void Gameboy::step() {
   if (_debugger.is_enabled()) {
     _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
   }
-  _components.core->execute(_begin);
+  _components.core->execute();
   _components.interrupt_controller->parse_interrupt();
   _components.timer->update(_components.core->cycles());
   _components.ppu->update_graphics(_components.core->cycles());
@@ -70,12 +70,11 @@ void Gameboy::step() {
 
 void Gameboy::boot() {
   _components.core->instr_jp(0x0000);
-  _begin = _components.bios->get_begin();
   while (_components.core->pc() < 0x0100) {
     if (_debugger.is_enabled()) {
       _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
     }
-    _components.core->execute(_begin);
+    _components.core->execute();
     _components.interrupt_controller->parse_interrupt();
     _components.timer->update(_components.core->cycles());
     _components.ppu->update_graphics(_components.core->cycles());
@@ -84,11 +83,12 @@ void Gameboy::boot() {
 
 int Gameboy::run() {
   boot();
+  //_components.mem_bus->write(0xFF50, 1);
   _begin = _components.cartridge->get_begin();
   do_checksum();
-  //while (_begin + _components.core->pc() != _end) {
-  //  step();
-  //}
+  while (true) {
+    step();
+  }
   return (0);
 }
 

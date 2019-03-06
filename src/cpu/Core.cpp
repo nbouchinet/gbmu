@@ -121,11 +121,6 @@ void Core::instr_dec(Byte &b) {
   set_flag(Flags::H, (b & 0xf) == 0u);
   --b;
   set_flag(Flags::Z, b == 0u);
-<<<<<<< HEAD
-=======
-  set_flag(Flags::N, true);
-  set_flag(Flags::H, (before & 0x0F) == 0);
->>>>>>> Remove Bios.cpp
 }
 
 // ----------------------------------------------------------------------------

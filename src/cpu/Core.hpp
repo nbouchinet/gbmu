@@ -82,9 +82,9 @@ public:
   void instr_cpl();
   void instr_ccf();
   void instr_scf();
-  void instr_nop(Byte) {}
+  void instr_nop(Byte = 0) {}
   void instr_halt();
-  void instr_stop() {}
+  void instr_stop(Byte = 0) {}
   void instr_di();
   void instr_ei();
 
@@ -143,7 +143,7 @@ public:
                         Byte clock_cycles);
 
   using Iterator = std::vector<Byte>::const_iterator;
-  void execute(Iterator it);
+  void execute();
 
   void notify_interrupt() {
     if (_halt)
