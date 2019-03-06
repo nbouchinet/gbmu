@@ -4,7 +4,6 @@ OBJ_FILES_src := Bios.o \
                  Cartridge.o \
                  Debugger.o \
                  Gameboy.o \
-                 main.o \
                  MemoryBus.o \
                  PPU.o \
                  ScreenOutput.o
