@@ -53,7 +53,7 @@ void InterruptController::parse_interrupt() {
 
 void InterruptController::execute_interrupt(Byte interrupt) {
   _IME = false;
-  _rIF = (_rIF & ~interrupt);
+  _rIF = (_rIF & ~(0x01 << interrupt));
   switch (interrupt) {
   case 0:
     _components.core->instr_call(VBI);
