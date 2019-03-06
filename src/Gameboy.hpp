@@ -36,8 +36,6 @@ private:
     Byte ram[AMemoryBankController::RAMSize];
   };
 
-  Core::Iterator _begin;
-  Core::Iterator _end;
   ComponentsContainer _components;
   Debugger _debugger;
 
