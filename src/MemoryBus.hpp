@@ -16,7 +16,6 @@ private:
   };
   std::vector<RangedComponent> _ranged_components;
   bool _bios_is_enabled = true;
-  Cartridge *_cartridge;
 
 public:
   MemoryBus(ComponentsContainer &components);

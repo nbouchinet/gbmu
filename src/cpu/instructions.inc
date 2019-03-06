@@ -1,5 +1,5 @@
 case 0x0:
-  exec_instruction([&] () { instr_nop(0); }, 4);
+  exec_instruction([&] () { instr_nop(); }, 4);
   break;
 case 0x1:
   exec_instruction([&] () { instr_ld(_bc.word, fetch_word()); }, 12);
@@ -17,7 +17,7 @@ case 0x5:
   exec_instruction([&] () { instr_dec(_bc.high); }, 4);
   break;
 case 0x6:
-  exec_instruction([&] () { instr_ld(_bc.high, *it++); }, 8);
+  exec_instruction([&] () { instr_ld(_bc.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0x7:
   exec_instruction([&] () { instr_rlca(); }, 4);
@@ -41,13 +41,13 @@ case 0xd:
   exec_instruction([&] () { instr_dec(_bc.low); }, 4);
   break;
 case 0xe:
-  exec_instruction([&] () { instr_ld(_bc.low, *it++); }, 8);
+  exec_instruction([&] () { instr_ld(_bc.low, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xf:
   exec_instruction([&] () { instr_rrca(); }, 4);
   break;
 case 0x10:
-  exec_instruction([&] () { instr_stop(); }, 4);
+  exec_instruction([&] () { instr_stop(0); }, 4);
   break;
 case 0x11:
   exec_instruction([&] () { instr_ld(_de.word, fetch_word()); }, 12);
@@ -65,13 +65,13 @@ case 0x15:
   exec_instruction([&] () { instr_dec(_de.high); }, 4);
   break;
 case 0x16:
-  exec_instruction([&] () { instr_ld(_de.high, *it++); }, 8);
+  exec_instruction([&] () { instr_ld(_de.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0x17:
   exec_instruction([&] () { instr_rla(); }, 4);
   break;
 case 0x18:
-  exec_instruction([&] () { instr_jr(*it++); }, 12);
+  exec_instruction([&] () { instr_jr(_components.mem_bus->read<Byte>(addr++)); }, 12);
   break;
 case 0x19:
   exec_instruction([&] () { instr_add(_hl.word, _de.word); }, 8);
@@ -89,13 +89,13 @@ case 0x1d:
   exec_instruction([&] () { instr_dec(_de.low); }, 4);
   break;
 case 0x1e:
-  exec_instruction([&] () { instr_ld(_de.low, *it++); }, 8);
+  exec_instruction([&] () { instr_ld(_de.low, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0x1f:
   exec_instruction([&] () { instr_rra(); }, 4);
   break;
 case 0x20:
-  exec_instruction([&] () { instr_jr(JumpCondition::NonZero, *it++); }, 12, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::NonZero, _components.mem_bus->read<Byte>(addr++)); }, 12, 8);
   break;
 case 0x21:
   exec_instruction([&] () { instr_ld(_hl.word, fetch_word()); }, 12);
@@ -113,13 +113,13 @@ case 0x25:
   exec_instruction([&] () { instr_dec(_hl.high); }, 4);
   break;
 case 0x26:
-  exec_instruction([&] () { instr_ld(_hl.high, *it++); }, 8);
+  exec_instruction([&] () { instr_ld(_hl.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0x27:
   exec_instruction([&] () { instr_daa(); }, 4);
   break;
 case 0x28:
-  exec_instruction([&] () { instr_jr(JumpCondition::Zero, *it++); }, 12, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::Zero, _components.mem_bus->read<Byte>(addr++)); }, 12, 8);
   break;
 case 0x29:
   exec_instruction([&] () { instr_add(_hl.word, _hl.word); }, 8);
@@ -137,13 +137,13 @@ case 0x2d:
   exec_instruction([&] () { instr_dec(_hl.low); }, 4);
   break;
 case 0x2e:
-  exec_instruction([&] () { instr_ld(_hl.low, *it++); }, 8);
+  exec_instruction([&] () { instr_ld(_hl.low, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0x2f:
   exec_instruction([&] () { instr_cpl(); }, 4);
   break;
 case 0x30:
-  exec_instruction([&] () { instr_jr(JumpCondition::NonCarry, *it++); }, 12, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::NonCarry, _components.mem_bus->read<Byte>(addr++)); }, 12, 8);
   break;
 case 0x31:
   exec_instruction([&] () { instr_ld(_sp.word, fetch_word()); }, 12);
@@ -161,13 +161,13 @@ case 0x35:
   exec_instruction([&] (Byte &v) { instr_dec(v); }, _hl.word, 12);
   break;
 case 0x36:
-  exec_instruction([&] (Byte &v) { instr_ld(v, *it++); }, _hl.word, 12);
+  exec_instruction([&] (Byte &v) { instr_ld(v, _components.mem_bus->read<Byte>(addr++)); }, _hl.word, 12);
   break;
 case 0x37:
   exec_instruction([&] () { instr_scf(); }, 4);
   break;
 case 0x38:
-  exec_instruction([&] () { instr_jr(JumpCondition::Carry, *it++); }, 12, 8);
+  exec_instruction([&] () { instr_jr(JumpCondition::Carry, _components.mem_bus->read<Byte>(addr++)); }, 12, 8);
   break;
 case 0x39:
   exec_instruction([&] () { instr_add(_hl.word, _sp.word); }, 8);
@@ -185,7 +185,7 @@ case 0x3d:
   exec_instruction([&] () { instr_dec(_af.high); }, 4);
   break;
 case 0x3e:
-  exec_instruction([&] () { instr_ld(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_ld(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0x3f:
   exec_instruction([&] () { instr_ccf(); }, 4);
@@ -593,7 +593,7 @@ case 0xc5:
   exec_instruction([&] () { instr_push(_bc.word); }, 16);
   break;
 case 0xc6:
-  exec_instruction([&] () { instr_add(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_add(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xc7:
   exec_instruction([&] () { instr_rst(0x00); }, 16);
@@ -614,7 +614,7 @@ case 0xcd:
   exec_instruction([&] () { instr_call(fetch_word()); }, 24);
   break;
 case 0xce:
-  exec_instruction([&] () { instr_adc(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_adc(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xcf:
   exec_instruction([&] () { instr_rst(0x08); }, 16);
@@ -635,7 +635,7 @@ case 0xd5:
   exec_instruction([&] () { instr_push(_de.word); }, 16);
   break;
 case 0xd6:
-  exec_instruction([&] () { instr_sub(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_sub(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xd7:
   exec_instruction([&] () { instr_rst(0x10); }, 16);
@@ -653,13 +653,13 @@ case 0xdc:
   exec_instruction([&] () { instr_call(JumpCondition::Carry, fetch_word()); }, 24, 12);
   break;
 case 0xde:
-  exec_instruction([&] () { instr_sbc(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_sbc(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xdf:
   exec_instruction([&] () { instr_rst(0x18); }, 16);
   break;
 case 0xe0:
-  exec_instruction([&] (Byte &v) { instr_ldh(v, _af.high); }, 0xFF00 + *it++, 12);
+  exec_instruction([&] (Byte &v) { instr_ldh(v, _af.high); }, 0xFF00 + _components.mem_bus->read<Byte>(addr++), 12);
   break;
 case 0xe1:
   exec_instruction([&] () { instr_pop(_hl.word); }, 12);
@@ -671,13 +671,13 @@ case 0xe5:
   exec_instruction([&] () { instr_push(_hl.word); }, 16);
   break;
 case 0xe6:
-  exec_instruction([&] () { instr_and(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_and(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xe7:
   exec_instruction([&] () { instr_rst(0x20); }, 16);
   break;
 case 0xe8:
-  exec_instruction([&] () { instr_add(_sp.word, *it++); }, 16);
+  exec_instruction([&] () { instr_add(_sp.word, _components.mem_bus->read<Byte>(addr++)); }, 16);
   break;
 case 0xe9:
   exec_instruction([&] (Byte &v) { instr_jp(v); }, _hl.word, 4);
@@ -686,13 +686,13 @@ case 0xea:
   exec_instruction([&] (Byte &v) { instr_ld(v, _af.high); }, fetch_word(), 16);
   break;
 case 0xee:
-  exec_instruction([&] () { instr_xor(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_xor(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xef:
   exec_instruction([&] () { instr_rst(0x28); }, 16);
   break;
 case 0xf0:
-  exec_instruction([&] () { instr_ldh(_af.high, _components.mem_bus->read<Byte>(0xFF00 + *it++)); }, 12);
+  exec_instruction([&] () { instr_ldh(_af.high, _components.mem_bus->read<Byte>(0xFF00 + _components.mem_bus->read<Byte>(addr++))); }, 12);
   break;
 case 0xf1:
   exec_instruction([&] () { instr_pop(_af.word); }, 12);
@@ -707,13 +707,13 @@ case 0xf5:
   exec_instruction([&] () { instr_push(_af.word); }, 16);
   break;
 case 0xf6:
-  exec_instruction([&] () { instr_or(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_or(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xf7:
   exec_instruction([&] () { instr_rst(0x30); }, 16);
   break;
 case 0xf8:
-  exec_instruction([&] () { instr_ld(_hl.word, static_cast<Word>(_sp.word + *it++)); }, 12);
+  exec_instruction([&] () { instr_ld(_hl.word, static_cast<Word>(_sp.word + _components.mem_bus->read<Byte>(addr++))); }, 12);
   break;
 case 0xf9:
   exec_instruction([&] () { instr_ld(_sp.word, _hl.word); }, 8);
@@ -725,13 +725,13 @@ case 0xfb:
   exec_instruction([&] () { instr_ei(); }, 4);
   break;
 case 0xfe:
-  exec_instruction([&] () { instr_cp(_af.high, *it++); }, 8);
+  exec_instruction([&] () { instr_cp(_af.high, _components.mem_bus->read<Byte>(addr++)); }, 8);
   break;
 case 0xff:
   exec_instruction([&] () { instr_rst(0x38); }, 16);
   break;
   case 0xCB:
-switch (*it++) {
+switch (_components.mem_bus->read<Byte>(addr++)) {
 case 0x0:
   exec_instruction([&] () { instr_rlc(_bc.high); }, 8);
   break;

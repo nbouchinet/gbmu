@@ -14,8 +14,6 @@
   _ranged_components.push_back(RangedComponent{begin, end, c});
 
 MemoryBus::MemoryBus(ComponentsContainer &components) {
-  _cartridge = components.cartridge.get();
-
   push_component(0x0000, 0x00FF, components.bios.get());
   push_component(0x0000, 0x7FFF, components.cartridge.get());
   push_component(0x8000, 0x9FFF, components.ppu.get());
