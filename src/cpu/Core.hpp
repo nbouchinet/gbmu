@@ -155,18 +155,16 @@ public:
 
 template <> inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
   _af.low = 0u;
-  Byte overflowing_nibbles = check_add_overflows(a, b);
-  set_flag(Flags::H, test_bit(3, overflowing_nibbles));
-  set_flag(Flags::C, test_bit(7, overflowing_nibbles));
+  set_flag(Flags::H, check_add_overflow_from(a, b, 4));
+  set_flag(Flags::C, check_add_overflow_from(a, b, 8));
   a += b;
   set_flag(Flags::Z, a == 0u);
 }
 
 template <> inline void Core::instr_add<Word, Word>(Word &a, Word b) {
   _af.low = 0u;
-  Word overflowing_nibbles = check_add_overflows(a, b);
-  set_flag(Flags::H, test_bit(11, overflowing_nibbles));
-  set_flag(Flags::C, test_bit(15, overflowing_nibbles));
+  set_flag(Flags::H, check_add_overflow_from(a, b, 12));
+  set_flag(Flags::C, check_add_overflow_from(a, b, 16));
   a += b;
   set_flag(Flags::Z, a == 0u);
 }

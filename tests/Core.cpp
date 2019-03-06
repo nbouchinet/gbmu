@@ -8,7 +8,7 @@
 #define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
 class Accessor {
-public:
+ public:
   ComponentsContainer container;
   Core &core;
   Register &getPc(void) { return core._pc; }
@@ -22,7 +22,7 @@ public:
 };
 
 class TestCoreFixture : public ::testing::Test {
-public:
+ public:
   struct s_flags {
     int c, z, n, h;
   };
@@ -36,14 +36,10 @@ public:
   }
 
   void test_flags_base(struct s_flags f) {
-    if (f.c != -1)
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), f.c);
-    if (f.z != -1)
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), f.z);
-    if (f.n != -1)
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), f.n);
-    if (f.h != -1)
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), f.h);
+    if (f.c != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), f.c);
+    if (f.z != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), f.z);
+    if (f.n != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), f.n);
+    if (f.h != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), f.h);
   }
 
   void reset_flags() {
@@ -340,12 +336,12 @@ void test_add(Accessor &access, T loop_begin, T nibble_mask) {
       access.core.instr_add(a_save, b);
       unsigned int res = a + b;
       unsigned int half_res = (a & nibble_mask) + (b & nibble_mask);
-      EXPECT_EQ(access.core.get_flag(Core::Flags::C), res > max);
-      EXPECT_EQ(access.core.get_flag(Core::Flags::H),
+      ASSERT_EQ(access.core.get_flag(Core::Flags::C), res > max);
+      ASSERT_EQ(access.core.get_flag(Core::Flags::H),
                 half_res > (max & nibble_mask));
-      EXPECT_FALSE(access.core.get_flag(Core::Flags::N));
-      EXPECT_EQ(access.core.get_flag(Core::Flags::Z), static_cast<T>(res) == 0);
-      EXPECT_EQ(static_cast<T>(a_save), static_cast<T>(res));
+      ASSERT_FALSE(access.core.get_flag(Core::Flags::N));
+      ASSERT_EQ(access.core.get_flag(Core::Flags::Z), static_cast<T>(res) == 0);
+      ASSERT_EQ(static_cast<T>(a_save), static_cast<T>(res));
     }
   }
 }
@@ -367,7 +363,7 @@ TEST_F(TestCoreFixture, adc) {
       unsigned int half_res = (a & 0xfu) + (b & 0xfu) + c;
       test_flags(.c = res > max, .h = half_res > (max & 0xfu), .n = false,
                  .z = static_cast<Byte>(res) == 0);
-      EXPECT_EQ(static_cast<Byte>(a_save), static_cast<Byte>(res));
+      ASSERT_EQ(static_cast<Byte>(a_save), static_cast<Byte>(res));
     }
   }
 }
@@ -380,10 +376,10 @@ TEST_F(TestCoreFixture, sub) {
       Byte a_save = a;
       accessor.core.instr_sub(a_save, b);
       int res = a - b;
-      int half_res = (a & 0xf0) - (b & 0xf0);
-      test_flags(.c = res < min, .h = half_res < (min & 0xf0), .n = true,
+      int half_res = (a & 0x0f) - (b & 0x0f);
+      test_flags(.c = res < min, .h = half_res < (min & 0x0f), .n = true,
                  .z = static_cast<Byte>(res) == 0);
-      EXPECT_EQ(static_cast<Byte>(a_save), static_cast<Byte>(res));
+      ASSERT_EQ(static_cast<Byte>(a_save), static_cast<Byte>(res));
     }
   }
 }
@@ -398,28 +394,28 @@ TEST_F(TestCoreFixture, sbc) {
 
       accessor.core.instr_sbc(a_save, b);
       int res = (a - b) - c;
-      int half_res = (a & 0xf0) - (b & 0xf0);
-      test_flags(.c = res < min, .h = half_res < (min & 0xf0), .n = true,
+      int half_res = ((a & 0x0f) - (b & 0x0f)) - c;
+      test_flags(.c = res < min, .h = half_res < (min & 0x0f), .n = true,
                  .z = static_cast<Byte>(res) == 0);
       EXPECT_EQ(static_cast<Byte>(a_save), static_cast<Byte>(res));
     }
   }
 }
 
-#define TEST_OPERAND(OPNAME, OP, _C, _H, _N)                                   \
-  constexpr Byte max = std::numeric_limits<Byte>::max();                       \
-  for (Byte a = 0u; a < max; ++a) {                                            \
-    for (Byte b = 0u; b < max; ++b) {                                          \
-      Byte a_save = a;                                                         \
-      accessor.core.OPNAME(a_save, b);                                         \
-      Byte res = a OP b;                                                       \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), _C);                   \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), _H);                   \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), _N);                   \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z),                        \
-                static_cast<Byte>(res) == 0);                                  \
-      EXPECT_EQ(static_cast<Byte>(a_save), res);                               \
-    }                                                                          \
+#define TEST_OPERAND(OPNAME, OP, _C, _H, _N)                 \
+  constexpr Byte max = std::numeric_limits<Byte>::max();     \
+  for (Byte a = 0u; a < max; ++a) {                          \
+    for (Byte b = 0u; b < max; ++b) {                        \
+      Byte a_save = a;                                       \
+      accessor.core.OPNAME(a_save, b);                       \
+      Byte res = a OP b;                                     \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), _C); \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), _H); \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), _N); \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z),      \
+                static_cast<Byte>(res) == 0);                \
+      EXPECT_EQ(static_cast<Byte>(a_save), res);             \
+    }                                                        \
   }
 
 TEST_F(TestCoreFixture, and) {
@@ -533,23 +529,23 @@ TEST_F(TestCoreFixture, program_1) {
 
   auto it = opcodes.begin();
 
-  accessor.core.execute(it); // ld a, 0x42
-  accessor.core.execute(it); // ld b, 0xF0
+  accessor.core.execute(it);  // ld a, 0x42
+  accessor.core.execute(it);  // ld b, 0xF0
 
   while (it + accessor.getPc().word != opcodes.end()) {
     accessor.core.execute(it);
     switch (i) {
-    case 0:
-      EXPECT_EQ(accessor.getAf().high, 0);
-      break;
-    case 1:
-      EXPECT_EQ(accessor.getAf().high, 0xF0);
-      break;
-    case 2:
-      EXPECT_EQ(accessor.getAf().high, 0);
-      break;
-    default:
-      break;
+      case 0:
+        EXPECT_EQ(accessor.getAf().high, 0);
+        break;
+      case 1:
+        EXPECT_EQ(accessor.getAf().high, 0xF0);
+        break;
+      case 2:
+        EXPECT_EQ(accessor.getAf().high, 0);
+        break;
+      default:
+        break;
     }
     i++;
   }

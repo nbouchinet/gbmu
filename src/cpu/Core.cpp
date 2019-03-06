@@ -26,10 +26,8 @@ void Core::instr_ldhl(Byte n) {
   reset_bit(7, n);
   _hl.word = _sp.word;
   if (neg) {
-    Word overflowing_nibbles =
-        check_sub_overflows(_hl.word, static_cast<Word>(n));
-    set_flag(Flags::H, test_bit(12, overflowing_nibbles));
-    set_flag(Flags::C, test_bit(0, overflowing_nibbles));
+    set_flag(Flags::H, (_hl.word & 0xf) < (n & 0xf));
+    set_flag(Flags::C, _hl.word < n);
     _hl.word -= n;
   } else {
     instr_add(_hl.word, static_cast<Word>(n));
@@ -65,9 +63,8 @@ void Core::instr_adc(Byte &a, Byte b) {
 
 void Core::instr_sub(Byte &a, Byte b) {
   _af.low = 0x40u;
-  Byte overflowing_nibbles = check_sub_overflows(a, b);
-  set_flag(Flags::H, test_bit(4, overflowing_nibbles));
-  set_flag(Flags::C, test_bit(0, overflowing_nibbles));
+  set_flag(Flags::H, (a & 0xf) < (b & 0xf));
+  set_flag(Flags::C, a < b);
   a -= b;
   set_flag(Flags::Z, a == 0u);
 }
@@ -113,8 +110,7 @@ void Core::instr_cp(Byte &a, Byte b) {
 
 void Core::instr_inc(Byte &b) {
   set_flag(Flags::N, false);
-  Byte overflowing_nibbles = check_add_overflows(b, Byte(1u));
-  set_flag(Flags::H, test_bit(3, overflowing_nibbles));
+  set_flag(Flags::H, (b & 0xf) == 0xf);
   ++b;
   set_flag(Flags::Z, b == 0u);
 }
@@ -122,15 +118,10 @@ void Core::instr_inc(Byte &b) {
 void Core::instr_inc(Word &b) { ++b; }
 
 void Core::instr_dec(Byte &b) {
-
-  Byte before = b;
-
-  --b;
-
-  set_flag(Flags::Z, b == 0u);
   set_flag(Flags::N, true);
-  set_flag(Flags::H, (before & 0x0F) == 0);
-
+  set_flag(Flags::H, (b & 0xf) == 0u);
+  --b;
+  set_flag(Flags::Z, b == 0u);
 }
 
 // ----------------------------------------------------------------------------
@@ -149,8 +140,7 @@ void Core::instr_dec(Word &b) { --b; }
 void Core::instr_daa() {
   Byte correction_mask = 0u;
 
-  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9))
-    correction_mask |= 0x6;
+  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9)) correction_mask |= 0x6;
   if (get_flag(Flags::C) || _af.high > 0x99) {
     correction_mask |= 0x60;
     set_flag(Flags::C, true);
@@ -190,14 +180,14 @@ void Core::instr_ei() { _components.interrupt_controller->set_IME(1); }
 
 bool Core::can_jump(JumpCondition jc) {
   switch (jc) {
-  case JumpCondition::NonZero:
-    return !get_flag(Flags::Z);
-  case JumpCondition::Zero:
-    return get_flag(Flags::Z);
-  case JumpCondition::NonCarry:
-    return !get_flag(Flags::C);
-  case JumpCondition::Carry:
-    return get_flag(Flags::C);
+    case JumpCondition::NonZero:
+      return !get_flag(Flags::Z);
+    case JumpCondition::Zero:
+      return get_flag(Flags::Z);
+    case JumpCondition::NonCarry:
+      return !get_flag(Flags::C);
+    case JumpCondition::Carry:
+      return get_flag(Flags::C);
   }
   return false;
 }
