@@ -9,6 +9,8 @@ FORMAT_DOUBLE           = "exec_instruction([&] () {{ instr_{}({}, {}); }}, {})"
 FORMAT_DOUBLE_BYTE      = "exec_instruction([&] (Byte &v) {{ instr_{}({}, {}); }}, {}, {})"
 FORMAT_DOUBLE_WORD      = "exec_instruction([&] (Word &v) {{ instr_{}({}, {}); }}, {}, {})"
 
+fetch_byte              = "_components.mem_bus->read<Byte>(addr++)"
+
 def get_deref_right(mnemonic, operand1, operand2):
     if "(" in operand1:
         operand = operand1
@@ -25,8 +27,8 @@ def get_deref_right(mnemonic, operand1, operand2):
     registers   = {
         "HL": "_hl.word", "DE": "_de.word",
         "C": "0xFF00 + _bc.low", "BC": "_bc.word",
-        "a16": "fetch_word()", "a8": "0xFF00 + *it++",
-        "d8": "0xFF00 + *it++", "d16": "fetch_word()"
+        "a16": "fetch_word()", "a8": "0xFF00 + " + fetch_byte,
+        "d8": "0xFF00 + " + fetch_byte, "d16": "fetch_word()"
     }
     return prefix + registers.get(operand) + suffix
 
@@ -44,8 +46,8 @@ def get_deref(mnemonic, operand1, operand2):
     registers   = {
         "HL": "_hl.word", "DE": "_de.word",
         "C": "0xFF00 + _bc.low", "BC": "_bc.word",
-        "a16": "fetch_word()", "a8": "0xFF00 + *it++",
-        "d8": "0xFF00 + *it++", "d16": "fetch_word()"
+        "a16": "fetch_word()", "a8": "0xFF00 + " + fetch_byte,
+        "d8": "0xFF00 + " + fetch_byte, "d16": "fetch_word()"
     }
     return registers.get(operand)
 
@@ -58,9 +60,9 @@ def get_reg(mnemonic, operand):
         "D": "_de.high", "E": "_de.low",
         "H": "_hl.high", "L": "_hl.low",
         "SP": "_sp.word",
-        "d8": "*it++", "d16": "fetch_word()",
-        "r8": "*it++",
-        "SP+r8": "static_cast<Word>(_sp.word + *it++)"
+        "d8": fetch_byte, "d16": "fetch_word()",
+        "r8": fetch_byte,
+        "SP+r8": "static_cast<Word>(_sp.word + " + fetch_byte + ")"
     }
 
     if mnemonic in ("jr", "jp", "call", "ret"):
@@ -69,7 +71,7 @@ def get_reg(mnemonic, operand):
             "C": "Carry", "NC": "NonCarry", "Z": "Zero", "NZ": "NonZero",
         }
         condreg = {
-            "r8": "*it++", "a16": "fetch_word()"
+            "r8": fetch_byte, "a16": "fetch_word()"
         }
         cond = conditionals.get(operand)
         if cond is not None:
@@ -114,12 +116,6 @@ def gen_code(opcodes):
         cpp_op1 = get_reg(mnemonic, operand1)
         cpp_op2 = get_reg(mnemonic, operand2)
 
-        # Introducing annoying instruction #1: LDH
-        # if mnemonic == "ldh":
-            # if operand1 == "A":
-                # exec_instruction = FORMAT_DOUBLE.format(mnemonic, "_af.high", "_components.mem_bus->read(0xFF00 + *it++)", cycles)
-            # else:
-                # exec_instruction = FORMAT_DOUBLE_BYTE.format(mnemonic, "v", "_af.high", "0xFF00 + *it++", cycles)
         # Annoying instruction #2 #3 #4 #5 #6
         # Thanks to Alaric's way of handling these instructions the following elif is necessary
         if mnemonic in ("sub", "and", "or", "xor", "cp"):
@@ -162,6 +158,7 @@ def gen_code(opcodes):
         else:
             exec_instruction = FORMAT_NONE.format(mnemonic, cycles)
         print("case " + addr + ":")
+        # print("  " + 'std::printf("%x : {}\\n", _pc.word);'.format(addr))
         print("  " + exec_instruction + ";")
         print("  break;")
 
@@ -170,7 +167,7 @@ def main():
     del opcodes["unprefixed"]["0xcb"]
     gen_code(opcodes.get("unprefixed"))
     print("  case 0xCB:")
-    print("switch (*it++) {")
+    print("switch (" + fetch_byte + ") {")
     gen_code(opcodes.get("cbprefixed"))
     print("}")
 
