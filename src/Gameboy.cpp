@@ -60,7 +60,7 @@ void Gameboy::handle_input_wraper(Byte val) {
 
 void Gameboy::step() {
   if (_debugger.is_enabled()) {
-    _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
+    _debugger.fetch(_components.core->pc());
   }
   _components.core->execute();
   _components.interrupt_controller->parse_interrupt();
@@ -72,7 +72,7 @@ void Gameboy::boot() {
   _components.core->instr_jp(0x0000);
   while (_components.core->pc() < 0x0100) {
     if (_debugger.is_enabled()) {
-      _debugger.fetch(_begin + _components.core->pc(), _components.core->pc());
+      _debugger.fetch(_components.core->pc());
     }
     _components.core->execute();
     _components.interrupt_controller->parse_interrupt();
