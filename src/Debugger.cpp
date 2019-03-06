@@ -17,12 +17,8 @@ Debugger::Debugger(ComponentsContainer &components)
 
 Debugger::_debug_info::_debug_info(uint16_t _pc,
                                    const Debugger::_instr_info &_map_info,
-                                   Core::Iterator _it, uint8_t _size)
-    : pc(_pc), instr(_map_info.instr), size(_size) {
-  for (int i = 0; i < 3; i++) {
-    value[i] = *(_it + i);
-  }
-}
+                                   std::array<int, 3> _value, uint8_t _size)
+    : pc(_pc), instr(_map_info.instr), value(_value), size(_size) {}
 
 const std::vector<std::pair<int, uint16_t>>
 Debugger::rdiff(const std::vector<uint16_t> &prev,
@@ -55,7 +51,16 @@ const std::vector<std::pair<int, uint16_t>> Debugger::get_register_diffs() {
  * Here it is the current iterator, not begin.
  */
 
-void Debugger::set_instruction_pool(const Core::Iterator &it, uint16_t pc) {
+std::array<int, 3> Debugger::construct_value(uint16_t pc) {
+  std::array<int, 3> value;
+  for (int i = 0; i < 3; i++) {
+    value[i] = _components.mem_bus->read<Byte>(pc + i);
+  }
+  return value;
+}
+
+void Debugger::set_instruction_pool(uint16_t pc) {
+
   uint16_t pc_add;
   auto mit = _instr_map.begin();
   auto mit_next = _instr_map.begin();
@@ -66,21 +71,27 @@ void Debugger::set_instruction_pool(const Core::Iterator &it, uint16_t pc) {
   _instr_pool.reserve(_frame_size);
 
   for (int i = 0; i <= _frame_size; i++) {
-    mit = _instr_map.find(*(it + pc_add));
-    mit_next = _instr_map.find(*(it + 1 + pc_add));
-    mit_cb = _instr_map.find((*(it + 1 + pc_add)) | 0xCB00);
+    mit = _instr_map.find(_components.mem_bus->read<Byte>(pc + pc_add));
+    mit_next =
+        _instr_map.find(_components.mem_bus->read<Byte>(pc + 1 + pc_add));
+    mit_cb = _instr_map.find(
+        (_components.mem_bus->read<Byte>(pc + 1 + pc_add)) | 0xCB00);
 
-    if (*(it + pc_add) == 0xCB && mit_next != _instr_map.end()) {
-      _instr_pool.emplace_back(pc + pc_add, mit_cb->second, it + pc_add,
+    if (_components.mem_bus->read<Byte>(pc + pc_add) == 0xCB &&
+        mit_next != _instr_map.end()) {
+      _instr_pool.emplace_back(pc + pc_add, mit_cb->second,
+                               construct_value(pc + pc_add), // test
                                mit_cb->second.size);
       pc_add += mit_cb->second.size;
     } else if (mit != _instr_map.end()) {
-      _instr_pool.emplace_back(pc + pc_add, mit->second, it + pc_add,
+      _instr_pool.emplace_back(pc + pc_add, mit->second,
+                               construct_value(pc + pc_add), // test
                                mit->second.size);
       pc_add += mit->second.size;
     } else {
       Debugger::_instr_info bad_value = {"??", 0x00};
-      _instr_pool.emplace_back(pc + pc_add, bad_value, it + pc_add, 0);
+      _instr_pool.emplace_back(pc + pc_add, bad_value,
+                               construct_value(pc + pc_add), 0); // test
     }
   }
 }
@@ -318,30 +329,30 @@ bool Debugger::is_duration_passed() {
   return false;
 }
 
-void Debugger::lock_game(const Core::Iterator &it, uint16_t pc) {
+void Debugger::lock_game(uint16_t pc) {
   if (on_breakpoint(pc) || is_duration_passed() || is_frame_passed() ||
       is_step_passed() || watchpoint_changed() || is_cpu_sec_passed()) {
-    update_data(it, pc);
+    update_data(pc);
     _lock = true;
   }
 }
 
-void Debugger::fetch(const Core::Iterator &it, uint16_t pc) {
+void Debugger::fetch(uint16_t pc) {
   static int first_time = 0;
 
   if (first_time == 0) {
-    update_data(it, pc);
+    update_data(pc);
     first_time = 1;
   }
-  lock_game(it, pc);
+  lock_game(pc);
   while (_lock) {
   }
 }
 
-void Debugger::update_data(const Core::Iterator &it, uint16_t pc) {
+void Debugger::update_data(uint16_t pc) {
   std::vector<uint16_t> current;
 
-  set_instruction_pool(it, pc);
+  set_instruction_pool(pc);
   current = construct_register_pool();
   _register_diffs = rdiff(_register_pool, current);
 }

@@ -5,10 +5,10 @@
 #include "src/Cartridge.hpp"
 #include "src/Fwd.hpp"
 #include "src/MemoryBus.hpp"
+#include <atomic>
 #include <chrono>
 #include <map>
 #include <vector>
-#include <atomic>
 
 class Debugger {
 
@@ -20,12 +20,12 @@ public:
   };
 
   struct _debug_info {
-    _debug_info(uint16_t pc, const _instr_info &map_info, Core::Iterator it,
-                uint8_t size);
+    _debug_info(uint16_t pc, const _instr_info &map_info,
+                std::array<int, 3> value, uint8_t size);
 
     uint16_t pc = 0x00;
     const char *instr = nullptr;
-    Byte value[3] = {0, 0, 0};
+    std::array<int, 3> value;
     uint8_t size = 0x00;
   };
 
@@ -591,7 +591,7 @@ public:
   void run_one_frame();
   void run_one_step();
 
-  void fetch(const Core::Iterator &it, uint16_t pc);
+  void fetch(uint16_t pc);
   bool is_enabled() const { return _enabled; }
 
   // getter
@@ -606,13 +606,13 @@ private:
   bool is_duration_passed();
   bool is_cpu_sec_passed();
   bool is_frame_passed();
-  void set_instruction_pool(const Core::Iterator &it, uint16_t pc);
-  void update_data(const Core::Iterator &it, uint16_t pc);
-  void lock_game(const Core::Iterator &it, uint16_t pc);
+  void set_instruction_pool(uint16_t pc);
+  void update_data(uint16_t pc);
+  void lock_game(uint16_t pc);
   bool on_breakpoint(uint16_t pc);
   bool watchpoint_changed();
+  std::array<int, 3> construct_value(uint16_t pc);
   uint16_t get_register_value(uint16_t addr);
-  using it = std::vector<uint16_t>::const_iterator;
   const std::vector<std::pair<int, uint16_t>>
   rdiff(const std::vector<uint16_t> &prev,
         const std::vector<uint16_t> &current);
