@@ -60,8 +60,6 @@ public:
   bool is_screen_filled() { return _components.ppu->is_screen_filled(); }
   Debugger &get_debugger() { return _debugger; }
 
-  void boot();
-
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
   };
