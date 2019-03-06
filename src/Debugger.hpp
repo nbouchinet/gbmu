@@ -8,6 +8,7 @@
 #include <chrono>
 #include <map>
 #include <vector>
+#include <atomic>
 
 class Debugger {
 
