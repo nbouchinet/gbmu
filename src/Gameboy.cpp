@@ -68,22 +68,9 @@ void Gameboy::step() {
   _components.ppu->update_graphics(_components.core->cycles());
 }
 
-void Gameboy::boot() {
-  _components.core->instr_jp(0x0000);
-  while (_components.core->pc() < 0x0100) {
-    if (_debugger.is_enabled()) {
-      _debugger.fetch(_components.core->pc());
-    }
-    _components.core->execute();
-    _components.interrupt_controller->parse_interrupt();
-    _components.timer->update(_components.core->cycles());
-    _components.ppu->update_graphics(_components.core->cycles());
-  }
-}
-
 int Gameboy::run() {
-  boot();
   //_components.mem_bus->write(0xFF50, 1);
+  _components.core->instr_jp(0x0000);
   _begin = _components.cartridge->get_begin();
   do_checksum();
   while (true) {
