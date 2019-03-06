@@ -49,31 +49,21 @@ TEST(BitOperations, reset_bit) {
 }
 
 TEST(Overflows, add) {
-  EXPECT_EQ(check_add_overflows(0x7u, 0x9u), 0x8u);
-  EXPECT_EQ(check_add_overflows(0x6u, 0xau), 0x8u);
-  EXPECT_EQ(check_add_overflows(0x80u, 0x80u), 0x80u);
-  EXPECT_EQ(check_add_overflows(0x89u, 0x86u), 0x80u);
-  EXPECT_EQ(check_add_overflows(0xffu, 0xffu), 0x88u);
-  EXPECT_EQ(check_add_overflows(0xfu, 0x1u), 0x08u);
-  EXPECT_EQ(check_add_overflows(0xffffu, 0xffffu), 0x8888u);
-
-  EXPECT_EQ(check_add_overflows(0x6u, 0x9u), 0x0u);
-  EXPECT_EQ(check_add_overflows(0x66u, 0x11u), 0x00u);
-  EXPECT_EQ(check_add_overflows(0x66u, 0xa9u), 0x80u);
-  EXPECT_EQ(check_add_overflows(0x0000u, 0x0000u), 0x0000u);
-}
-
-TEST(Overflows, sub) {
-  EXPECT_EQ(check_sub_overflows(0x1u, 0x2u), 0x1u);
-  EXPECT_EQ(check_sub_overflows(0x39u, 0x79u), 0x11u);
-  EXPECT_EQ(check_sub_overflows(0x10u, 0x20u), 0x11u);
-  EXPECT_EQ(check_sub_overflows(0x11u, 0x22u), 0x11u);
-  EXPECT_EQ(check_sub_overflows(0x111111u, 0x222222u), 0x111111u);
-  EXPECT_EQ(check_sub_overflows(0xfeu, 0xefu), 0x0u);
-
-  EXPECT_EQ(check_sub_overflows(0x0u, 0x0u), 0x00u);
-  EXPECT_EQ(check_sub_overflows(0x9u, 0x9u), 0x00u);
-  EXPECT_EQ(check_sub_overflows(0x42u, 0x41u), 0x00u);
+  EXPECT_TRUE(check_add_overflow_from(0x7u, 0x9u, 4));
+  EXPECT_TRUE(check_add_overflow_from(0xau, 0x6u, 4));
+  EXPECT_FALSE(check_add_overflow_from(0x5u, 0x5u, 4));
+  EXPECT_FALSE(check_add_overflow_from(0x7u, 0x9u, 8));
+  EXPECT_FALSE(check_add_overflow_from(0xau, 0x6u, 8));
+  EXPECT_FALSE(check_add_overflow_from(0x5u, 0x5u, 8));
+  EXPECT_TRUE(check_add_overflow_from(0x70u, 0x90u, 8));
+  EXPECT_TRUE(check_add_overflow_from(0xa0u, 0x60u, 8));
+  EXPECT_FALSE(check_add_overflow_from(0x50u, 0x50u, 8));
+  EXPECT_FALSE(check_add_overflow_from(0x70u, 0x90u, 4));
+  EXPECT_FALSE(check_add_overflow_from(0xa0u, 0x60u, 4));
+  EXPECT_TRUE(check_add_overflow_from(0x7000u, 0x9000u, 16));
+  EXPECT_TRUE(check_add_overflow_from(0xa000u, 0x6000u, 16));
+  EXPECT_FALSE(check_add_overflow_from(0x7000u, 0x9000u, 8));
+  EXPECT_FALSE(check_add_overflow_from(0x5000u, 0x3000u, 16));
 }
 
 int main(int ac, char *av[]) {
