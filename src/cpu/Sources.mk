@@ -2,6 +2,7 @@
 
 OBJ_FILES_src/cpu := Core.o \
                      CoreExecute.o \
+                     InputController.o \
                      InterruptController.o \
                      Timer.o
 

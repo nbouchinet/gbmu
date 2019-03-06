@@ -3,7 +3,7 @@
 #include "src/Gameboy.hpp"
 
 namespace {
-	ComponentsContainer container("../tools/Tetris.gb");
+	ComponentsContainer container("tools/Tetris.gb");
 	Timer t(container);
 
 	TEST(Timer, readwrite) {
