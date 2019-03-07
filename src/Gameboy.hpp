@@ -65,6 +65,7 @@ public:
   Debugger &get_debugger() { return _debugger; }
 
   void go() { _wait.store(false); }
+  bool is_cycling() { return !_wait; }
 
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
