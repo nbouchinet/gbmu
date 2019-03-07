@@ -43,6 +43,7 @@ private:
   uint8_t _cgb_flag;
 
   std::atomic<bool> _wait;
+  int _cycles = 0;
 
   friend class Accessor;
 

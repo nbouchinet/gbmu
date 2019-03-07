@@ -59,27 +59,27 @@ void Gameboy::step() {
   if (_debugger.is_enabled()) {
     _debugger.fetch(_components.core->pc());
   }
-  _components.core->execute();
-  _components.interrupt_controller->parse_interrupt();
-  _components.timer->update(_components.core->cycles());
-  _components.ppu->update_graphics(_components.core->cycles());
+
+  if (_cycles >= 70224 * 4) {
+    _wait.store(true);
+    _cycles = 0;
+  }
+  if (!_wait) {
+    _components.core->execute();
+    _components.interrupt_controller->parse_interrupt();
+    _components.timer->update(_components.core->cycles());
+    _components.ppu->update_graphics(_components.core->cycles());
+    _cycles += _components.core->cycles();
+  }
 }
 
 int Gameboy::run() {
-  int cycles = 0;
-
   //_components.mem_bus->write(0xFF50, 1);
   set_cgb_flag();
   _components.core->instr_jp(0x0000);
   do_checksum();
   while (true) {
-	cycles += _components.core->cycles();
-	if (cycles >= 70224 * 4) {
-		_wait.store(true);
-		cycles = 0;
-	}
-	if (!_wait)
-		step();
+    step();
   }
   return (0);
 }
