@@ -55,21 +55,20 @@ void InterruptController::parse_interrupt() {
 void InterruptController::execute_interrupt(Byte interrupt) {
   _IME = false;
   _rIF = (_rIF & ~(0x01 << interrupt));
-  _components.core->instr_push(_components.core->pc());
   switch (interrupt) {
   case 0:
-    _components.core->instr_jp(VBI);
+    _components.core->start_interrupt(VBI);
     break;
   case 1:
-    _components.core->instr_jp(LCDCSI);
+    _components.core->start_interrupt(LCDCSI);
     break;
   case 2:
-    _components.core->instr_jp(TOI);
+    _components.core->start_interrupt(TOI);
     break;
   case 3:
     break;
   case 4:
-    _components.core->instr_jp(JOYI);
+    _components.core->start_interrupt(JOYI);
     break;
   }
 }
