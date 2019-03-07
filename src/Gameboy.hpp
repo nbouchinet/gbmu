@@ -36,8 +36,10 @@ private:
     Byte ram[AMemoryBankController::RAMSize];
   };
 
+  void set_cgb_flag();
   ComponentsContainer _components;
   Debugger _debugger;
+  uint8_t _cgb_flag;
 
   friend class Accessor;
 
@@ -56,6 +58,7 @@ public:
   void handle_input_wraper(Byte val);
   void notify_debugger(Debugger::e_dbg_state state, int duration = 0);
   bool is_screen_filled() { return _components.ppu->is_screen_filled(); }
+  const uint8_t &get_cgb_flag() const {return _cgb_flag;}
   Debugger &get_debugger() { return _debugger; }
 
   class BadChecksum : public std::exception {
