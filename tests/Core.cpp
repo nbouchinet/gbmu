@@ -520,37 +520,6 @@ TEST_F(TestCoreFixture, rr) {
   test_flags(.c = 1);
 }
 
-TEST_F(TestCoreFixture, program_1) {
-  reg = 0x00;
-  accessor.getBc().high = 0x00;
-  accessor.getPc().word = 0x00;
-  std::vector<Byte> opcodes{0x3E, 0x42, 0x06, 0xF0, 0xAF, 0x78, 0xAF};
-  int i = 0;
-
-  auto it = opcodes.begin();
-
-  accessor.core.execute(it);  // ld a, 0x42
-  accessor.core.execute(it);  // ld b, 0xF0
-
-  while (it + accessor.getPc().word != opcodes.end()) {
-    accessor.core.execute(it);
-    switch (i) {
-      case 0:
-        EXPECT_EQ(accessor.getAf().high, 0);
-        break;
-      case 1:
-        EXPECT_EQ(accessor.getAf().high, 0xF0);
-        break;
-      case 2:
-        EXPECT_EQ(accessor.getAf().high, 0);
-        break;
-      default:
-        break;
-    }
-    i++;
-  }
-}
-
 TEST_F(TestCoreFixture, cpl) {
   for (int i = 0x0; i < 0xFF; i++) {
     accessor.getAf().high = i;
