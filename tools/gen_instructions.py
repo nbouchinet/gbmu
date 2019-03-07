@@ -62,7 +62,7 @@ def get_reg(mnemonic, operand):
         "SP": "_sp.word",
         "d8": fetch_byte, "d16": "fetch_word()",
         "r8": fetch_byte,
-        "SP+r8": "static_cast<Word>(_sp.word + " + fetch_byte + ")"
+        "SP+r8": fetch_byte
     }
 
     if mnemonic in ("jr", "jp", "call", "ret"):
@@ -71,7 +71,8 @@ def get_reg(mnemonic, operand):
             "C": "Carry", "NC": "NonCarry", "Z": "Zero", "NZ": "NonZero",
         }
         condreg = {
-            "r8": fetch_byte, "a16": "fetch_word()"
+            "r8": fetch_byte, "a16": "fetch_word()",
+            "HL": "_hl.word"
         }
         cond = conditionals.get(operand)
         if cond is not None:
@@ -113,6 +114,8 @@ def gen_code(opcodes):
             if operand1 and "(" in operand1:
                 first_is_deref = True
 
+        if mnemonic == "ld" and operand2 == "SP+r8":
+            mnemonic = "ldhl"
         cpp_op1 = get_reg(mnemonic, operand1)
         cpp_op2 = get_reg(mnemonic, operand2)
 
