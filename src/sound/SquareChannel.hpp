@@ -1,6 +1,8 @@
 #ifndef SQUARECHANNEL_HPP
 #define SQUARECHANNEL_HPP
 
+#include "src/Fwd.hpp"
+
 #include "src/sound/ModulationUnits.hpp"
 #include "src/sound/SoundChannel.hpp"
 

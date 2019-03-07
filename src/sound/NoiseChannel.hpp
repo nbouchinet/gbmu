@@ -1,8 +1,9 @@
 #ifndef NOISECHANNEL_HPP
 #define NOISECHANNEL_HPP
 
-#include "src/sound/SoundChannel.hpp"
+#include "src/Fwd.hpp"
 
+#include "src/sound/SoundChannel.hpp"
 #include "src/sound/ModulationUnits.hpp"
 
 namespace sound {

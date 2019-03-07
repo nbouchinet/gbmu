@@ -3,6 +3,7 @@
 
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
+
 #include "src/sound/AudioInterface.hpp"
 #include "src/sound/VolumeTable.hpp"
 

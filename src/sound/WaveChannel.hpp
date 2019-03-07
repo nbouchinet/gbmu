@@ -1,14 +1,14 @@
 #ifndef WAVESOUND_HPP
 #define WAVESOUND_HPP
 
+#include "src/Fwd.hpp"
+
 #include "src/sound/ModulationUnits.hpp"
 #include "src/sound/SoundChannel.hpp"
 
 #include <array>
 
 namespace sound {
-
-class VolumeTable;
 
 class WaveChannel : public SoundChannel {
  private:
