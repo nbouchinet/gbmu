@@ -67,6 +67,7 @@ void Gameboy::step() {
 
 int Gameboy::run() {
   //_components.mem_bus->write(0xFF50, 1);
+  set_cgb_flag();
   _components.core->instr_jp(0x0000);
   do_checksum();
   while (true) {
@@ -149,4 +150,8 @@ void Gameboy::do_checksum() {
 
   if (cartridge_sum != sum)
     throw BadChecksum();
+}
+
+void Gameboy::set_cgb_flag() {
+	_cgb_flag = _components.mem_bus->read<Byte>(0x143);
 }
