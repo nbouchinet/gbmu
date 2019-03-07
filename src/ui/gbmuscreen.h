@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <iostream>
+#include <memory>
 
 # define GB_WIDTH 160
 # define GB_HEIGTH 144
@@ -20,7 +21,8 @@ class GbmuScreen : public QGraphicsView
 	Q_OBJECT
 
 	private:
-        QWidget *_ptrParent;
+        QWidget *_parent;
+		std::unique_ptr<QGraphicsScene> _scene;
 	public slots:
         void updateGbScreen(void);
 	public:
