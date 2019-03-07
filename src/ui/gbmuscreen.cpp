@@ -36,9 +36,9 @@ void GbmuScreen::updateGbScreen(void) {
       image.setPixel(i, j, qRgba(r, g, b, a));
     }
   }
-  image.setPixel(5, 50, 0x000000FF);
   QPixmap p =
       QPixmap::fromImage(image.scaled(width(), height() - SKIP_TOOLBAR));
   _scene->clear();
   _scene->addPixmap(p);
+  g_gameboy.go();
 }

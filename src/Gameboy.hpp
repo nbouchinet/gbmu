@@ -7,6 +7,7 @@
 #include "src/Fwd.hpp"
 #include "src/PPU.hpp"
 #include "src/ScreenOutput.hpp"
+#include <atomic>
 
 #include <memory>
 
@@ -41,6 +42,8 @@ private:
   Debugger _debugger;
   uint8_t _cgb_flag;
 
+  std::atomic<bool> _wait;
+
   friend class Accessor;
 
   void do_checksum();
@@ -60,6 +63,8 @@ public:
   bool is_screen_filled() { return _components.ppu->is_screen_filled(); }
   const uint8_t &get_cgb_flag() const {return _cgb_flag;}
   Debugger &get_debugger() { return _debugger; }
+
+  void go() { _wait.store(false); }
 
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
