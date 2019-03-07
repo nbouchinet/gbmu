@@ -14,9 +14,6 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-	//All Registers in one vector
-	std::vector<uint16_t> registers = g_gameboy.get_debugger().construct_register_pool();
-
 	//Main Registers
 	ui->registersWidget->setShowGrid(false);
 	ui->registersWidget->setColumnCount(1);
@@ -30,10 +27,7 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	ui->registersWidget->setVerticalHeaderLabels(verticalLabels);
 	ui->registersWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui->registersWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	for (int i = 0; i < 6; i++){
-		ui->registersWidget->setItem(i, 0, new QTableWidgetItem(qstring_hex_pad(registers[i], 4)));
-	}
-
+	
 	//Video Registers
 	ui->videoRegistersWidget->setShowGrid(false);
 	ui->videoRegistersWidget->setColumnCount(2);
@@ -47,12 +41,6 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	ui->videoRegistersWidget->setVerticalHeaderLabels(verticalLabels);
 	ui->videoRegistersWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui->videoRegistersWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	QStringList addrList;
-	addrList << "FF40" << "FF41" << "FF42" << "FF43" << "FF44" << "FF45" << "FF46" << "FF47" << "FF48" << "FF49" << "FF4A" << "FF4B" << "FF68" << "FF69" << "FF6A" << "FF6B";
-	for (int i = 0; i < 16; i++){
-		ui->videoRegistersWidget->setItem(i, 0, new QTableWidgetItem(addrList.at(i)));
-		ui->videoRegistersWidget->setItem(i, 1, new QTableWidgetItem(qstring_hex_pad(registers[i + 6], 4)));
-	}
 
 	//Other Registers
 	ui->otherRegistersWidget->setShowGrid(false);
@@ -67,13 +55,9 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	ui->otherRegistersWidget->setVerticalHeaderLabels(verticalLabels);
 	ui->otherRegistersWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui->otherRegistersWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	addrList.clear();
-	addrList << "FF00" << "FF01" << "FF02" << "FF04" << "FF05" << "FF06" << "FF07" << "FF4D" << "FF4F" << "FF51" << "FF52" << "FF53" << "FF54" << "FF55" << "FF70" << "FF0F" << "FFFF";
-	for (int i = 0; i < 17; i++){
-		ui->otherRegistersWidget->setItem(i, 0, new QTableWidgetItem(addrList.at(i)));
-		ui->otherRegistersWidget->setItem(i, 1, new QTableWidgetItem(qstring_hex_pad(registers[i + 6 + 16], 4)));
-	}
-	
+
+	init_registers_view();	
+
 	//Instructions pool size
 	ui->disassemblerWidget->setShowGrid(false);
 	ui->disassemblerWidget->setColumnCount(2);
@@ -120,7 +104,7 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 		add_watchpoint(label, addrText);
 	});
 
-	//Run Duration Spin Box
+	//Run Duration Spin Box Min-Max
 	ui->runDurationSpinBox->setMinimum(1);
 	ui->runDurationSpinBox->setMaximum(10);
 }
@@ -135,10 +119,32 @@ inline QString DebuggerWindow::qstring_hex_pad(uint32_t value, int padding)
 	return QString("%1").arg(value, padding, 16, QChar('0')).toUpper();
 }
 
+void DebuggerWindow::init_registers_view()
+{
+	std::vector<uint16_t> registers = g_gameboy->get_debugger().construct_register_pool();
+	for (int i = 0; i < 6; i++){
+		ui->registersWidget->setItem(i, 0, new QTableWidgetItem(qstring_hex_pad(registers[i], 4)));
+	}
+
+	QStringList addrList;
+	addrList << "FF40" << "FF41" << "FF42" << "FF43" << "FF44" << "FF45" << "FF46" << "FF47" << "FF48" << "FF49" << "FF4A" << "FF4B" << "FF68" << "FF69" << "FF6A" << "FF6B";
+	for (int i = 0; i < 16; i++){
+		ui->videoRegistersWidget->setItem(i, 0, new QTableWidgetItem(addrList.at(i)));
+		ui->videoRegistersWidget->setItem(i, 1, new QTableWidgetItem(qstring_hex_pad(registers[i + 6], 4)));
+	}
+
+	addrList.clear();
+	addrList << "FF00" << "FF01" << "FF02" << "FF04" << "FF05" << "FF06" << "FF07" << "FF4D" << "FF4F" << "FF51" << "FF52" << "FF53" << "FF54" << "FF55" << "FF70" << "FF0F" << "FFFF";
+	for (int i = 0; i < 17; i++){
+		ui->otherRegistersWidget->setItem(i, 0, new QTableWidgetItem(addrList.at(i)));
+		ui->otherRegistersWidget->setItem(i, 1, new QTableWidgetItem(qstring_hex_pad(registers[i + 6 + 16], 4)));
+	}
+}
+
 void DebuggerWindow::refresh_memory_map()
 {
 	QStringList titles;
-	std::vector<Byte> memory_dump = g_gameboy.get_debugger().get_memory_dump(_addr_memory_map);
+	std::vector<Byte> memory_dump = g_gameboy->get_debugger().get_memory_dump(_addr_memory_map);
 	if (memory_dump.size() == 160)
 	{
 		int k = 0;
@@ -158,8 +164,8 @@ void DebuggerWindow::refresh_memory_map()
 void DebuggerWindow::refresh_instr()
 {
 	QStringList titles;
-	g_gameboy.get_debugger().set_instruction_pool_size(6);
-	std::vector<Debugger::_debug_info> instr_pool = g_gameboy.get_debugger().get_instruction_pool();
+	g_gameboy->get_debugger().set_instruction_pool_size(6);
+	std::vector<Debugger::_debug_info> instr_pool = g_gameboy->get_debugger().get_instruction_pool();
 	QString value;
 	int pool_size = instr_pool.size();
 	for (int i = 0; i < pool_size; i++){
@@ -185,7 +191,7 @@ void DebuggerWindow::reset_color(QTableWidget *widget, int column)
 
 void DebuggerWindow::refresh_registers()
 {
-	std::vector<std::pair<int, uint16_t>> registers = g_gameboy.get_debugger().get_register_diffs();
+	std::vector<std::pair<int, uint16_t>> registers = g_gameboy->get_debugger().get_register_diffs();
 	reset_color(ui->registersWidget, 0);
 	reset_color(ui->videoRegistersWidget, 1);
 	reset_color(ui->otherRegistersWidget, 1);
@@ -235,7 +241,7 @@ void DebuggerWindow::add_watchpoint(const QString &label, const QString &addrTex
 				uint16_t addr = addrText.toUInt(&ok, 16);
 				if (ok)
 				{
-					g_gameboy.get_debugger().add_watchpoint(addr, valueHex);
+					g_gameboy->get_debugger().add_watchpoint(addr, valueHex);
 					ui->watchpointsWidget->addItem(new QListWidgetItem(label + ":" + addrText + ":" + (value.isEmpty() ? "" : qstring_hex_pad(valueHex, 4))));
 				}
 			}
@@ -254,7 +260,7 @@ void DebuggerWindow::addBreakpoint()
 			uint16_t addr = ui->breakpointsEdit->text().toUInt(&ok, 16);
 			if (ok)
 			{
-				g_gameboy.get_debugger().add_breakpoint(addr);
+				g_gameboy->get_debugger().add_breakpoint(addr);
 				ui->breakpointsWidget->addItem(new QListWidgetItem(qstring_hex_pad(ui->breakpointsEdit->text().toInt(), 4)));
 			}
 		}
@@ -266,26 +272,27 @@ void DebuggerWindow::refresh_info()
 {
 	refresh_registers();
 	refresh_instr();
+	refresh_memory_map();
 }
 
 void DebuggerWindow::on_stepButton_clicked()
 {
-	g_gameboy.notify_debugger(Debugger::RUN_ONE_STEP);
-	while (!g_gameboy.get_debugger().get_lock()){}
+	g_gameboy->notify_debugger(Debugger::RUN_ONE_STEP);
+	while (!g_gameboy->get_debugger().get_lock()){}
 	refresh_info();
 }
 
 void DebuggerWindow::on_runOneFrameButton_clicked()
 {
-	g_gameboy.notify_debugger(Debugger::RUN_ONE_FRAME);
-	while (!g_gameboy.get_debugger().get_lock()){}
+	g_gameboy->notify_debugger(Debugger::RUN_ONE_FRAME);
+	while (!g_gameboy->get_debugger().get_lock()){}
 	refresh_info();
 }
 
 void DebuggerWindow::on_runDurationButton_clicked()
 {
-	g_gameboy.notify_debugger(Debugger::RUN_DURATION, ui->runDurationSpinBox->value());
-	while (!g_gameboy.get_debugger().get_lock()){}
+	g_gameboy->notify_debugger(Debugger::RUN_DURATION, ui->runDurationSpinBox->value());
+	while (!g_gameboy->get_debugger().get_lock()){}
 	refresh_info();
 }
 
@@ -308,7 +315,7 @@ void DebuggerWindow::on_deleteBreakpointButton_clicked()
 		uint16_t addr = ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item))->text().toUInt(&ok, 16);
 		if (ok)
 		{
-			g_gameboy.get_debugger().remove_breakpoint(addr);
+			g_gameboy->get_debugger().remove_breakpoint(addr);
 			delete ui->breakpointsWidget->takeItem(ui->breakpointsWidget->row(item));
 		}
 	}
@@ -316,7 +323,7 @@ void DebuggerWindow::on_deleteBreakpointButton_clicked()
 
 void DebuggerWindow::on_DebuggerWindow_rejected()
 {
-	g_gameboy.get_debugger().toggle();
+	g_gameboy->get_debugger().toggle();
 }
 
 void DebuggerWindow::on_deleteWatchpointButton_clicked()
@@ -331,7 +338,7 @@ void DebuggerWindow::on_deleteWatchpointButton_clicked()
 		uint16_t value = watchpointText.at(2).toUInt(&okValue, 16);
 		if (okAddr && okValue)
 		{
-			g_gameboy.get_debugger().remove_watchpoint(addr, value);
+			g_gameboy->get_debugger().remove_watchpoint(addr, value);
 			delete ui->watchpointsWidget->takeItem(ui->watchpointsWidget->row(item));
 		}
 	}
@@ -354,4 +361,10 @@ void DebuggerWindow::on_memoryLineEdit_editingFinished()
 		}
 	}
 	ui->memoryLineEdit->clear();
+}
+
+void DebuggerWindow::on_resetButton_clicked()
+{
+	g_gameboy->reset();
+	refresh_info();
 }

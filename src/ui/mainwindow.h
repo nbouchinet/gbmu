@@ -11,7 +11,7 @@ class MainWindow;
 }
 
 
-extern Gameboy g_gameboy;
+extern Gameboy *g_gameboy;
 extern QMutex mutexGb;
 
 class MainWindow : public QMainWindow
