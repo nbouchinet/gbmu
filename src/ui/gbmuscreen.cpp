@@ -22,6 +22,9 @@ void GbmuScreen::updateGbScreen(void) {
   if (_parent->width() != width() || _parent->height() != height())
     resize(_parent->width(), _parent->height());
 
+  if (g_gameboy.is_cycling())
+	  return ;
+
   QImage image = QImage(GB_WIDTH, GB_HEIGTH, QImage::Format_RGBA8888);
   for (int i = 0; i < GB_WIDTH; i++) {
     for (int j = 0; j < GB_HEIGTH; j++) {
