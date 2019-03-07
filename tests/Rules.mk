@@ -1,6 +1,6 @@
 TEST_CC			:= clang++
 TEST_CFLAGS		:=
-TEST_LFLAGS		:= -lgtest -pthread -lportaudiocpp -lportaudio
+TEST_LFLAGS		:= -lgtest -pthread 
 ifeq ($(shell uname -s), Darwin)
 	TEST_CFLAGS		+= -I ~/.brew/include
 	TEST_LFLAGS		+= -L ~/.brew/lib

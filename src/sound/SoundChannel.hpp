@@ -21,15 +21,15 @@ class SoundChannel : public IReadWrite {
   virtual void do_clear() = 0;
 
  protected:
-  Byte p_output_volume;
-  bool p_enabled;
+  Byte p_output_volume = 0;
+  bool p_enabled = false;
 
   void bind_module(ModUnitPtr module) { _modulation_units.push_back(module); }
+  SoundChannel() = default;
 
  public:
   static constexpr Byte MaxVolume = 0xf;
   virtual ~SoundChannel() = default;
-  SoundChannel() { clear(); }
 
   void update_modules(unsigned int modulation_unit_step);
   void update();

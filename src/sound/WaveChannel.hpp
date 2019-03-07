@@ -31,6 +31,7 @@ class WaveChannel : public SoundChannel {
  public:
   WaveChannel(VolumeTable& table) : _table(table), _length(255) {
     bind_module(&_length);
+    clear();
   }
   WaveChannel() = delete;
 

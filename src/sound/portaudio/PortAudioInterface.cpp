@@ -1,4 +1,4 @@
-#include "src/sound/PortAudioInterface.hpp"
+#include "PortAudioInterface.hpp"
 
 #include <cassert>
 #include <vector>

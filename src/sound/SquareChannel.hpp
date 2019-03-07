@@ -36,6 +36,7 @@ class SquareChannel : public SoundChannel {
     if (sweep_enabled) bind_module(&_sweep);
     bind_module(&_length);
     bind_module(&_envelope);
+    clear();
   }
 
   void write(Word addr, Byte v) override;

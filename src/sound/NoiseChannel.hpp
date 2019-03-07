@@ -27,6 +27,7 @@ class NoiseChannel : public SoundChannel {
   NoiseChannel() : _length(63), _envelope(_volume) {
     bind_module(&_length);
     bind_module(&_envelope);
+    clear();
   }
 
   void write(Word, Byte) override;
