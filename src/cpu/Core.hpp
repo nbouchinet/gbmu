@@ -92,6 +92,7 @@ public:
   bool can_jump(JumpCondition);
   void instr_jp(JumpCondition, Word);
   void instr_jp(Word);
+  void start_interrupt(Word addr) { instr_push(_pc.word); _pc.word = addr; }
   void instr_jr(JumpCondition, Byte);
   void instr_jr(Byte);
   void instr_call(JumpCondition, Word);

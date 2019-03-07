@@ -22,12 +22,13 @@ void Core::instr_ldi(Byte &a, Byte b) {
 
 void Core::instr_ldhl(Byte n) {
   bool neg = test_bit(7, n);
-  reset_bit(7, n);
   _hl.word = _sp.word;
   if (neg) {
     set_flag(Flags::H, (_hl.word & 0xf) < (n & 0xf));
     set_flag(Flags::C, _hl.word < n);
-    _hl.word -= n;
+
+	int8_t sn = n;
+    _hl.word += sn;
   } else {
     instr_add(_hl.word, static_cast<Word>(n));
   }

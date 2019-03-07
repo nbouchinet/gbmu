@@ -39,14 +39,15 @@ void InterruptController::parse_interrupt() {
   rIF = _rIF;
   rIE = _rIE;
   if (rIF) {
-    for (Byte i = 0; i < 5; i--) {
-      if ((rIF & 0x01) == (rIE & 0x01)) {
+    for (Byte i = 0; i < 5; i++) {
+      if ((rIF & 0x01) == (rIE & 0x01) && (rIE & 0x1)) {
         _components.core->notify_interrupt();
-        if (_IME)
+        if (_IME) {
           execute_interrupt(i);
+		}
       }
-      rIF >>= rIF;
-      rIE >>= rIE;
+      rIF >>= 1;
+      rIE >>= 1;
     }
   }
 }
@@ -56,18 +57,18 @@ void InterruptController::execute_interrupt(Byte interrupt) {
   _rIF = (_rIF & ~(0x01 << interrupt));
   switch (interrupt) {
   case 0:
-    _components.core->instr_call(VBI);
+    _components.core->start_interrupt(VBI);
     break;
   case 1:
-    _components.core->instr_call(LCDCSI);
+    _components.core->start_interrupt(LCDCSI);
     break;
   case 2:
-    _components.core->instr_call(TOI);
+    _components.core->start_interrupt(TOI);
     break;
   case 3:
     break;
   case 4:
-    _components.core->instr_call(JOYI);
+    _components.core->start_interrupt(JOYI);
     break;
   }
 }
