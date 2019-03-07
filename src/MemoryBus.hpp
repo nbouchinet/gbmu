@@ -45,11 +45,10 @@ public:
       _sb = v;
     }
     if (addr == 0xff02 && v == 0x81) {
-      std::cout << _sb;
+      std::cerr << _sb;
     }
 
     if (addr == 0xFF50) {
-      std::cout << "disable_bios" << std::endl;
       disable_bios();
     }
 
