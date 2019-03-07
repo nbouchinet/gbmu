@@ -37,10 +37,19 @@ public:
     return ret;
   }
 
+  Byte _sb = 0;
   template <typename T> void write(Word addr, T v) {
     auto i = sizeof(T);
 
+    if (addr == 0xff01) {
+      _sb = v;
+    }
+    if (addr == 0xff02 && v == 0x81) {
+      std::cout << _sb;
+    }
+
     if (addr == 0xFF50) {
+      std::cout << "disable_bios" << std::endl;
       disable_bios();
     }
 

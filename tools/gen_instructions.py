@@ -158,7 +158,14 @@ def gen_code(opcodes):
         else:
             exec_instruction = FORMAT_NONE.format(mnemonic, cycles)
         print("case " + addr + ":")
-        # print("  " + 'std::printf("%x : {}\\n", _pc.word);'.format(addr))
+        print("#ifdef DEBUG_CORE")
+        if operand1 and operand2:
+            print('std::printf("%04x: {} {} {}\\n", _pc.word);'.format(mnemonic, operand1, operand2))
+        elif operand1:
+            print('std::printf("%04x: {} {}\\n", _pc.word);'.format(mnemonic, operand1, operand2))
+        else:
+            print('std::printf("%04x: {}\\n", _pc.word);'.format(mnemonic))
+        print("#endif")
         print("  " + exec_instruction + ";")
         print("  break;")
 
