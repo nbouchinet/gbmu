@@ -99,6 +99,10 @@ void				PPU::reset()
 	_unsigned_tile_numbers = false;
 	_windowing_on = false;
 	_nb_sprites = 0;
+
+	_h_blank_hdma_src_addr = 0;
+	_h_blank_hdma_dst_addr = 0;
+	_h_blank_hdma_steps = 0;
 }
 
 //==============================================================================
@@ -119,6 +123,68 @@ void					PPU::set_bit(uint8_t & src, uint8_t bit_number)
 void					PPU::unset_bit(uint8_t & src, uint8_t bit_number)
 {
 	src &= ~(1UL << bit_number);
+}
+
+//------------------------------------------------------------------------------
+bool					PPU::is_hdma_active()
+{
+	return (test_bit(_hdma5, 7));
+}
+
+//------------------------------------------------------------------------------
+void					PPU::hdma_h_blank_step()
+{
+	for (int i = 0; i < 16; i++)
+	{
+		_components.mem_bus->write(_h_blank_hdma_dst_addr + (_h_blank_hdma_steps * 16) + i,
+				_components.mem_bus->read<Byte>(_h_blank_hdma_src_addr + (_h_blank_hdma_steps * 16) + i));
+	}
+	if (_h_blank_hdma_steps == (_hdma5 & 0x7F))
+	{
+		unset_bit(_hdma5, 7);
+	}
+	_h_blank_hdma_steps++;
+}
+
+//------------------------------------------------------------------------------
+void					PPU::initiate_hdma_transfer()
+{
+	std::cerr << "Initiated an hdma transfer !" << std::endl;
+	if (test_bit(_hdma5, 7) == true) // horizontal blanking dma : only 16 bytes transfered per H-blank
+	{
+		_h_blank_hdma_steps = 0;
+		_h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
+		_h_blank_hdma_dst_addr = 0x8000 + (((_hdma3 << 8) + _hdma4) & 0x1FF0);
+	}
+	else // general purpose dma : everything is tranfered at once
+	{
+		uint16_t			addr_source;
+		uint16_t			addr_dest;
+		uint16_t			addr_add;
+		uint16_t			lines_to_transfer;
+
+		addr_source = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
+		addr_add = ((_hdma3 << 8) + _hdma4) & 0x1FF0;
+		addr_dest = 0x8000 + addr_add;
+		lines_to_transfer = _hdma5 & 0x7F;
+
+		for (int i = 0; i < (lines_to_transfer + 1) * 16; i++)
+		{
+			_components.mem_bus->write(addr_dest + i, _components.mem_bus->read<Byte>(addr_source + i));
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+void					PPU::dma_transfer(uint16_t address)
+{
+	uint16_t	dma_addr;
+
+	dma_addr = address << 8;
+	for (int i = 0; i < 0xA0; i++)
+	{
+		write(0xFE00 + i, _components.mem_bus->read<Byte>(dma_addr + i)); // dma's are always written into OAM ram
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -182,19 +248,7 @@ void				PPU::write(Word address, Byte value)
 			_lyc = value;
 			break;
 		case 0xFF46:
-			uint16_t	dma_addr;
-			dma_addr = address << 8;
-			if (1) // IS DMG
-			{
-				for (int i = 0; i < 0xA0; i++)
-				{
-					write(0xFE00 + i, _components.mem_bus->read<Byte>(dma_addr + i));
-				}
-			}
-			else if (2) // IS CGB oh boi its the hdma stuff yay
-			{
-
-			}
+			dma_transfer(address);
 			break;
 		case 0xFF47:
 			_bgp = value;
@@ -228,6 +282,7 @@ void				PPU::write(Word address, Byte value)
 			break;
 		case 0xFF55:
 			_hdma5 = value;
+			initiate_hdma_transfer();
 			break;
 		case 0xFF68:
 			_bcps = value;
@@ -555,7 +610,7 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 
 	else if (2) // is CGB
 	{
-		
+		replace_pixel_segment(holder, contender); // obvious tmp is obvious
 	}
 }
 
@@ -668,12 +723,13 @@ void				PPU::render_tiles()
 		_vbk = 0;
 		tile_number = read(tile_number_address);
 
-		//if (CGB)
-		//{
-		//	_vbk = 1
-		//	tile_attr = read(tile_number_address);
-		//}
-
+		///*
+		if (1)
+		{
+			_vbk = 1;
+			tile_attr = read(tile_number_address);
+		}
+		//*/
 		tile_location = get_tile_data_address(tile_number);
 
 		uint8_t			pixel_line_in_tile = y_pos % 8;
@@ -847,7 +903,7 @@ void					PPU::update_lcd_status()
 	uint8_t				mode = 0;
 	bool				RequestInterrupt_flag = false;
 
-	if (_ly >= 144)
+	if (_ly >= 144) // (V)ertical Blank
 	{
 		mode = 1;
 		set_bit(status_tmp, 0);
@@ -859,20 +915,20 @@ void					PPU::update_lcd_status()
 		uint32_t mode_2_bounds = 456 - 80;
 		uint32_t mode_3_bounds = mode_2_bounds - 172;
 
-		if (_scanline_counter >= mode_2_bounds)
+		if (_scanline_counter >= mode_2_bounds) // OAM search
 		{
 			mode = 2;
 			set_bit(status_tmp, 1);
 			unset_bit(status_tmp, 0);
 			RequestInterrupt_flag = test_bit(status_tmp, 5);
 		}
-		else if (_scanline_counter >= mode_3_bounds)
+		else if (_scanline_counter >= mode_3_bounds) // Transfer data to lcd driver
 		{
 			mode = 3;
 			set_bit(status_tmp, 1);
 			set_bit(status_tmp, 0);
 		}
-		else
+		else // (H)orizontal Blank
 		{
 			mode = 0;
 			unset_bit(status_tmp, 1);

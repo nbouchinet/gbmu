@@ -83,6 +83,10 @@ private:
 	void					setup_window();
 	void					setup_background_data();
 	void					setup_sprite_data();
+	bool					is_hdma_active();
+	void					hdma_h_blank_step();
+	void					initiate_hdma_transfer();
+	void					dma_transfer(uint16_t address);
 	bool					is_lcd_enabled();
 	void					render_scanline();
 	void					set_pixel(uint8_t y, uint8_t x, uint32_t value);
@@ -123,7 +127,6 @@ private:
 	uint8_t					_ocps;					// (0xFF6A)
 	uint8_t					_ocpd;					// (0xFF6B)
 
-
 	uint32_t				_scanline_counter;
 	uint16_t				_background_data_start;
 	uint16_t				_background_chr_attr_start;
@@ -132,6 +135,10 @@ private:
 	uint8_t					_sprite_size;
 	bool					_unsigned_tile_numbers;
 	bool					_windowing_on;
+
+	uint16_t				_h_blank_hdma_src_addr;
+	uint16_t				_h_blank_hdma_dst_addr;
+	uint8_t					_h_blank_hdma_steps;
 
 	uint32_t				_background_color_palettes_translated[8][4];
 	uint32_t				_sprite_color_palettes_translated[8][4];
