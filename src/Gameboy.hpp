@@ -45,6 +45,7 @@ private:
   std::atomic<bool> _wait;
   int _cycles = 0;
   std::string _rom_path;
+  bool _is_abort;
 
   friend class Accessor;
 
@@ -66,6 +67,8 @@ public:
   bool is_screen_filled() { return _components.ppu->is_screen_filled(); }
   const uint8_t &get_cgb_flag() const {return _cgb_flag;}
   Debugger &get_debugger() { return _debugger; }
+  bool &get_is_abort() { return _is_abort; }
+  void set_is_abort(bool val) { _is_abort = val; }
 
   void go() { _wait.store(false); }
   bool is_cycling() { return !_wait; }

@@ -4,14 +4,14 @@
 #include "debuggerwindow.h"
 #include "worker.h"
 
-#include <QDesktopServices>
+#include <QFileDialog>
 #include <QUrl>
 #include <QMessageBox>
 #include <QTimer>
 #include <QKeyEvent>
 #include <QThread>
 
-Gameboy *g_gameboy = NULL;
+Gameboy *g_gameboy = nullptr;
 QMutex mutexGb;
 
 #include <iostream>
@@ -21,27 +21,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-	
+	/*
 	g_gameboy = new Gameboy("/Users/hublanc/Documents/gbInput/tools/Tetris.gb");
 
 	//Setting up gameboy's screen
-    GbmuScreen *gameboyScreen = new GbmuScreen(this);
-    QTimer *timerScreen = new QTimer(this);
-    connect(timerScreen, &QTimer::timeout, gameboyScreen, &GbmuScreen::updateGbScreen);
-    timerScreen->start(17);
+    GbmuScreen *gbs = new GbmuScreen(this);
+    QTimer *st = new QTimer(this);
+    connect(st, &QTimer::timeout, gbs, &GbmuScreen::updateGbScreen);
+    st->start(17);
 
 	//Setting Controller
-	QThread* thread = new QThread;
-	Worker* worker = new Worker();
-	worker->moveToThread(thread);
-	// | this connect seems to fail but it is just for debug
-	// v
-	//connect(worker, SIGNAL (error(QString)), this, SLOT (errorString(QString)));
-	connect(thread, SIGNAL (started()), worker, SLOT (process()));
-	connect(worker, SIGNAL (finished()), thread, SLOT (quit()));
-	connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
-	connect(thread, SIGNAL (finished()), thread, SLOT (deleteLater()));
-	thread->start();
+	QThread *gt = new QThread;
+	Worker *gw = new Worker();
+	gw->moveToThread(gt);
+	connect(gt, SIGNAL (started()), gw, SLOT (process()));
+	connect(gw, SIGNAL (finished()), gt, SLOT (quit()));
+	//connect(_gameboy_worker, SIGNAL (finished()), _gameboy_worker, SLOT (deleteLater()));
+	//connect(_gameboy_thread, SIGNAL (finished()), _gameboy_thread, SLOT (deleteLater()));
+	gt->start();
+	*/
 }
 
 MainWindow::~MainWindow()
@@ -51,7 +49,36 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_triggered()
 {
-    QDesktopServices::openUrl( QUrl::fromLocalFile( "/Users/nbouchin/" ) );
+	_rom_path = QFileDialog::getOpenFileName(this, tr("Open ROM"), "/home", tr("*.gb *.gbc"));
+	if (_rom_path.isEmpty())
+		return ;
+	if (g_gameboy && _gameboy_thread && _gameboy_worker && _timer_screen && _gameboy_screen)
+	{
+		g_gameboy->set_is_abort(true);
+		_gameboy_thread->quit();
+		_gameboy_thread->wait();
+		_gameboy_worker->deleteLater();
+		_gameboy_thread->deleteLater();
+		_timer_screen->deleteLater();
+		delete _gameboy_screen;
+		delete g_gameboy;
+		g_gameboy = nullptr;
+	}
+	g_gameboy = new Gameboy(_rom_path.toUtf8().constData());
+
+	//Setting up gameboy's screen
+    _gameboy_screen = new GbmuScreen(this);
+    _timer_screen = new QTimer(this);
+    connect(_timer_screen, &QTimer::timeout, _gameboy_screen, &GbmuScreen::updateGbScreen);
+    _timer_screen->start(17);
+
+	//Setting Controller
+	_gameboy_thread = new QThread;
+	_gameboy_worker = new Worker();
+	_gameboy_worker->moveToThread(_gameboy_thread);
+	connect(_gameboy_thread, SIGNAL (started()), _gameboy_worker, SLOT (process()));
+	connect(_gameboy_worker, SIGNAL (finished()), _gameboy_thread, SLOT (quit()));
+	_gameboy_thread->start();
 }
 
 void MainWindow::on_actionPlay_triggered()
@@ -71,10 +98,13 @@ void MainWindow::on_actionMute_triggered()
 
 void MainWindow::on_actionDebug_triggered()
 {
-	g_gameboy->get_debugger().toggle();
-    DebuggerWindow debuggerwindow;
-    debuggerwindow.setModal(true);
-    debuggerwindow.exec();
+	if (g_gameboy)
+	{
+		g_gameboy->get_debugger().toggle();
+		DebuggerWindow debuggerwindow;
+		debuggerwindow.setModal(true);
+		debuggerwindow.exec();
+	}
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -87,31 +117,31 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 			g_gameboy->handle_input_wraper(0xEB);
 			break;
 		case Qt::Key_S:
-			std::cout << "I PRESSED S (UP)" << std::endl;
+			std::cout << "I PRESSED S (DOWN)" << std::endl;
 			g_gameboy->handle_input_wraper(0xE7);
 			break;
 		case Qt::Key_A:
-			std::cout << "I PRESSED A (UP)" << std::endl;
+			std::cout << "I PRESSED A (LEFT)" << std::endl;
 			g_gameboy->handle_input_wraper(0xED);
 			break;
 		case Qt::Key_D:
-			std::cout << "I PRESSED D (UP)" << std::endl;
+			std::cout << "I PRESSED D (RIGHT)" << std::endl;
 			g_gameboy->handle_input_wraper(0xEE);
 			break;
 		case Qt::Key_J:
-			std::cout << "I PRESSED J (UP)" << std::endl;
+			std::cout << "I PRESSED J (A)" << std::endl;
 			g_gameboy->handle_input_wraper(0xDE);
 			break;
 		case Qt::Key_K:
-			std::cout << "I PRESSED K (UP)" << std::endl;
+			std::cout << "I PRESSED K (B)" << std::endl;
 			g_gameboy->handle_input_wraper(0xDD);
 			break;
 		case Qt::Key_N:
-			std::cout << "I PRESSED N (UP)" << std::endl;
+			std::cout << "I PRESSED N (START)" << std::endl;
 			g_gameboy->handle_input_wraper(0xD7);
 			break;
 		case Qt::Key_M:
-			std::cout << "I PRESSED M (UP)" << std::endl;
+			std::cout << "I PRESSED M (SELECT)" << std::endl;
 			g_gameboy->handle_input_wraper(0xDB);
 			break;
 	}

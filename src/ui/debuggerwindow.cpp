@@ -323,6 +323,7 @@ void DebuggerWindow::on_deleteBreakpointButton_clicked()
 
 void DebuggerWindow::on_DebuggerWindow_rejected()
 {
+	g_gameboy->get_debugger().set_lock(false);
 	g_gameboy->get_debugger().toggle();
 }
 

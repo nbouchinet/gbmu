@@ -5,6 +5,13 @@
 #include <QMutex>
 
 #include "src/Gameboy.hpp"
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "gbmuscreen.h"
+#include "debuggerwindow.h"
+#include "worker.h"
+
+class Worker;
 
 namespace Ui {
 class MainWindow;
@@ -35,6 +42,12 @@ private slots:
     
 private:
     Ui::MainWindow *ui;
+	QString			_rom_path;
+	QThread			*_gameboy_thread = nullptr;
+	Worker			*_gameboy_worker = nullptr;
+	QTimer			*_timer_screen = nullptr;
+	GbmuScreen		*_gameboy_screen = nullptr;
+
 
 	//Key Event function
 	void keyPressEvent(QKeyEvent *event);
