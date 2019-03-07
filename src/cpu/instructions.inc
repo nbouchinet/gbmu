@@ -1430,7 +1430,7 @@ case 0xf8:
 #ifdef DEBUG_CORE
 std::printf("%04x: ld HL SP+r8\n", _pc.word);
 #endif
-  exec_instruction([&] () { instr_ld(_hl.word, static_cast<Word>(_sp.word + _components.mem_bus->read<Byte>(addr++))); }, 12);
+  exec_instruction([&] () { instr_ldhl(_components.mem_bus->read<Byte>(addr++)); }, 12);
   break;
 case 0xf9:
 #ifdef DEBUG_CORE
