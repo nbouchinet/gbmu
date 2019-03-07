@@ -34,7 +34,6 @@ void Core::execute() {
     ret |= _components.mem_bus->read<Byte>(addr++) << 8;
     return ret;
   };
-
   switch (_components.mem_bus->read<Byte>(addr++)) {
 #include "instructions.inc"
     default:
@@ -46,4 +45,5 @@ void Core::execute() {
   else {
     _pc.word += addr - original_addr;
   }
+  _has_jumped = false;
 }

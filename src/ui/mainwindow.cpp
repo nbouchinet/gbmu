@@ -11,7 +11,7 @@
 #include <QTimer>
 #include <QUrl>
 
-Gameboy g_gameboy("./tools/Tetris.gb");
+Gameboy g_gameboy("./tools/cpu_instrs/cpu_instrs.gb");
 QMutex mutexGb;
 
 #include <iostream>
