@@ -3,6 +3,7 @@
 #include "src/Gameboy.hpp"
 #include "src/MemoryBus.hpp"
 #include "src/cpu/InterruptController.hpp"
+#include <iostream>
 
 #include <cassert>
 
@@ -41,7 +42,7 @@ void Core::instr_ldhl(Byte n) {
     set_flag(Flags::H, (_hl.word & 0xf) < (n & 0xf));
     set_flag(Flags::C, _hl.word < n);
 
-	int8_t sn = n;
+    int8_t sn = n;
     _hl.word += sn;
   } else {
     instr_add(_hl.word, static_cast<Word>(n));
@@ -62,6 +63,9 @@ void Core::instr_push(Word v) {
 void Core::instr_pop(Word &dest) {
   dest = _components.mem_bus->read<Byte>(_sp.word++);
   dest |= static_cast<Word>(_components.mem_bus->read<Byte>(_sp.word++)) << 8;
+  if (_components.mem_bus->read<Byte>(_pc.word) == 0xF1) {
+    _af.word &= 0xFFF0;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -81,6 +85,7 @@ void Core::instr_sub(Byte &a, Byte b) {
   set_flag(Flags::C, a < b);
   a -= b;
   set_flag(Flags::Z, a == 0u);
+  set_flag(Flags::N, true);
 }
 
 void Core::instr_sbc(Byte &a, Byte b) {
@@ -123,8 +128,8 @@ void Core::instr_cp(Byte &a, Byte b) {
 // ----------------------------------------------------------------------------
 
 void Core::instr_inc(Byte &b) {
-  set_flag(Flags::N, false);
   set_flag(Flags::H, (b & 0xf) == 0xf);
+  set_flag(Flags::N, false);
   ++b;
   set_flag(Flags::Z, b == 0u);
 }
@@ -150,11 +155,13 @@ void Core::instr_dec(Word &b) { --b; }
  * ex: A = (0000 1000)bcd, B = (0100 0010)bcd
  *  ADD A, B -> A = (0100 1010)b # Incorrect BCD value
  *  DAA -> A = (0101 0000)b # correct BCD addition result
+ *  need to debug
  */
 void Core::instr_daa() {
   Byte correction_mask = 0u;
 
-  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9)) correction_mask |= 0x6;
+  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9))
+    correction_mask |= 0x6;
   if (get_flag(Flags::C) || _af.high > 0x99) {
     correction_mask |= 0x60;
     set_flag(Flags::C, true);
@@ -162,6 +169,7 @@ void Core::instr_daa() {
   (get_flag(Flags::N)) ? _af.high -= correction_mask
                        : _af.high += correction_mask;
   set_flag(Flags::Z, _af.high == 0);
+  set_flag(Flags::H, false);
 }
 
 void Core::instr_halt() { _halt = true; }
@@ -194,14 +202,14 @@ void Core::instr_ei() { _components.interrupt_controller->set_IME(1); }
 
 bool Core::can_jump(JumpCondition jc) {
   switch (jc) {
-    case JumpCondition::NonZero:
-      return !get_flag(Flags::Z);
-    case JumpCondition::Zero:
-      return get_flag(Flags::Z);
-    case JumpCondition::NonCarry:
-      return !get_flag(Flags::C);
-    case JumpCondition::Carry:
-      return get_flag(Flags::C);
+  case JumpCondition::NonZero:
+    return !get_flag(Flags::Z);
+  case JumpCondition::Zero:
+    return get_flag(Flags::Z);
+  case JumpCondition::NonCarry:
+    return !get_flag(Flags::C);
+  case JumpCondition::Carry:
+    return get_flag(Flags::C);
   }
   return false;
 }
