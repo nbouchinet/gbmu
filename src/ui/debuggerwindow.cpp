@@ -261,7 +261,7 @@ void DebuggerWindow::addBreakpoint()
 			if (ok)
 			{
 				g_gameboy->get_debugger().add_breakpoint(addr);
-				ui->breakpointsWidget->addItem(new QListWidgetItem(qstring_hex_pad(ui->breakpointsEdit->text().toInt(), 4)));
+				ui->breakpointsWidget->addItem(new QListWidgetItem(qstring_hex_pad(addr, 4)));
 			}
 		}
 	}
