@@ -49,7 +49,6 @@ public:
   Byte _sb = 0;
   template <typename T> void write(Word addr, T v) {
     auto i = sizeof(T);
-
     if (addr == 0xff01) {
       _sb = v;
     }

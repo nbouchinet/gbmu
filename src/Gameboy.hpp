@@ -6,9 +6,11 @@
 #include "src/Debugger.hpp"
 #include "src/Fwd.hpp"
 #include "src/PPU.hpp"
+#include "src/sound/APU.hpp"
 #include "src/ScreenOutput.hpp"
-#include <atomic>
+#include "src/sound/portaudio/PortAudioInterface.hpp"
 
+#include <atomic>
 #include <memory>
 
 struct ComponentsContainer {
@@ -21,10 +23,11 @@ struct ComponentsContainer {
   std::unique_ptr<LCDRegisters> lcd_registers;
   std::unique_ptr<UnitWorkingRAM> unit_working_ram;
   std::unique_ptr<PPU> ppu;
+  std::unique_ptr<sound::APU> apu;
   std::unique_ptr<ScreenOutput> driver_screen;
   std::unique_ptr<Bios> bios;
 
-  ComponentsContainer(const std::string &);
+  ComponentsContainer(const std::string &, sound::AudioInterface *);
   ~ComponentsContainer();
 };
 
@@ -38,6 +41,7 @@ private:
   };
 
   void set_cgb_flag();
+  sound::PortAudioInterface _audio_interface;
   ComponentsContainer _components;
   Debugger _debugger;
   uint8_t _cgb_flag;

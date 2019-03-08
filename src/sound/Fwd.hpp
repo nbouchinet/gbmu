@@ -12,6 +12,8 @@ namespace sound {
   class SweepUnit;
   class LengthUnit;
   class EnvelopeUnit;
+  class AudioInterface;
+  class PortAudioInterface;
 }
 
 #endif // FWD_HPP
