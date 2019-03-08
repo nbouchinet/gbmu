@@ -158,16 +158,23 @@ void Core::instr_dec(Word &b) { --b; }
  *  need to debug
  */
 void Core::instr_daa() {
-  Byte correction_mask = 0u;
-
-  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9))
-    correction_mask |= 0x6;
-  if (get_flag(Flags::C) || _af.high > 0x99) {
-    correction_mask |= 0x60;
-    set_flag(Flags::C, true);
+  if (get_flag(Flags::N)) {
+    if (get_flag(Flags::C)) {
+      _af.high -= 0x60;
+    }
+    if (get_flag(Flags::H)) {
+      _af.high -= 0x06;
+    }
+  } else {
+    if (get_flag(Flags::C) || (_af.high & 0xFF) > 0x99) {
+      _af.high += 0x60;
+      set_flag(Flags::C, true);
+    }
+    if (get_flag(Flags::H) || (_af.high & 0x0F) > 0x09) {
+      _af.high += 0x06;
+    }
   }
-  (get_flag(Flags::N)) ? _af.high -= correction_mask
-                       : _af.high += correction_mask;
+
   set_flag(Flags::Z, _af.high == 0);
   set_flag(Flags::H, false);
 }
