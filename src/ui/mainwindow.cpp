@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include <QThread>
+#include <QGraphicsPixmapItem>
 
 Gameboy *g_gameboy = nullptr;
 QMutex mutexGb;
@@ -21,6 +22,28 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+	/*
+	ui->graphicsView->setAutoFillBackground(false);
+	ui->graphicsView->move(100, 100);
+	ui->graphicsView->resize(width(), height());
+	g_gameboy = new Gameboy("/Users/hublanc/Documents/gbInput/tools/Tetris.gb");
+
+	//Setting up gameboy's screen
+    GbmuScreen *gbs = new GbmuScreen(this);
+    QTimer *st = new QTimer(this);
+    connect(st, &QTimer::timeout, gbs, &GbmuScreen::updateGbScreen);
+    st->start(17);
+
+	//Setting Controller
+	QThread *gt = new QThread;
+	Worker *gw = new Worker();
+	gw->moveToThread(gt);
+	connect(gt, SIGNAL (started()), gw, SLOT (process()));
+	connect(gw, SIGNAL (finished()), gt, SLOT (quit()));
+	//connect(_gameboy_worker, SIGNAL (finished()), _gameboy_worker, SLOT (deleteLater()));
+	//connect(_gameboy_thread, SIGNAL (finished()), _gameboy_thread, SLOT (deleteLater()));
+	gt->start();
+	*/
 }
 
 MainWindow::~MainWindow()
@@ -60,6 +83,7 @@ void MainWindow::on_actionOpen_triggered()
 	connect(_gameboy_thread, SIGNAL (started()), _gameboy_worker, SLOT (process()));
 	connect(_gameboy_worker, SIGNAL (finished()), _gameboy_thread, SLOT (quit()));
 	_gameboy_thread->start();
+	setCentralWidget(_gameboy_screen);
 }
 
 void MainWindow::on_actionPlay_triggered()

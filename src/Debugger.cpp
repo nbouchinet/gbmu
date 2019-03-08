@@ -17,7 +17,7 @@ Debugger::Debugger(ComponentsContainer &components)
 
 void Debugger::reset()
 {
-	update_data(_components.cartridge->get_begin() + _components.core->pc(), _components.core->pc());
+	update_data(_components.core->pc());
 }
 
 Debugger::_debug_info::_debug_info(uint16_t _pc,
