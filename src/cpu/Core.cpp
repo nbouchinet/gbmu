@@ -6,6 +6,20 @@
 
 #include <cassert>
 
+void Core::reset() {
+  _pc.word = 0x0100;
+  _sp.word = 0xfffe;
+  _af.word = 0x01b0;
+  _bc.word = 0x0013;
+  _de.word = 0x00d8;
+  _hl.word = 0x014d;
+  _clock = 0x00;
+  _cycles = 0x00;
+  _in_jump_state = false;
+  _has_jumped = false;
+  _halt = false;
+}
+
 // ----------------------------------------------------------------------------
 // ld
 // ----------------------------------------------------------------------------

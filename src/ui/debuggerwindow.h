@@ -24,6 +24,7 @@ class DebuggerWindow : public QDialog
 public:
     explicit DebuggerWindow(QWidget *parent = nullptr);
     ~DebuggerWindow();
+	void init_registers_view();
 	void refresh_info();
 	void refresh_registers();
 	void refresh_instr();
@@ -44,6 +45,7 @@ private slots:
 	void on_DebuggerWindow_rejected();
 	void on_deleteWatchpointButton_clicked();
 	void on_memoryLineEdit_editingFinished();
+    void on_resetButton_clicked();
 
 private:
     Ui::DebuggerWindow *ui;
