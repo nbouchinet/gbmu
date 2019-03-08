@@ -102,7 +102,7 @@ void				PPU::reset()
 
 	_h_blank_hdma_src_addr = 0;
 	_h_blank_hdma_dst_addr = 0;
-	_h_blank_hdma_steps = 0;
+	_h_blank_hdma_step_done = false;
 }
 
 //==============================================================================
@@ -128,7 +128,7 @@ void					PPU::unset_bit(uint8_t & src, uint8_t bit_number)
 //------------------------------------------------------------------------------
 bool					PPU::is_hdma_active()
 {
-	return (test_bit(_hdma5, 7));
+	return (test_bit(_hdma5, 7) == true ? false : true);
 }
 
 //------------------------------------------------------------------------------
@@ -136,32 +136,29 @@ void					PPU::hdma_h_blank_step()
 {
 	for (int i = 0; i < 16; i++)
 	{
-		_components.mem_bus->write(_h_blank_hdma_dst_addr + (_h_blank_hdma_steps * 16) + i,
-				_components.mem_bus->read<Byte>(_h_blank_hdma_src_addr + (_h_blank_hdma_steps * 16) + i));
+		_components.mem_bus->write(_h_blank_hdma_dst_addr + i,
+				_components.mem_bus->read<Byte>(_h_blank_hdma_src_addr + i));
+		_h_blank_hdma_src_addr++;
+		_h_blank_hdma_dst_addr++;
 	}
-	if (_h_blank_hdma_steps == (_hdma5 & 0x7F))
-	{
-		unset_bit(_hdma5, 7);
-	}
-	_h_blank_hdma_steps++;
+	_hdma5--;
 }
 
 //------------------------------------------------------------------------------
-void					PPU::initiate_hdma_transfer()
+void					PPU::initiate_hdma_transfer(uint8_t hdma5_arg)
 {
 	std::cerr << "Initiated an hdma transfer !" << std::endl;
-	if (test_bit(_hdma5, 7) == true) // horizontal blanking dma : only 16 bytes transfered per H-blank
+	if (test_bit(hdma5_arg, 7) == true) // horizontal blanking dma : only 16 bytes transfered per H-blank
 	{
-		_h_blank_hdma_steps = 0;
 		_h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
 		_h_blank_hdma_dst_addr = 0x8000 + (((_hdma3 << 8) + _hdma4) & 0x1FF0);
 	}
-	else // general purpose dma : everything is tranfered at once
+	else // general purpose dma : everything is tranfered at once rignt away
 	{
-		uint16_t			addr_source;
-		uint16_t			addr_dest;
-		uint16_t			addr_add;
-		uint16_t			lines_to_transfer;
+		uint16_t			addr_source = 0;
+		uint16_t			addr_dest = 0;
+		uint16_t			addr_add = 0;
+		uint16_t			lines_to_transfer = 0;
 
 		addr_source = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
 		addr_add = ((_hdma3 << 8) + _hdma4) & 0x1FF0;
@@ -173,6 +170,15 @@ void					PPU::initiate_hdma_transfer()
 			_components.mem_bus->write(addr_dest + i, _components.mem_bus->read<Byte>(addr_source + i));
 		}
 	}
+}
+
+//------------------------------------------------------------------------------
+void					PPU::handle_hdma_transfer(uint8_t hdma5_arg)
+{
+	if (is_hdma_active() == false)
+		initiate_hdma_transfer(hdma5_arg);
+	else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false)
+		unset_bit(_hdma5, 7);
 }
 
 //------------------------------------------------------------------------------
@@ -203,19 +209,66 @@ uint16_t				PPU::color_palette_array_case_wrapper(uint8_t specifier) const
 }
 
 //------------------------------------------------------------------------------
-void				PPU::write(Word address, Byte value)
+void				PPU::handle_cgb_bg_palette_write(uint8_t bcpd_arg)
 {
 	uint16_t		palette_tmp_value = 0;
 	uint8_t			array_case = 0;
 
+	_bcpd = bcpd_arg;
+	array_case = color_palette_array_case_wrapper(_bcps);
+	if (test_bit(_bcps, 7) == true)
+		array_case += 1;
+	if (test_bit(_bcps, 0) == true) // high byte
+	{
+		palette_tmp_value = bcpd_arg;
+		palette_tmp_value = palette_tmp_value << 8;
+		palette_tmp_value += _background_color_palettes[array_case / 4][array_case % 4] & 0x00FF;
+	}
+	else // low byte
+	{
+		palette_tmp_value = palette_tmp_value & 0xFF00;
+		palette_tmp_value += bcpd_arg;
+	}
+	_background_color_palettes[array_case / 4][array_case % 4] = palette_tmp_value;
+	_background_color_palettes_translated[array_case / 4][array_case % 4] = translate_cgb_color_value(_background_color_palettes[array_case / 4][array_case % 4]);
+}
+
+//------------------------------------------------------------------------------
+void				PPU::handle_cgb_obj_palette_write(uint8_t ocpd_arg)
+{
+	uint16_t		palette_tmp_value = 0;
+	uint8_t			array_case = 0;
+
+	_ocpd = ocpd_arg;
+	array_case = color_palette_array_case_wrapper(_ocps);
+	if (test_bit(_ocps, 7) == true)
+		array_case += 1;
+	if (test_bit(_ocps, 0) == true) // high byte
+	{
+		palette_tmp_value = ocpd_arg;
+		palette_tmp_value = palette_tmp_value << 8;
+		palette_tmp_value += _sprite_color_palettes[array_case / 4][array_case % 4] & 0x00FF;
+	}
+	else // low byte
+	{
+		palette_tmp_value = palette_tmp_value & 0xFF00;
+		palette_tmp_value += ocpd_arg;
+	}
+	_sprite_color_palettes[array_case / 4][array_case % 4] = palette_tmp_value;
+	_sprite_color_palettes_translated[array_case / 4][array_case % 4] = translate_cgb_color_value(_sprite_color_palettes[array_case / 4][array_case % 4]);
+}
+
+//------------------------------------------------------------------------------
+void				PPU::write(Word address, Byte value)
+{
 	if (address >= 0x8000 && address < 0xA000)
 	{
-		if (_vbk == 0)
+		if (test_bit(_vbk, 0) == false)
 		{
 			_lcd_memory_bank_0[address - 0x8000] = value;
 			return ;
 		}
-		else if (_vbk == 1)
+		else if (test_bit(_vbk, 0) == true)
 		{
 			_lcd_memory_bank_1[address - 0x8000] = value;
 			return ;
@@ -269,82 +322,101 @@ void				PPU::write(Word address, Byte value)
 			_wx = value;
 			break;
 		case 0xFF51:
+			std::cerr << "write to _hdma1 " << _hdma1 << std::endl;
 			_hdma1 = value;
 			break;
 		case 0xFF52:
+			std::cerr << "write to _hdma2 " << _hdma2 << std::endl;
 			_hdma2 = value;
 			break;
 		case 0xFF53:
+			std::cerr << "write to _hdma3 " << _hdma3 << std::endl;
 			_hdma3 = value;
 			break;
 		case 0xFF54:
+			std::cerr << "write to _hdma4 " << _hdma4 << std::endl;
 			_hdma4 = value;
 			break;
 		case 0xFF55:
-			_hdma5 = value;
-			initiate_hdma_transfer();
+			std::cerr << "write to _hdma5 " << _hdma5 << std::endl;
+			handle_hdma_transfer(value);
 			break;
 		case 0xFF68:
 			_bcps = value;
 			break;
 		case 0xFF69:
-			_bcpd = value;
-			array_case = color_palette_array_case_wrapper(_bcps);
-			if (test_bit(_bcps, 7) == true)
-				array_case += 1;
-			if (test_bit(_bcps, 0) == true) // high byte
-			{
-				palette_tmp_value = value;
-				palette_tmp_value = palette_tmp_value << 8;
-				palette_tmp_value += _background_color_palettes[array_case / 4][array_case % 4] & 0x00FF;
-			}
-			else // low byte
-			{
-				palette_tmp_value = palette_tmp_value & 0xFF00;
-				palette_tmp_value += value;
-			}
-			_background_color_palettes[array_case / 4][array_case % 4] = palette_tmp_value;
-			_background_color_palettes_translated[array_case / 4][array_case % 4] = translate_cgb_color_value(_background_color_palettes[array_case / 4][array_case % 4]);
+			handle_cgb_bg_palette_write(value);
 			break;
 		case 0xFF6A:
 			_ocps = value;
 			break;
 		case 0xFF6B:
-			_ocpd = value;
-			array_case = color_palette_array_case_wrapper(_ocps);
-			if (test_bit(_ocps, 7) == true)
-				array_case += 1;
-			if (test_bit(_ocps, 0) == true) // high byte
-			{
-				palette_tmp_value = value;
-				palette_tmp_value = palette_tmp_value << 8;
-				palette_tmp_value += _sprite_color_palettes[array_case / 4][array_case % 4] & 0x00FF;
-			}
-			else // low byte
-			{
-				palette_tmp_value = palette_tmp_value & 0xFF00;
-				palette_tmp_value += value;
-			}
-			_sprite_color_palettes[array_case / 4][array_case % 4] = palette_tmp_value;
-			_sprite_color_palettes_translated[array_case / 4][array_case % 4] = translate_cgb_color_value(_sprite_color_palettes[array_case / 4][array_case % 4]);
-
+			handle_cgb_obj_palette_write(value);
 			break;
 	}
+}
+
+//------------------------------------------------------------------------------
+Byte				PPU::handle_cgb_obj_palette_read() const
+{
+	uint8_t			array_case = 0;
+	uint16_t		palette_tmp_value = 0;
+	Byte			ret = 0;
+
+	array_case = color_palette_array_case_wrapper(_bcps);
+	palette_tmp_value = _background_color_palettes[array_case / 4][array_case % 4];
+	if (test_bit(_bcps, 0) == true)
+	{
+		// high byte
+		palette_tmp_value = palette_tmp_value & 0xFF00;
+		palette_tmp_value = palette_tmp_value >> 8;
+		ret = palette_tmp_value;
+	}
+	else
+	{
+		// low byte
+		palette_tmp_value = palette_tmp_value & 0x00FF;
+		ret = palette_tmp_value;
+	}
+	return (ret);
+}
+
+//------------------------------------------------------------------------------
+Byte				PPU::handle_cgb_bg_palette_read() const
+{
+	uint8_t			array_case = 0;
+	uint16_t		palette_tmp_value = 0;
+	Byte			ret = 0;
+
+	array_case = color_palette_array_case_wrapper(_ocps);
+	palette_tmp_value = _sprite_color_palettes[array_case / 4][array_case % 4];
+	if (test_bit(_ocps, 0) == true)
+	{
+		// high byte
+		palette_tmp_value = palette_tmp_value & 0xFF00;
+		palette_tmp_value = palette_tmp_value >> 8;
+		ret = palette_tmp_value;
+	}
+	else
+	{
+		// low byte
+		palette_tmp_value = palette_tmp_value & 0x00FF;
+		ret = palette_tmp_value;
+	}
+	return (ret);
 }
 
 //------------------------------------------------------------------------------
 Byte				PPU::read(Word address) const
 {
 	Byte			ret = 0;
-	uint8_t			array_case = 0;
-	uint16_t		palette_tmp_value = 0;
 
 	if (address >= 0x8000 && address < 0xA000)
 	{
 		if (test_bit(_vbk, 0) == false)
 		{
-				ret = _lcd_memory_bank_0[address - 0x8000];
-				return (ret) ;
+			ret = _lcd_memory_bank_0[address - 0x8000];
+			return (ret) ;
 		}
 		else if (test_bit(_vbk, 0) == true)
 		{
@@ -415,41 +487,13 @@ Byte				PPU::read(Word address) const
 			ret = _bcps;
 			break;
 		case 0xFF69:
-			array_case = color_palette_array_case_wrapper(_bcps);
-			palette_tmp_value = _background_color_palettes[array_case / 4][array_case % 4];
-			if (test_bit(_bcps, 0) == true)
-			{
-				// high byte
-				palette_tmp_value = palette_tmp_value & 0xFF00;
-				palette_tmp_value = palette_tmp_value >> 8;
-				ret = palette_tmp_value;
-			}
-			else
-			{
-				// low byte
-				palette_tmp_value = palette_tmp_value & 0x00FF;
-				ret = palette_tmp_value;
-			}
+			ret = handle_cgb_bg_palette_read();
 			break;
 		case 0xFF6A:
 			ret = _ocps;
 			break;
 		case 0xFF6B:
-			array_case = color_palette_array_case_wrapper(_ocps);
-			palette_tmp_value = _sprite_color_palettes[array_case / 4][array_case % 4];
-			if (test_bit(_ocps, 0) == true)
-			{
-				// high byte
-				palette_tmp_value = palette_tmp_value & 0xFF00;
-				palette_tmp_value = palette_tmp_value >> 8;
-				ret = palette_tmp_value;
-			}
-			else
-			{
-				// low byte
-				palette_tmp_value = palette_tmp_value & 0x00FF;
-				ret = palette_tmp_value;
-			}
+			ret = handle_cgb_obj_palette_read();
 			break;
 	}
 	return (ret);
@@ -872,8 +916,8 @@ void					PPU::translate_palettes()
 
 			_sprites_dmg_palettes[0][i] = extract_value(_obp0, i * 2, i * 2 + 1);
 			_sprites_dmg_palettes[1][i] = extract_value(_obp1, i * 2, i * 2 + 1);
-			_sprites_dmg_palettes_translated[0][i] = translate_dmg_color_value(extract_value(_obp0, i, i * 2 + 1));
-			_sprites_dmg_palettes_translated[1][i] = translate_dmg_color_value(extract_value(_obp1, i, i * 2 + 1));
+			_sprites_dmg_palettes_translated[0][i] = translate_dmg_color_value(extract_value(_obp0, i * 2, i * 2 + 1));
+			_sprites_dmg_palettes_translated[1][i] = translate_dmg_color_value(extract_value(_obp1, i * 2, i * 2 + 1));
 		}
 	}
 
@@ -909,6 +953,7 @@ void					PPU::update_lcd_status()
 		set_bit(status_tmp, 0);
 		unset_bit(status_tmp, 1);
 		RequestInterrupt_flag = test_bit(status_tmp, 4);
+		_h_blank_hdma_step_done = false;
 	}
 	else
 	{
@@ -934,6 +979,11 @@ void					PPU::update_lcd_status()
 			unset_bit(status_tmp, 1);
 			unset_bit(status_tmp, 0);
 			RequestInterrupt_flag = test_bit(status_tmp, 3);
+			if (is_hdma_active() == true && _h_blank_hdma_step_done == false)
+			{
+				hdma_h_blank_step();
+				_h_blank_hdma_step_done = true;
+			}
 		}
 	}
 

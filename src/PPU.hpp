@@ -83,9 +83,14 @@ private:
 	void					setup_window();
 	void					setup_background_data();
 	void					setup_sprite_data();
+	Byte					handle_cgb_bg_palette_read() const;
+	Byte					handle_cgb_obj_palette_read() const;
+	void					handle_cgb_bg_palette_write(uint8_t bcpd_arg);
+	void					handle_cgb_obj_palette_write(uint8_t ocpd_arg);
+	void					handle_hdma_transfer(uint8_t hdma5_arg);
 	bool					is_hdma_active();
 	void					hdma_h_blank_step();
-	void					initiate_hdma_transfer();
+	void					initiate_hdma_transfer(uint8_t hdma5_arg);
 	void					dma_transfer(uint16_t address);
 	bool					is_lcd_enabled();
 	void					render_scanline();
@@ -138,7 +143,7 @@ private:
 
 	uint16_t				_h_blank_hdma_src_addr;
 	uint16_t				_h_blank_hdma_dst_addr;
-	uint8_t					_h_blank_hdma_steps;
+	bool					_h_blank_hdma_step_done;
 
 	uint32_t				_background_color_palettes_translated[8][4];
 	uint32_t				_sprite_color_palettes_translated[8][4];
