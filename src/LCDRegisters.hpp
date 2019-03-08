@@ -6,9 +6,22 @@ private:
   Byte _lcdc, _stat, _scy, _scx, _ly, _lyc, _dma, _bgp, _obp0, _obp1, _wy, _wx;
 
 public:
-  LCDRegisters()
-      : _lcdc(0x91), _stat(0), _scy(0), _scx(0), _ly(0), _lyc(0xFC), _dma(0),
-        _bgp(0xFC), _obp0(0xFF), _obp1(0xFF), _wy(0), _wx(0) {}
+  LCDRegisters() { reset(); }
+
+  void reset(){
+	_lcdc = 0x91;
+	_stat = 0;
+	_scy = 0;
+	_scx = 0;
+	_ly = 0;
+	_lyc = 0xFC;
+	_dma = 0;
+	_bgp = 0xFC;
+	_obp0 = 0xFF;
+	_obp1 = 0xFF;
+	_wy = 0;
+	_wx = 0;
+  }
 
   Byte read(Word addr) const override {
     switch (addr) {

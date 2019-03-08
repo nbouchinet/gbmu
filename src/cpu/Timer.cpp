@@ -5,6 +5,15 @@
 
 #include <iostream>
 
+void Timer::reset() {
+	_rTAC = 0;
+	_rDIV = 0x00;
+	_rTIMA = 0x00;
+	_rTMA = 0x00;
+	_counter = 0x00;
+	_rDIVCounter = 0x00;
+}
+
 uint8_t Timer::read(Word addr) const {
   switch (addr) {
     case DIV:

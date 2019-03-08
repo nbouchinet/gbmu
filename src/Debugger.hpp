@@ -599,6 +599,9 @@ public:
   bool get_run_frame() const { return _run_one_frame; }
   bool get_run_step() const { return _run_one_step; }
   bool get_lock() const { return _lock.load(); }
+  void set_lock(bool val) { _lock.store(val); }
+
+  void reset();
 
 private:
   void reset_flags();

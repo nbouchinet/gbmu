@@ -25,24 +25,26 @@ public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
   static constexpr std::size_t StackSize = 0x7F;
 
-  Core(ComponentsContainer &components) : _components(components) {}
+  Core(ComponentsContainer &components) : _components(components) { reset(); }
   Core(const Core &) = delete;
+
+  void reset();
 
   friend class Accessor;
 
 private:
-  Register _pc = {.word = 0x0100};
-  Register _sp = {.word = 0xfffe};
-  Register _af = {.word = 0x01b0};
-  Register _bc = {.word = 0x0013};
-  Register _de = {.word = 0x00d8};
-  Register _hl = {.word = 0x014d};
-  Word _clock = 0x00;
-  Word _cycles = 0x00;
-  bool _in_jump_state = false;
-  bool _has_jumped = false;
+  Register _pc;
+  Register _sp;
+  Register _af;
+  Register _bc;
+  Register _de;
+  Register _hl;
+  Word _clock;
+  Word _cycles;
+  bool _in_jump_state;
+  bool _has_jumped;
   std::array<Byte, StackSize> _stack;
-  bool _halt = false;
+  bool _halt;
 
   ComponentsContainer &_components;
 

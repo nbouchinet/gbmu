@@ -20,6 +20,8 @@ private:
 public:
   Cartridge(const std::string &);
 
+  void reset(const std::string &rom_path);
+
   auto get_begin() const { return rom.cbegin(); }
   auto get_end() const { return rom.cend(); }
 

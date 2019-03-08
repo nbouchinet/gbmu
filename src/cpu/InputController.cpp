@@ -5,7 +5,13 @@
 #include "src/cpu/InterruptController.hpp"
 
 InputController::InputController(ComponentsContainer& components)
-	: _components(components), _rP1(0) {}
+	: _components(components){
+	reset();
+}
+
+void InputController::reset() {
+	_rP1 = 0;
+}
 
 void InputController::write(Word addr, Byte val) {
 	(void)_components;

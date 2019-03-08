@@ -5,8 +5,16 @@
 
 #include <iostream>
 
-InterruptController::InterruptController(ComponentsContainer &components)
-    : _components(components), _rIF(0), _rIE(0), _IME(false) {}
+InterruptController::InterruptController(ComponentsContainer& components)
+	: _components(components) {
+	reset();
+}
+
+void InterruptController::reset() {
+	_rIF = 0;
+	_rIE = 0;
+	_IME = false;
+}
 
 void InterruptController::write(Word addr, Byte val) {
   switch (addr) {

@@ -10,8 +10,13 @@
 #include "MemoryBankController5.hpp"
 
 Cartridge::Cartridge(const std::string &rom_path) : rom(0) {
-  load_rom(rom_path);
-  mbc = get_mbc(rom[0x147]);
+	reset(rom_path);
+}
+
+void Cartridge::reset(const std::string &rom_path) {
+	std::fill(ram.begin(), ram.end(), 0);
+	load_rom(rom_path);
+	mbc = get_mbc(rom[0x147]);
 }
 
 void Cartridge::load_rom(const std::string &path) {
@@ -27,6 +32,7 @@ void Cartridge::load_rom(const std::string &path) {
   file.seekg(0, std::ios::beg);
   rom.resize(size);
   file.read((char *)(rom.data()), size);
+  file.close();
 }
 
 std::unique_ptr<AMemoryBankController> Cartridge::get_mbc(Byte cartridge_type) {

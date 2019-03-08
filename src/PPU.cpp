@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 PPU::PPU(ComponentsContainer& components) : _components(components)
 {
-	init();
+	reset();
 	return;
 }
 
@@ -17,7 +17,7 @@ PPU::~PPU()
 }
 
 //------------------------------------------------------------------------------
-void				PPU::init()
+void				PPU::reset()
 {
 	for (int i = 0; i < 8192; i++)
 	{
