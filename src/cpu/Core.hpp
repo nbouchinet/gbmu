@@ -45,6 +45,7 @@ private:
   bool _has_jumped;
   std::array<Byte, StackSize> _stack;
   bool _halt;
+  Byte _current_opcode = 0x00;
 
   ComponentsContainer &_components;
 

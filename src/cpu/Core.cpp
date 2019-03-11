@@ -63,7 +63,8 @@ void Core::instr_push(Word v) {
 void Core::instr_pop(Word &dest) {
   dest = _components.mem_bus->read<Byte>(_sp.word++);
   dest |= static_cast<Word>(_components.mem_bus->read<Byte>(_sp.word++)) << 8;
-  if (_components.mem_bus->read<Byte>(_pc.word) == 0xF1) {
+
+  if (_current_opcode == 0xF1) {
     _af.word &= 0xFFF0;
   }
 }
