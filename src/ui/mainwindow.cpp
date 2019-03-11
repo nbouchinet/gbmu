@@ -22,28 +22,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-	/*
-	ui->graphicsView->setAutoFillBackground(false);
-	ui->graphicsView->move(100, 100);
-	ui->graphicsView->resize(width(), height());
-	g_gameboy = new Gameboy("/Users/hublanc/Documents/gbInput/tools/Tetris.gb");
 
-	//Setting up gameboy's screen
-    GbmuScreen *gbs = new GbmuScreen(this);
-    QTimer *st = new QTimer(this);
-    connect(st, &QTimer::timeout, gbs, &GbmuScreen::updateGbScreen);
-    st->start(17);
-
-	//Setting Controller
-	QThread *gt = new QThread;
-	Worker *gw = new Worker();
-	gw->moveToThread(gt);
-	connect(gt, SIGNAL (started()), gw, SLOT (process()));
-	connect(gw, SIGNAL (finished()), gt, SLOT (quit()));
-	//connect(_gameboy_worker, SIGNAL (finished()), _gameboy_worker, SLOT (deleteLater()));
-	//connect(_gameboy_thread, SIGNAL (finished()), _gameboy_thread, SLOT (deleteLater()));
-	gt->start();
-	*/
+	//Shortcut settings
+	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+	ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+	ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+	ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
 }
 
 MainWindow::~MainWindow()
@@ -89,6 +74,7 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::on_actionPlay_triggered()
 {
     QMessageBox::information(this, "tit", "Play the game");
+	ui->actionPlay->setIcon(QIcon(":/resources/resources/pause.png"));
 }
 
 void MainWindow::on_actionStop_triggered()

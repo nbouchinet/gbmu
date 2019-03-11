@@ -8,11 +8,19 @@
 #include <QInputDialog>
 #include <QDebug>
 
+#include <unistd.h>
 DebuggerWindow::DebuggerWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DebuggerWindow)
 {
     ui->setupUi(this);
+	
+	//Shortcut settings
+	ui->resetButton->setShortcut(QKeySequence(Qt::Key_R));
+	ui->stepButton->setShortcut(QKeySequence(Qt::Key_S));
+	ui->runOneFrameButton->setShortcut(QKeySequence(Qt::Key_F));
+	ui->runDurationButton->setShortcut(QKeySequence(Qt::Key_D));
+
 
 	//Main Registers
 	ui->registersWidget->setShowGrid(false);
@@ -68,7 +76,7 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	ui->disassemblerWidget->setRowCount(6);
 	ui->disassemblerWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui->disassemblerWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-	refresh_instr();
+	refresh_instr(true);
 
 	//Memory Map
 	ui->memoryWidget->setShowGrid(false);
@@ -80,7 +88,7 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	ui->memoryWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	ui->memoryWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	_addr_memory_map = 0x00;
-	refresh_memory_map();
+	refresh_memory_map(true);
 
 	//Breakpoints
 	ui->breakpointsWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -89,6 +97,8 @@ DebuggerWindow::DebuggerWindow(QWidget *parent) :
 	//Watchpoints
 	ui->watchpointsWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	ui->memoryLineEdit->setMaxLength(4);
+	ui->watchpointsAddrEdit->setMaxLength(4);
+	ui->watchpointsValueEdit->setMaxLength(4);
 	connect(ui->registersWidget->verticalHeader(), &QHeaderView::sectionClicked, [this](int logicalIndex){
 		QString label = ui->registersWidget->verticalHeaderItem(logicalIndex)->text();
 		add_watchpoint(label, QString::number(logicalIndex));
@@ -141,7 +151,7 @@ void DebuggerWindow::init_registers_view()
 	}
 }
 
-void DebuggerWindow::refresh_memory_map()
+void DebuggerWindow::refresh_memory_map(bool init)
 {
 	QStringList titles;
 	std::vector<Byte> memory_dump = g_gameboy->get_debugger().get_memory_dump(_addr_memory_map);
@@ -153,30 +163,43 @@ void DebuggerWindow::refresh_memory_map()
 			titles << qstring_hex_pad(_addr_memory_map + (16 * i), 4);
 			for (int j = 0; j < 16; j++)
 			{
-				ui->memoryWidget->setItem(i, j, new QTableWidgetItem(qstring_hex_pad(memory_dump[k], 2)));
+				if (init)
+					ui->memoryWidget->setItem(i, j, new QTableWidgetItem(qstring_hex_pad(memory_dump[k], 2)));
+				else
+					ui->memoryWidget->item(i, j)->setText(qstring_hex_pad(memory_dump[k], 2));
 				k++;
 			}
 		}
 		ui->memoryWidget->setVerticalHeaderLabels(titles);
 	}
+	if (init)
+		init = false;
 }
 
-void DebuggerWindow::refresh_instr()
+void DebuggerWindow::refresh_instr(bool init)
 {
 	QStringList titles;
 	g_gameboy->get_debugger().set_instruction_pool_size(6);
 	std::vector<Debugger::_debug_info> instr_pool = g_gameboy->get_debugger().get_instruction_pool();
 	QString value;
 	int pool_size = instr_pool.size();
-	for (int i = 0; i < pool_size; i++){
+	for (int i = 0; i < pool_size && i < 6; i++){
 		titles << qstring_hex_pad(instr_pool[i].pc, 4);
-		ui->disassemblerWidget->setItem(i, 0, new QTableWidgetItem(instr_pool[i].instr));
+		if (init)
+			ui->disassemblerWidget->setItem(i, 0, new QTableWidgetItem(instr_pool[i].instr));
+		else
+			ui->disassemblerWidget->item(i, 0)->setText(instr_pool[i].instr);
 		value = qstring_hex_pad(instr_pool[i].value[0], 2) + " " +
 			(instr_pool[i].size >= 2 ? qstring_hex_pad(instr_pool[i].value[1], 2) : "") + " " +
 			(instr_pool[i].size == 3 ? qstring_hex_pad(instr_pool[i].value[2], 2) : "");
-		ui->disassemblerWidget->setItem(i, 1, new QTableWidgetItem(value));
+		if (init)
+			ui->disassemblerWidget->setItem(i, 1, new QTableWidgetItem(value));
+		else
+			ui->disassemblerWidget->item(i, 1)->setText(value);
 	}
 	ui->disassemblerWidget->setVerticalHeaderLabels(titles);
+	if (init)
+		init = false;
 }
 
 void DebuggerWindow::reset_color(QTableWidget *widget, int column)
@@ -198,17 +221,17 @@ void DebuggerWindow::refresh_registers()
 	for (auto value: registers) {
 		if (value.first >= MAIN_REGISTERS_BEGIN && value.first <= MAIN_REGISTERS_END)
 		{
-			ui->registersWidget->setItem(value.first, 0, new QTableWidgetItem(qstring_hex_pad(value.second, 4)));
+			ui->registersWidget->item(value.first, 0)->setText(qstring_hex_pad(value.second, 4));
 			ui->registersWidget->item(value.first, 0)->setForeground(QBrush(QColor(Qt::blue)));
 		}
 		else if (value.first >= VIDEO_REGISTERS_BEGIN && value.first <= VIDEO_REGISTERS_END)
 		{
-			ui->videoRegistersWidget->setItem(value.first - VIDEO_REGISTERS_BEGIN, 1, new QTableWidgetItem(qstring_hex_pad(value.second, 4)));
+			ui->videoRegistersWidget->item(value.first - VIDEO_REGISTERS_BEGIN, 1)->setText(qstring_hex_pad(value.second, 4));
 			ui->videoRegistersWidget->item(value.first - VIDEO_REGISTERS_BEGIN, 1)->setForeground(QBrush(QColor(Qt::blue)));
 		}
 		else if (value.first >= OTHER_REGISTERS_BEGIN && value.first <= OTHER_REGISTERS_END)
 		{
-			ui->otherRegistersWidget->setItem(value.first - OTHER_REGISTERS_BEGIN, 1, new QTableWidgetItem(qstring_hex_pad(value.second, 4)));
+			ui->otherRegistersWidget->item(value.first - OTHER_REGISTERS_BEGIN, 1)->setText(qstring_hex_pad(value.second, 4));
 			ui->otherRegistersWidget->item(value.first - OTHER_REGISTERS_BEGIN, 1)->setForeground(QBrush(QColor(Qt::blue)));
 		}
 	}
@@ -368,4 +391,52 @@ void DebuggerWindow::on_resetButton_clicked()
 {
 	g_gameboy->reset();
 	refresh_info();
+}
+
+void DebuggerWindow::on_runCpuSecondButton_clicked()
+{
+	g_gameboy->notify_debugger(Debugger::RUN_CPU_SEC);
+	while (!g_gameboy->get_debugger().get_lock()){}
+	refresh_info();
+}
+
+void DebuggerWindow::add_watchpoint_manual()
+{
+	bool ok = true;
+	if (ui->watchpointsAddrEdit->text().isEmpty())
+		return;
+	if (!duplicateInListWidgetItem("NONE:" + ui->watchpointsAddrEdit->text() + ":" + ui->watchpointsValueEdit->text(), ui->watchpointsWidget))
+	{
+		QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
+		if (hexMatcher.exactMatch(ui->watchpointsValueEdit->text()) || ui->watchpointsValueEdit->text().isEmpty())
+		{
+			int32_t valueHex = ui->watchpointsValueEdit->text().isEmpty() ? -1 : ui->watchpointsValueEdit->text().toInt(&ok, 16);
+			if (ok)
+			{
+				uint16_t addr = ui->watchpointsAddrEdit->text().toUInt(&ok, 16);
+				if (ok && addr > 5)
+				{
+					g_gameboy->get_debugger().add_watchpoint(addr, valueHex);
+					ui->watchpointsWidget->addItem(new QListWidgetItem("NONE:" + ui->watchpointsAddrEdit->text() + ":" + (ui->watchpointsValueEdit->text().isEmpty() ? "" : qstring_hex_pad(valueHex, 4))));
+				}
+			}
+		}
+	}
+	ui->watchpointsAddrEdit->clear();
+	ui->watchpointsValueEdit->clear();
+}
+
+void DebuggerWindow::on_watchpointsAddrEdit_returnPressed()
+{
+	add_watchpoint_manual();
+}
+
+void DebuggerWindow::on_watchpointsValueEdit_returnPressed()
+{
+	add_watchpoint_manual();
+}
+
+void DebuggerWindow::on_addWatchpointButton_clicked()
+{
+	add_watchpoint_manual();
 }
