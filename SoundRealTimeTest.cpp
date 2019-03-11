@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "src/sound/APU.hpp"
-#include "src/sound/PortAudioInterface.hpp"
+#include "src/sound/portaudio/PortAudioInterface.hpp"
 
 #include <array>
 #include <cassert>
@@ -36,7 +36,6 @@ void test_audio_interface(sound::AudioInterface *i) {
         (static_cast<double>(i) / static_cast<double>(size/4)) * M_PI * 2.);
     sine[i] = (sin >= 0.) ? 1. : -1.;
   }
-  std::cerr << "\n";
   while (true) {
     while (not i->queue_stereo_samples(sine, sine)) {
     }

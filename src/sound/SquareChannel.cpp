@@ -48,7 +48,7 @@ void SquareChannel::write(Word addr, Byte v) {
       break;
     case 0x2:
       _volume = (v & 0xf0) >> 4;
-      _envelope.set_negate(-((v & 0x8) >> 3));
+      _envelope.set_negate(!((v & 0x8) >> 3));
       _envelope.set_period(v & 0x7);
       break;
     case 0x3:

@@ -6,6 +6,7 @@
 #include "utils/Operations_utils.hpp"
 
 #include <cassert>
+#include <iostream>
 
 namespace sound {
 
@@ -48,8 +49,7 @@ void APU::update_clock() {
 
     if (_output_index >= AudioInterface::SamplesTableSize) {
       while (not _audio_interface->queue_stereo_samples(_right_output,
-                                                        _left_output))
-        ;
+                                                        _left_output)) {}
       _output_index = 0;
     }
   }
@@ -67,7 +67,7 @@ float APU::fetch_and_mix_samples(Byte enabled_channels, float vol) const {
 
 void APU::update_clock(Word cycles) {
   if (not _APU_on) return;
-  while (--cycles) {
+  while (cycles--) {
     update_clock();
   }
 }
@@ -111,8 +111,7 @@ void APU::write(Word addr, Byte v) {
       return;
     case 0xff26: {
       _APU_on = (v & 0x80) >> 7;
-      if (not _APU_on)
-        _modulation_units_steps = 0;
+      if (not _APU_on) _modulation_units_steps = 0;
       for (auto i = 0; i < 4; ++i) {
         _channels[i].channel->enable(v & (1 << i));
         if (not _APU_on) _channels[i].channel->clear();

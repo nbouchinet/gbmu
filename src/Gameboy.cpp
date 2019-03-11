@@ -84,14 +84,14 @@ void Gameboy::step() {
     _wait.store(true);
     _cycles = 0;
   }
-  if (!_wait) {
+  //if (!_wait) {
     _components.core->execute();
     _cycles += _components.core->cycles();
     _components.timer->update(_components.core->cycles());
     _components.ppu->update_graphics(_components.core->cycles());
     _components.interrupt_controller->parse_interrupt();
     _components.apu->update_clock(_components.core->cycles());
-  }
+  //}
 }
 
 void Gameboy::load_existing_save() {

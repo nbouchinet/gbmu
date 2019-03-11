@@ -58,12 +58,12 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   return true;
 }
 
-float PortAudioInterface::mix(const std::vector<float>& samples, float) const {
+float PortAudioInterface::mix(const std::vector<float>& samples, float volume) const {
   float ret = 0.f;
   for (const auto& sample : samples) {
     ret += sample / samples.size();
   }
-  return ret;
+  return ret * volume;
 }
 
 void PortAudioInterface::start() { _stream->start(); }
