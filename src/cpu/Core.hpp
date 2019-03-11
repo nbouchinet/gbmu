@@ -95,7 +95,10 @@ public:
   bool can_jump(JumpCondition);
   void instr_jp(JumpCondition, Word);
   void instr_jp(Word);
-  void start_interrupt(Word addr) { instr_push(_pc.word); _pc.word = addr; }
+  void start_interrupt(Word addr) {
+    instr_push(_pc.word);
+    _pc.word = addr;
+  }
   void instr_jr(JumpCondition, Byte);
   void instr_jr(Byte);
   void instr_call(JumpCondition, Word);
@@ -114,10 +117,10 @@ public:
   void instr_sra(Byte &);
   void instr_srl(Byte &);
 
-  void instr_rlca() { instr_rlc(_af.high); }
-  void instr_rla() { instr_rl(_af.high); }
-  void instr_rrca() { instr_rrc(_af.high); }
-  void instr_rra() { instr_rr(_af.high); }
+  void instr_rlca() { instr_rlc(_af.high); set_flag(Flags::Z, false); }
+  void instr_rla() { instr_rl(_af.high); set_flag(Flags::Z, false); }
+  void instr_rrca() { instr_rrc(_af.high); set_flag(Flags::Z, false); }
+  void instr_rra() { instr_rr(_af.high); set_flag(Flags::Z, false); }
 
   void instr_swap(Byte &);
   void instr_bit(Byte, Byte &);
@@ -166,14 +169,43 @@ template <> inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
 }
 
 template <> inline void Core::instr_add<Word, Word>(Word &a, Word b) {
-  _af.low = 0u;
-  set_flag(Flags::H, check_add_overflow_from(a, b, 12));
-  set_flag(Flags::C, check_add_overflow_from(a, b, 16));
-  a += b;
-  set_flag(Flags::Z, a == 0u);
+  if (_current_opcode == 0x39 || _current_opcode == 0x09 ||
+      _current_opcode == 0x19 || _current_opcode == 0x29) {
+    Word result = a + b;
+
+    set_flag(Flags::N, false);
+    set_flag(Flags::C, result < a);
+    set_flag(Flags::H, ((result ^ a ^ b) & 0x1000));
+
+    a = result;
+
+  } else {
+    _af.low = 0u;
+    set_flag(Flags::H, check_add_overflow_from(a, b, 12));
+    set_flag(Flags::C, check_add_overflow_from(a, b, 16));
+    a += b;
+    set_flag(Flags::Z, a == 0u);
+  }
 }
 
 template <> inline void Core::instr_add<Word, Byte>(Word &a, Byte b) {
-  instr_add<Word, Word>(a, static_cast<Word>(b));
+  if (_current_opcode == 0xe8) { // ADD SP,r8
+    int8_t sb = b;
+    Word result = 0;
+
+    _af.low = 0u;
+    set_flag(Flags::N, false);
+    set_flag(Flags::Z, false);
+
+    result = a + sb;
+
+    set_flag(Flags::H, ((result & 0xF) < (_sp.word & 0xF)));
+    set_flag(Flags::C, ((result & 0xFF) < (_sp.word & 0xFF)));
+
+    a = result;
+
+  } else {
+    instr_add<Word, Word>(a, static_cast<Word>(b));
+  }
 }
 #endif

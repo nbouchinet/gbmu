@@ -36,19 +36,19 @@ void Core::instr_ldi(Byte &a, Byte b) {
 }
 
 void Core::instr_ldhl(Byte n) {
-  bool neg = test_bit(7, n);
-  _hl.word = _sp.word;
-  if (neg) {
-    set_flag(Flags::H, (_hl.word & 0xf) < (n & 0xf));
-    set_flag(Flags::C, _hl.word < n);
+  int8_t e = static_cast<int8_t>(n);
 
-    int8_t sn = n;
-    _hl.word += sn;
-  } else {
-    instr_add(_hl.word, static_cast<Word>(n));
-  }
+  Word result = _sp.word + e;
+
+  Word check = _sp.word ^ e ^ ((_sp.word + e) & 0xFFFF);
+
+  set_flag(Flags::C, ((check & 0x100) == 0x100));
+  set_flag(Flags::H, ((check & 0x10) == 0x10));
+
   set_flag(Flags::Z, false);
   set_flag(Flags::N, false);
+
+  _hl.word = result;
 }
 
 // ----------------------------------------------------------------------------
@@ -316,6 +316,7 @@ void Core::instr_rlc(Byte &reg) {
         bool bit7 = test_bit(7, reg);
         set_flag(Flags::C, bit7);
         reg <<= 1;
+        get_flag(Flags::C) ? set_bit(0, reg) : reset_bit(0, reg);
         reg |= bit7;
       },
       reg);
@@ -367,7 +368,7 @@ void Core::instr_sra(Byte &reg) {
   flag_handle(
       [this](Byte &reg) {
         set_flag(Flags::C, test_bit(0, reg));
-        reg >>= 1;
+        reg = (reg >> 1) | (reg & 0x80);
       },
       reg);
 }
@@ -382,7 +383,13 @@ void Core::instr_srl(Byte &reg) {
       reg);
 }
 
-void Core::instr_swap(Byte &reg) { reg = (reg >> 4) | (reg << 4); }
+void Core::instr_swap(Byte &reg) {
+  reg = (reg >> 4) | (reg << 4);
+  set_flag(Flags::Z, reg == 0);
+  set_flag(Flags::N, false);
+  set_flag(Flags::H, false);
+  set_flag(Flags::C, false);
+}
 
 // ----------------------------------------------------------------------------
 // Bitwise operations
