@@ -136,7 +136,7 @@ void test_envelope(bool neg) {
   const Byte period = 7u;
   Byte vol = 7u;
   EnvelopeUnit env(vol);
-  env.set_negate(neg);
+  env.set_add(neg);
   env.set_period(period);
   env.trigger();
 
@@ -154,9 +154,9 @@ void test_envelope(bool neg) {
 
 TEST(EnvelopeUnit, step) {
   SCOPED_TRACE("neg envelope failed");
-  test_envelope(true);
-  SCOPED_TRACE("positive envelope failed");
   test_envelope(false);
+  SCOPED_TRACE("positive envelope failed");
+  test_envelope(true);
 }
 
 // -----------------------------------------------------------------------------

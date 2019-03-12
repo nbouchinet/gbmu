@@ -74,7 +74,7 @@ class LengthUnit : public IModulationUnit {
 
 class EnvelopeUnit : public IModulationUnit {
  private:
-  bool _negate : 1;
+  bool _add : 1;
   Byte _period : 3;
   bool _enabled; 
   Byte _current_period;
@@ -86,9 +86,9 @@ class EnvelopeUnit : public IModulationUnit {
 
   Byte trigger_steps() const override { return 0b10000000; }
 
-  void set_negate(bool v) { _negate = v; }
+  void set_add(bool v) { _add = v; }
   void set_period(Byte v) { _period = v; }
-  bool does_negate() const { return _negate; }
+  bool does_add() const { return _add; }
 
   auto is_enabled() const { return _enabled; }
   auto period() const { return _period; }

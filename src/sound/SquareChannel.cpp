@@ -48,7 +48,7 @@ void SquareChannel::write(Word addr, Byte v) {
       break;
     case 0x2:
       _volume = (v & 0xf0) >> 4;
-      _envelope.set_negate(!((v & 0x8) >> 3));
+      _envelope.set_add((v & 0x8) >> 3);
       _envelope.set_period(v & 0x7);
       break;
     case 0x3:
@@ -72,7 +72,7 @@ Byte SquareChannel::read(Word addr) const {
       return (buf << 6) | (_length.length() & 0x3f);
     }
     case 0x2:
-      return (_volume << 4) | (_envelope.does_negate() << 3) |
+      return (_volume << 4) | (_envelope.does_add() << 3) |
              (_envelope.period() & 0x7);
     case 0x3:
       return _frequency & 0xff;

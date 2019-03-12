@@ -46,7 +46,7 @@ bool EnvelopeUnit::call() {
   if (not _enabled) return true;
   if (--_current_period != 0 or _period == 0) return true;
   _current_period = _period;
-  Byte new_vol = _volume + ((_negate) ? -1 : 1);
+  Byte new_vol = _volume + ((_add) ? 1 : -1);
   if (new_vol > SoundChannel::MaxVolume)
     _enabled = false;
   else
@@ -60,7 +60,7 @@ void EnvelopeUnit::trigger()  {
 }
 
 void EnvelopeUnit::clear() {
-  _negate = 0;
+  _add = 0;
   _period = 0;
   _enabled = false;
   _current_period = 0;

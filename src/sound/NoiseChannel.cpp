@@ -37,7 +37,7 @@ void NoiseChannel::write(Word addr, Byte v) {
       break;
     case 0xff21:
       _volume = (v & 0xf0) >> 4;
-      _envelope.set_negate(-((v & 0x8) >> 3));
+      _envelope.set_add((v & 0x8) >> 3);
       _envelope.set_period(v & 0x7);
       break;
     case 0xff22:
@@ -57,7 +57,7 @@ Byte NoiseChannel::read(Word addr) const {
     case 0xff20:
       return (_length.length() & 0x3f);
     case 0xff21:
-      return (_volume << 4) | (_envelope.does_negate() << 3) |
+      return (_volume << 4) | (_envelope.does_add() << 3) |
              (_envelope.period() & 0x7);
     case 0xff22:
       return (_shift << 4) | (_width_mode << 3) | (_divisor_code & 0x7);

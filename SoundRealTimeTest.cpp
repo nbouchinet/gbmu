@@ -34,7 +34,7 @@ void test_audio_interface(sound::AudioInterface *i) {
   for (auto i = 0u; i < size; ++i) {
     auto sin = std::sin(
         (static_cast<double>(i) / static_cast<double>(size/4)) * M_PI * 2.);
-    sine[i] = (sin >= 0.) ? 1. : -1.;
+    sine[i] = (sin >= 0.) ? .5 : -.5;
   }
   while (true) {
     while (not i->queue_stereo_samples(sine, sine)) {
