@@ -18,10 +18,10 @@ union Register {
   };
 };
 
-class Accessor; // Friend interface class for unit testing
+class Accessor;  // Friend interface class for unit testing
 
 class Core : public IReadWrite {
-public:
+ public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
   static constexpr std::size_t StackSize = 0x7F;
 
@@ -32,7 +32,7 @@ public:
 
   friend class Accessor;
 
-private:
+ private:
   Register _pc;
   Register _sp;
   Register _af;
@@ -49,7 +49,7 @@ private:
 
   ComponentsContainer &_components;
 
-public:
+ public:
   void set_flag(Flags f, bool v) {
     int mask = static_cast<int>(f);
     if (v)
@@ -58,8 +58,11 @@ public:
       _af.low ^= mask;
   }
 
-public:
-  template <typename T> void instr_ld(T &a, T b) { a = b; }
+ public:
+  template <typename T>
+  void instr_ld(T &a, T b) {
+    a = b;
+  }
   void instr_ldd(Byte &, Byte);
   void instr_ldi(Byte &, Byte);
   void instr_ldhl(Byte a);
@@ -67,7 +70,8 @@ public:
   void instr_push(Word v);
   void instr_pop(Word &dest);
 
-  template <typename A, typename B> void instr_add(A &a, B b);
+  template <typename A, typename B>
+  void instr_add(A &a, B b);
   void instr_adc(Byte &, Byte);
   void instr_sub(Byte &, Byte);
   void instr_sbc(Byte &, Byte);
@@ -117,10 +121,22 @@ public:
   void instr_sra(Byte &);
   void instr_srl(Byte &);
 
-  void instr_rlca() { instr_rlc(_af.high); set_flag(Flags::Z, false); }
-  void instr_rla() { instr_rl(_af.high); set_flag(Flags::Z, false); }
-  void instr_rrca() { instr_rrc(_af.high); set_flag(Flags::Z, false); }
-  void instr_rra() { instr_rr(_af.high); set_flag(Flags::Z, false); }
+  void instr_rlca() {
+    instr_rlc(_af.high);
+    set_flag(Flags::Z, false);
+  }
+  void instr_rla() {
+    instr_rl(_af.high);
+    set_flag(Flags::Z, false);
+  }
+  void instr_rrca() {
+    instr_rrc(_af.high);
+    set_flag(Flags::Z, false);
+  }
+  void instr_rra() {
+    instr_rr(_af.high);
+    set_flag(Flags::Z, false);
+  }
 
   void instr_swap(Byte &);
   void instr_bit(Byte, Byte &);
@@ -153,14 +169,14 @@ public:
   void execute();
 
   void notify_interrupt() {
-    if (_halt)
-      _halt = false;
+    if (_halt) _halt = false;
   }
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
 };
 
-template <> inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
+template <>
+inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
   _af.low = 0u;
   set_flag(Flags::H, check_add_overflow_from(a, b, 4));
   set_flag(Flags::C, check_add_overflow_from(a, b, 8));
@@ -168,44 +184,24 @@ template <> inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
   set_flag(Flags::Z, a == 0u);
 }
 
-template <> inline void Core::instr_add<Word, Word>(Word &a, Word b) {
-  if (_current_opcode == 0x39 || _current_opcode == 0x09 ||
-      _current_opcode == 0x19 || _current_opcode == 0x29) {
-    Word result = a + b;
-
-    set_flag(Flags::N, false);
-    set_flag(Flags::C, result < a);
-    set_flag(Flags::H, ((result ^ a ^ b) & 0x1000));
-
-    a = result;
-
-  } else {
-    _af.low = 0u;
-    set_flag(Flags::H, check_add_overflow_from(a, b, 12));
-    set_flag(Flags::C, check_add_overflow_from(a, b, 16));
-    a += b;
+template <>
+inline void Core::instr_add<Word, Word>(Word &a, Word b) {
+  set_flag(Flags::N, false);
+  set_flag(Flags::C, check_add_overflow_from(a, b, 16));
+  set_flag(Flags::H, check_add_overflow_from(a, b, 12));
+  a += b;
+  if ((_current_opcode & 0xf0) > 0x30 or (_current_opcode & 0xf) != 0x9)
     set_flag(Flags::Z, a == 0u);
-  }
 }
 
-template <> inline void Core::instr_add<Word, Byte>(Word &a, Byte b) {
-  if (_current_opcode == 0xe8) { // ADD SP,r8
+template <>
+inline void Core::instr_add<Word, Byte>(Word &a, Byte b) {
     int8_t sb = b;
     Word result = 0;
-
     _af.low = 0u;
-    set_flag(Flags::N, false);
-    set_flag(Flags::Z, false);
-
     result = a + sb;
-
-    set_flag(Flags::H, ((result & 0xF) < (_sp.word & 0xF)));
-    set_flag(Flags::C, ((result & 0xFF) < (_sp.word & 0xFF)));
-
+    set_flag(Flags::H, ((result & 0xF) < (a & 0xF)));
+    set_flag(Flags::C, ((result & 0xFF) < (a & 0xFF)));
     a = result;
-
-  } else {
-    instr_add<Word, Word>(a, static_cast<Word>(b));
-  }
 }
 #endif

@@ -38,15 +38,12 @@ void Core::instr_ldi(Byte &a, Byte b) {
 void Core::instr_ldhl(Byte n) {
   int8_t e = static_cast<int8_t>(n);
 
+  _af.low = 0u;
   Word result = _sp.word + e;
-
-  Word check = _sp.word ^ e ^ ((_sp.word + e) & 0xFFFF);
+  Word check = _sp.word ^ e ^ result;
 
   set_flag(Flags::C, ((check & 0x100) == 0x100));
   set_flag(Flags::H, ((check & 0x10) == 0x10));
-
-  set_flag(Flags::Z, false);
-  set_flag(Flags::N, false);
 
   _hl.word = result;
 }
@@ -65,7 +62,7 @@ void Core::instr_pop(Word &dest) {
   dest |= static_cast<Word>(_components.mem_bus->read<Byte>(_sp.word++)) << 8;
 
   if (_current_opcode == 0xF1) {
-    _af.word &= 0xFFF0;
+    _af.low &= 0xF0;
   }
 }
 
@@ -384,11 +381,9 @@ void Core::instr_srl(Byte &reg) {
 }
 
 void Core::instr_swap(Byte &reg) {
+  _af.low = 0u;
   reg = (reg >> 4) | (reg << 4);
   set_flag(Flags::Z, reg == 0);
-  set_flag(Flags::N, false);
-  set_flag(Flags::H, false);
-  set_flag(Flags::C, false);
 }
 
 // ----------------------------------------------------------------------------
