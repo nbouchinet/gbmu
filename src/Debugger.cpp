@@ -15,10 +15,7 @@ Debugger::Debugger(ComponentsContainer &components)
   _register_pool = construct_register_pool();
 }
 
-void Debugger::reset()
-{
-	update_data(_components.core->pc());
-}
+void Debugger::reset() { update_data(_components.core->pc()); }
 
 Debugger::_debug_info::_debug_info(uint16_t _pc,
                                    const Debugger::_instr_info &_map_info,
@@ -311,11 +308,12 @@ bool Debugger::is_step_passed() {
 
 bool Debugger::is_cpu_sec_passed() {
   if (_run_cpu_sec) {
-    _cpu_duration -= _components.core->cycles() / 4;
-    if (_cpu_duration <= 0) {
+    if (_cpu_duration - _components.core->cycles() <= 0) {
+      _cpu_duration = 0;
       reset_flags();
       return true;
     }
+    _cpu_duration -= _components.core->cycles();
   }
   return false;
 }
