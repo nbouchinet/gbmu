@@ -735,8 +735,8 @@ uint16_t			PPU::get_tile_data_address(uint8_t tileIdentifier)
 	uint8_t		tile_memory_size = 16; // 2 bytes per line of pixels
 	uint16_t	tile_data_address;
 
-	if (_sprite_size == 16)
-		unset_bit(tileIdentifier, 0);
+	//if (_sprite_size == 16)
+	//	unset_bit(tileIdentifier, 0);
 
 	if (_unsigned_tile_numbers == true)
 		tile_data_address = _background_data_start + (tileIdentifier * tile_memory_size);
@@ -876,7 +876,7 @@ void				PPU::render_scanline()
 	setup_background_data();
 	setup_sprite_data();
 
-	if (test_bit(_lcdc, 0) == true)
+	if (_gb_mode == MODE_GB_CGB || (_gb_mode == MODE_GB_DMG && test_bit(_lcdc, 0) == true))
 		render_tiles();
 	if (test_bit(_lcdc, 1) == true)
 		render_sprites();
@@ -921,17 +921,18 @@ uint32_t				PPU::translate_cgb_color_value(uint16_t value)
 //------------------------------------------------------------------------------
 uint32_t				PPU::translate_dmg_color_value(uint8_t value)
 {
-	uint32_t			ret = 0;
-	uint32_t			reversedValue = 255 - (85 * value);
-
-	ret += reversedValue;
-	ret = ret << 8;
-	ret += reversedValue;
-	ret = ret << 8;
-	ret += reversedValue;
-	ret = ret << 8;
-	ret += 255; // we set alpha value to 255 by default
-	return (ret);
+	switch (value)
+	{
+		case 0:
+			return (0xFFFFFFFF);
+		case 1:
+			return (0x555555FF);
+		case 2:
+			return (0xAAAAAAFF);
+		case 3:
+			return (0x000000FF);
+	}
+	return (0);
 }
 
 //------------------------------------------------------------------------------
@@ -939,14 +940,31 @@ void					PPU::translate_dmg_palettes()
 {
 	for (int i = 0; i < 4; i++)
 	{
-		_background_dmg_palette[i] = extract_value(_bgp, i * 2, i * 2 + 1);
-		_background_dmg_palette_translated[i] = translate_dmg_color_value(extract_value(_bgp, i * 2, i * 2 + 1));
+		_background_dmg_palette[i] = extract_value(_bgp, (i * 2), (i * 2) + 1);
+		_background_dmg_palette_translated[i] = translate_dmg_color_value(extract_value(_bgp, (i * 2), (i * 2) + 1));
 
-		_sprites_dmg_palettes[0][i] = extract_value(_obp0, i * 2, i * 2 + 1);
-		_sprites_dmg_palettes[1][i] = extract_value(_obp1, i * 2, i * 2 + 1);
-		_sprites_dmg_palettes_translated[0][i] = translate_dmg_color_value(extract_value(_obp0, i * 2, i * 2 + 1));
-		_sprites_dmg_palettes_translated[1][i] = translate_dmg_color_value(extract_value(_obp1, i * 2, i * 2 + 1));
+		_sprites_dmg_palettes[0][i] = extract_value(_obp0, (i * 2), (i * 2) + 1);
+		_sprites_dmg_palettes[1][i] = extract_value(_obp1, (i * 2), (i * 2) + 1);
+		_sprites_dmg_palettes_translated[0][i] = translate_dmg_color_value(extract_value(_obp0, (i * 2), (i * 2) + 1));
+		_sprites_dmg_palettes_translated[1][i] = translate_dmg_color_value(extract_value(_obp1, (i * 2), (i * 2) + 1));
 	}
+
+	std::cerr << "tramslate called " << "bgp = " << std::bitset<8>(_bgp) << std::endl;
+	for (int i = 0; i < 4; i++)
+	{
+		std::cerr << "_background_dmg_palette[" << i << "] = " << static_cast<uint32_t>(_background_dmg_palette[i]) << " | translated = " << std::hex << _background_dmg_palette_translated[i] << std::endl;
+	}
+	
+//	std::cerr << "obp0 = " << std::bitset<8>(_obp0) << std::endl;
+//	for (int i = 0; i < 4; i++)
+//	{
+//		std::cerr << "_sprites_dmg_palettes[0][" << i << "] = " << static_cast<uint32_t>(_sprites_dmg_palettes[0][i]) << " | translated = " << _sprites_dmg_palettes_translated[0][i] << std::endl;
+//	}
+//	std::cerr << "obp1 = " << std::bitset<8>(_obp1) << std::endl;
+//	for (int i = 0; i < 4; i++)
+//	{
+//		std::cerr << "_sprites_dmg_palettes[1][" << i << "] = " << static_cast<uint32_t>(_sprites_dmg_palettes[1][i]) << " | translated = " << _sprites_dmg_palettes_translated[1][i] << std::endl;
+//	}
 }
 
 //------------------------------------------------------------------------------
