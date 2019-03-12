@@ -84,7 +84,7 @@ void Timer::update(Word cycles) {
         _components.interrupt_controller->request_interrupt(
             InterruptController::TOI); // Request timer overflow interrupt
       } else {
-        ++_rTIMA; // Increment Timer counter
+        _rTIMA++; // Increment Timer counter
       }
     }
   }
@@ -93,7 +93,7 @@ void Timer::update(Word cycles) {
 void Timer::update_divider(Word cycles) {
   _rDIVCounter += cycles;
   if (_rDIVCounter >= 255) {
-    _rDIVCounter =_rDIVCounter - 255;
+    _rDIVCounter = 0;
     _rDIV++;
   }
 }

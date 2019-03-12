@@ -6,15 +6,15 @@
 
 #include <iostream>
 
-InterruptController::InterruptController(ComponentsContainer& components)
-	: _components(components) {
-	reset();
+InterruptController::InterruptController(ComponentsContainer &components)
+    : _components(components) {
+  reset();
 }
 
 void InterruptController::reset() {
-	_rIF = 0x0;
-	_rIE = 0x0;
-	_IME = false;
+  _rIF = 0x0;
+  _rIE = 0x0;
+  _IME = false;
 }
 
 void InterruptController::write(Word addr, Byte val) {
@@ -48,7 +48,7 @@ void InterruptController::parse_interrupt() {
         _components.core->notify_interrupt();
         if (_IME) {
           execute_interrupt(i);
-		}
+        }
       }
     }
   }
@@ -68,6 +68,7 @@ void InterruptController::execute_interrupt(Byte interrupt) {
     _components.core->start_interrupt(TOI);
     break;
   case 3:
+    _components.core->start_interrupt(STCI);
     break;
   case 4:
     _components.core->start_interrupt(JOYI);
