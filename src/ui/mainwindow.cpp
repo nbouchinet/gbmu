@@ -71,15 +71,34 @@ void MainWindow::on_actionOpen_triggered()
 	setCentralWidget(_gameboy_screen);
 }
 
+void MainWindow::pause_gameboy(bool stop)
+{
+	if (g_gameboy == nullptr)
+		return;
+	if (!g_gameboy->get_pause() || stop)
+	{
+		ui->actionPlay->setIcon(QIcon(":/resources/resources/play.png"));
+		g_gameboy->set_pause(true);
+	}
+	else
+	{
+		ui->actionPlay->setIcon(QIcon(":/resources/resources/pause.png"));
+		g_gameboy->set_pause(false);
+	}
+}
+
 void MainWindow::on_actionPlay_triggered()
 {
-    QMessageBox::information(this, "tit", "Play the game");
-	ui->actionPlay->setIcon(QIcon(":/resources/resources/pause.png"));
+	pause_gameboy();
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    QMessageBox::information(this, "tit", "Stop the game");
+	if (g_gameboy)
+	{
+		g_gameboy->reset();
+		pause_gameboy(true);
+	}
 }
 
 void MainWindow::on_actionMute_triggered()

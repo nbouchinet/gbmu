@@ -7,7 +7,7 @@
 #include <cassert>
 
 void Core::reset() {
-  _pc.word = 0x0100;
+  _pc.word = 0x0000;
   _sp.word = 0xfffe;
   _af.word = 0x01b0;
   _bc.word = 0x0013;

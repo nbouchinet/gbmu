@@ -244,7 +244,7 @@ bool DebuggerWindow::duplicateInListWidgetItem(const QString &value, const QList
 	{
 		QListWidgetItem *item = list->item(i);
 		if (item->text() == value)
-			return (true);
+			return (true);	
 	}
 	return (false);
 }
@@ -253,19 +253,19 @@ void DebuggerWindow::add_watchpoint(const QString &label, const QString &addrTex
 {
 	bool ok;
     QString value = QInputDialog::getText(this, tr("Add Watchpoint"), tr("Value:"), QLineEdit::Normal, "", &ok);
-	if (!duplicateInListWidgetItem(label + ":" + addrText + ":" + value, ui->watchpointsWidget))
+	QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
+	if (hexMatcher.exactMatch(value) || value.isEmpty())
 	{
-		QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
-		if (hexMatcher.exactMatch(value) || value.isEmpty())
+		int32_t valueHex = value.isEmpty() ? -1 : value.toInt(&ok, 16);
+		if (ok)
 		{
-			int32_t valueHex = value.isEmpty() ? -1 : value.toInt(&ok, 16);
+			uint16_t addr = addrText.toUInt(&ok, 16);
 			if (ok)
 			{
-				uint16_t addr = addrText.toUInt(&ok, 16);
-				if (ok)
-				{
+				if (!duplicateInListWidgetItem(label + ":" + qstring_hex_pad(addr, 4) + ":" + (value.isEmpty() ? "" : qstring_hex_pad(valueHex, 4)), ui->watchpointsWidget))
+				{	
 					g_gameboy->get_debugger().add_watchpoint(addr, valueHex);
-					ui->watchpointsWidget->addItem(new QListWidgetItem(label + ":" + addrText + ":" + (value.isEmpty() ? "" : qstring_hex_pad(valueHex, 4))));
+					ui->watchpointsWidget->addItem(new QListWidgetItem(label + ":" + qstring_hex_pad(addr, 4) + ":" + (value.isEmpty() ? "" : qstring_hex_pad(valueHex, 4))));
 				}
 			}
 		}
@@ -274,14 +274,14 @@ void DebuggerWindow::add_watchpoint(const QString &label, const QString &addrTex
 
 void DebuggerWindow::addBreakpoint()
 {
-	if (!duplicateInListWidgetItem(ui->breakpointsEdit->text(), ui->breakpointsWidget))
+	QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
+	if (hexMatcher.exactMatch(ui->breakpointsEdit->text()))
 	{
-		QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
-		if (hexMatcher.exactMatch(ui->breakpointsEdit->text()))
+		bool ok;
+		uint16_t addr = ui->breakpointsEdit->text().toUInt(&ok, 16);
+		if (ok)
 		{
-			bool ok;
-			uint16_t addr = ui->breakpointsEdit->text().toUInt(&ok, 16);
-			if (ok)
+			if (!duplicateInListWidgetItem(qstring_hex_pad(addr, 4), ui->breakpointsWidget))
 			{
 				g_gameboy->get_debugger().add_breakpoint(addr);
 				ui->breakpointsWidget->addItem(new QListWidgetItem(qstring_hex_pad(addr, 4)));
@@ -324,7 +324,7 @@ void DebuggerWindow::on_addBreakpointButton_clicked()
 	addBreakpoint();
 }
 
-void DebuggerWindow::on_breakpointsEdit_editingFinished()
+void DebuggerWindow::on_breakpointsEdit_returnPressed()
 {
 	addBreakpoint();
 }
@@ -405,19 +405,19 @@ void DebuggerWindow::add_watchpoint_manual()
 	bool ok = true;
 	if (ui->watchpointsAddrEdit->text().isEmpty())
 		return;
-	if (!duplicateInListWidgetItem("NONE:" + ui->watchpointsAddrEdit->text() + ":" + ui->watchpointsValueEdit->text(), ui->watchpointsWidget))
+	QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
+	if (hexMatcher.exactMatch(ui->watchpointsValueEdit->text()) || ui->watchpointsValueEdit->text().isEmpty())
 	{
-		QRegExp hexMatcher("^[0-9A-F]{1,4}$", Qt::CaseInsensitive);
-		if (hexMatcher.exactMatch(ui->watchpointsValueEdit->text()) || ui->watchpointsValueEdit->text().isEmpty())
+		int32_t valueHex = ui->watchpointsValueEdit->text().isEmpty() ? -1 : ui->watchpointsValueEdit->text().toInt(&ok, 16);
+		if (ok)
 		{
-			int32_t valueHex = ui->watchpointsValueEdit->text().isEmpty() ? -1 : ui->watchpointsValueEdit->text().toInt(&ok, 16);
-			if (ok)
+			uint16_t addr = ui->watchpointsAddrEdit->text().toUInt(&ok, 16);
+			if (ok && addr > 5)
 			{
-				uint16_t addr = ui->watchpointsAddrEdit->text().toUInt(&ok, 16);
-				if (ok && addr > 5)
+				if (!duplicateInListWidgetItem("NONE:" + qstring_hex_pad(addr, 4) + ":" + (ui->watchpointsValueEdit->text().isEmpty() ? "" : qstring_hex_pad(valueHex, 4)), ui->watchpointsWidget))
 				{
 					g_gameboy->get_debugger().add_watchpoint(addr, valueHex);
-					ui->watchpointsWidget->addItem(new QListWidgetItem("NONE:" + ui->watchpointsAddrEdit->text() + ":" + (ui->watchpointsValueEdit->text().isEmpty() ? "" : qstring_hex_pad(valueHex, 4))));
+					ui->watchpointsWidget->addItem(new QListWidgetItem("NONE:" + qstring_hex_pad(addr, 4) + ":" + (ui->watchpointsValueEdit->text().isEmpty() ? "" : qstring_hex_pad(valueHex, 4))));
 				}
 			}
 		}

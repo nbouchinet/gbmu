@@ -51,6 +51,7 @@ private:
 
 	//Key Event function
 	void keyPressEvent(QKeyEvent *event);
+	void pause_gameboy(bool stop = false);
 };
 
 #endif // MAINWINDOW_H

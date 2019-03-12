@@ -41,7 +41,7 @@ private slots:
     void on_runOneFrameButton_clicked();
     void on_runDurationButton_clicked();
 	void on_addBreakpointButton_clicked();
-	void on_breakpointsEdit_editingFinished();
+	void on_breakpointsEdit_returnPressed();
 	void on_deleteBreakpointButton_clicked();
 	void on_DebuggerWindow_rejected();
 	void on_deleteWatchpointButton_clicked();
