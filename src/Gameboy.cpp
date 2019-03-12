@@ -73,16 +73,16 @@ void Gameboy::step() {
     _debugger.fetch(_components.core->pc());
   }
 
-  if (_cycles >= 70224 * 4) {
+  if (_cycles > 69905) {
     _wait.store(true);
     _cycles = 0;
   }
   if (!_wait) {
     _components.core->execute();
-    _components.interrupt_controller->parse_interrupt();
-    _components.timer->update(_components.core->cycles());
-    _components.ppu->update_graphics(_components.core->cycles());
     _cycles += _components.core->cycles();
+    _components.timer->update(_components.core->cycles());
+    _components.interrupt_controller->parse_interrupt();
+    _components.ppu->update_graphics(_components.core->cycles());
   }
 }
 

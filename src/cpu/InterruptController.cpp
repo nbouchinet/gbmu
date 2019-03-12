@@ -2,6 +2,7 @@
 
 #include "src/Gameboy.hpp"
 #include "src/cpu/Core.hpp"
+#include <unistd.h>
 
 #include <iostream>
 
@@ -11,8 +12,8 @@ InterruptController::InterruptController(ComponentsContainer& components)
 }
 
 void InterruptController::reset() {
-	_rIF = 0;
-	_rIE = 0;
+	_rIF = 0x0;
+	_rIE = 0x0;
 	_IME = false;
 }
 
@@ -41,21 +42,14 @@ Byte InterruptController::read(Word addr) const {
 }
 
 void InterruptController::parse_interrupt() {
-  Byte rIF;
-  Byte rIE;
-
-  rIF = _rIF;
-  rIE = _rIE;
-  if (rIF) {
+  if (_rIF) {
     for (Byte i = 0; i < 5; i++) {
-      if ((rIF & 0x01) == (rIE & 0x01) && (rIE & 0x1)) {
+      if (((_rIF >> i) & 0x01) == ((_rIE >> i) & 0x01) && ((_rIE >> i) & 0x1)) {
         _components.core->notify_interrupt();
         if (_IME) {
           execute_interrupt(i);
 		}
       }
-      rIF >>= 1;
-      rIE >>= 1;
     }
   }
 }
@@ -79,6 +73,7 @@ void InterruptController::execute_interrupt(Byte interrupt) {
     _components.core->start_interrupt(JOYI);
     break;
   }
+  _IME = true;
 }
 
 void InterruptController::request_interrupt(Word interrupt) {
