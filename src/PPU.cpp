@@ -65,7 +65,7 @@ void				PPU::reset()
 		_sprites_dmg_palettes_translated[1][i] = 0;
 	}
 
-	translate_palettes();
+	translate_dmg_palettes();
 
 	_lcdc = 0x91;
 	_stat = 0x80;
@@ -99,6 +99,7 @@ void				PPU::reset()
 	_unsigned_tile_numbers = false;
 	_windowing_on = false;
 	_nb_sprites = 0;
+	_gb_mode = MODE_GB_DMG;
 
 	_h_blank_hdma_src_addr = 0;
 	_h_blank_hdma_dst_addr = 0;
@@ -130,6 +131,7 @@ bool					PPU::is_hdma_active()
 {
 	return (test_bit(_hdma5, 7) == true ? false : true);
 }
+
 
 //------------------------------------------------------------------------------
 void					PPU::hdma_h_blank_step()
@@ -305,15 +307,15 @@ void				PPU::write(Word address, Byte value)
 			break;
 		case 0xFF47:
 			_bgp = value;
-			translate_palettes();
+			translate_dmg_palettes();
 			break;
 		case 0xFF48:
 			_obp0 = value;
-			translate_palettes();
+			translate_dmg_palettes();
 			break;
 		case 0xFF49:
 			_obp1 = value;
-			translate_palettes();
+			translate_dmg_palettes();
 			break;
 		case 0xFF4A:
 			_wy = value;
@@ -621,7 +623,7 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 {
 	// note : we assume that contender is always a sprite because we first render all tiles (which cannot intersect)
 
-	if (1) // is DMG
+	if (_gb_mode == MODE_GB_DMG) // is DMG
 	{
 		if (holder.is_sprite == false) // sprite VS background
 		{
@@ -652,9 +654,35 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 		}
 	}
 
-	else if (2) // is CGB
+	else if (_gb_mode == MODE_GB_CGB) // is CGB
 	{
-		replace_pixel_segment(holder, contender); // obvious tmp is obvious
+		if (holder.is_sprite == false)
+		{
+			// careful, tiles also have priority flag in CGB !!! why nintendo whyyyyyyyyyyyy
+			if (test_bit(holder.sprite_info.flags, 7) == true) // priority given to tiles because why the f*** not
+			{
+				
+			}
+			else // bit 7 is zero, priority according to the contending sprite's priority flag (same as DMG)
+			{
+				if (test_bit(contender.sprite_info.flags, 7) == false // contender sprite has priority to BG
+						&& contender.value > 0) // == not transparent pixel | value 0 is always transparent for sprites
+				{
+					replace_pixel_segment(holder, contender);
+				}
+				else if (test_bit(contender.sprite_info.flags, 7) == true // contender sprite does not have priority to BG
+						&& _background_dmg_palette[holder.value] == 0) // background is transparent;
+				{
+					replace_pixel_segment(holder, contender);
+				}
+			}
+		}
+		else if (holder.is_sprite == true) // same as DMG
+		{
+			if (holder.value == 0 && contender.value != 0) // transparent pixel vs not transparent
+				replace_pixel_segment(holder, contender);
+		}
+		//replace_pixel_segment(holder, contender); // obvious tmp is obvious
 	}
 }
 
@@ -767,24 +795,20 @@ void				PPU::render_tiles()
 		_vbk = 0;
 		tile_number = read(tile_number_address);
 
-		///*
-		if (1)
+		if (_gb_mode == MODE_GB_CGB)
 		{
 			_vbk = 1;
 			tile_attr = read(tile_number_address);
 		}
-		//*/
 		tile_location = get_tile_data_address(tile_number);
 
 		uint8_t			pixel_line_in_tile = y_pos % 8;
 		uint8_t			pixel_in_tile_line = x_pos % 8;
-		//if (CGB)
-		//{
-		//	if (test_bit(tile_attr, 6) == true) // we check the vertical flip flag, only in CGB
-		//		pixel_line_in_tile = 7 - pixel_line_in_tile;
-		//	if (test_bit(tile_attr, 5) == true) // we check horizontal flip flag, only in CGB
-		pixel_in_tile_line = 7 - pixel_in_tile_line;
-		//}
+
+		if (test_bit(tile_attr, 6) == true) // we check the vertical flip flag, only in CGB
+			pixel_line_in_tile = 7 - pixel_line_in_tile;
+		if (test_bit(tile_attr, 5) == false) // we check horizontal flip flag, only in CGB
+			pixel_in_tile_line = 7 - pixel_in_tile_line;
 
 		uint16_t		tile_line = (pixel_line_in_tile * 2);						// 16 bits (2 bytes) per 8 pixels, get the right horizontal line of pixels
 		if (test_bit(tile_attr, 3) == true)
@@ -794,7 +818,7 @@ void				PPU::render_tiles()
 		uint8_t			first_byte = read(tile_location + tile_line);
 		uint8_t			second_byte = read(tile_location + tile_line + 1);
 
-		//extract the color value
+		//extract the color value from each byte's corresponding bit 
 		uint8_t			color_id = 0;
 		if (test_bit(first_byte, pixel_in_tile_line) == true)
 			color_id += 2;
@@ -812,29 +836,35 @@ void				PPU::render_tiles()
 //------------------------------------------------------------------------------
 void				PPU::send_pixel_pipeline()
 {
-	int mode = 0;
-
 	for (int i = 0; i < LCD_WIDTH; i++)
 	{
-		switch (mode /* DMG, CGB etc */)
+		if (_gb_mode == MODE_GB_DMG)
 		{
-			case 0:// DMG
-				if (_pixel_pipeline[i].is_sprite == false)
-				{
-					set_pixel(_ly, i, _background_dmg_palette_translated[_pixel_pipeline[i].value]);
-				}
-				else if (_pixel_pipeline[i].is_sprite == true)
-				{
-					if (test_bit(_pixel_pipeline[i].sprite_info.flags, 4) == true)
-						set_pixel(_ly, i, _sprites_dmg_palettes_translated[1][_pixel_pipeline[i].value]);
-					else
-						set_pixel(_ly, i, _sprites_dmg_palettes_translated[0][_pixel_pipeline[i].value]);
-				}
-				break ;
-			case 1:
-				break ;
-			case 2:
-				break ;
+			if (_pixel_pipeline[i].is_sprite == false)
+			{
+				set_pixel(_ly, i, _background_dmg_palette_translated[_pixel_pipeline[i].value]);
+			}
+			else if (_pixel_pipeline[i].is_sprite == true)
+			{
+				if (test_bit(_pixel_pipeline[i].sprite_info.flags, 4) == true)
+					set_pixel(_ly, i, _sprites_dmg_palettes_translated[1][_pixel_pipeline[i].value]);
+				else
+					set_pixel(_ly, i, _sprites_dmg_palettes_translated[0][_pixel_pipeline[i].value]);
+			}
+		}
+		else if (_gb_mode == MODE_GB_CGB)
+		{
+			uint8_t		palette_number = 0;
+			if (_pixel_pipeline[i].is_sprite == false)
+			{
+				palette_number = extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+				set_pixel(_ly, i, _background_color_palettes_translated[palette_number][_pixel_pipeline[i].value]);
+			}
+			else if (_pixel_pipeline[i].is_sprite == true)
+			{
+				palette_number = extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+				set_pixel(_ly, i, _sprite_color_palettes_translated[palette_number][_pixel_pipeline[i].value]);
+			}
 		}
 	}
 }
@@ -905,25 +935,17 @@ uint32_t				PPU::translate_dmg_color_value(uint8_t value)
 }
 
 //------------------------------------------------------------------------------
-void					PPU::translate_palettes()
+void					PPU::translate_dmg_palettes()
 {
-	if (1 /* IS_DMG */)
+	for (int i = 0; i < 4; i++)
 	{
-		for (int i = 0; i < 4; i++)
-		{
-			_background_dmg_palette[i] = extract_value(_bgp, i * 2, i * 2 + 1);
-			_background_dmg_palette_translated[i] = translate_dmg_color_value(extract_value(_bgp, i * 2, i * 2 + 1));
+		_background_dmg_palette[i] = extract_value(_bgp, i * 2, i * 2 + 1);
+		_background_dmg_palette_translated[i] = translate_dmg_color_value(extract_value(_bgp, i * 2, i * 2 + 1));
 
-			_sprites_dmg_palettes[0][i] = extract_value(_obp0, i * 2, i * 2 + 1);
-			_sprites_dmg_palettes[1][i] = extract_value(_obp1, i * 2, i * 2 + 1);
-			_sprites_dmg_palettes_translated[0][i] = translate_dmg_color_value(extract_value(_obp0, i * 2, i * 2 + 1));
-			_sprites_dmg_palettes_translated[1][i] = translate_dmg_color_value(extract_value(_obp1, i * 2, i * 2 + 1));
-		}
-	}
-
-	if (2 /* IS_CGB */)
-	{
-
+		_sprites_dmg_palettes[0][i] = extract_value(_obp0, i * 2, i * 2 + 1);
+		_sprites_dmg_palettes[1][i] = extract_value(_obp1, i * 2, i * 2 + 1);
+		_sprites_dmg_palettes_translated[0][i] = translate_dmg_color_value(extract_value(_obp0, i * 2, i * 2 + 1));
+		_sprites_dmg_palettes_translated[1][i] = translate_dmg_color_value(extract_value(_obp1, i * 2, i * 2 + 1));
 	}
 }
 
@@ -1009,6 +1031,7 @@ void					PPU::update_graphics(Word cycles)
 	uint8_t				current_scanline;
 
 	update_lcd_status();
+
 
 	if (is_lcd_enabled())
 	{

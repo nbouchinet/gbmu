@@ -75,6 +75,10 @@ public:
 	static constexpr Word	OCPS = 0xFF6A;
 	static constexpr Word	OCPD = 0xFF6B;
 
+	static constexpr Byte	MODE_GB_NOMODE = 0x00;
+	static constexpr Byte	MODE_GB_DMG = 0x01;
+	static constexpr Byte	MODE_GB_CGB = 0x02;
+
 private:
 	uint16_t				get_tile_data_address(uint8_t tile_identifier);
 	uint16_t				determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool boi_its_a_window);
@@ -100,7 +104,7 @@ private:
 	void					get_sprites_for_line();
 	void					send_pixel_pipeline();
 	void					blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender);
-	void					translate_palettes();
+	void					translate_dmg_palettes();
 	uint32_t				translate_cgb_color_value(uint16_t value);
 	uint32_t				translate_dmg_color_value(uint8_t value);
 	uint16_t				color_palette_array_case_wrapper(uint8_t specifier) const;
@@ -140,6 +144,7 @@ private:
 	uint8_t					_sprite_size;
 	bool					_unsigned_tile_numbers;
 	bool					_windowing_on;
+	uint8_t					_gb_mode;
 
 	uint16_t				_h_blank_hdma_src_addr;
 	uint16_t				_h_blank_hdma_dst_addr;
