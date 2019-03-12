@@ -185,13 +185,13 @@ TEST_F(TestCoreFixture, daa) {
   accessor.core.set_flag(Core::Flags::N, true);
   accessor.getAf().high = 0xF4;
   accessor.core.instr_daa();
-  EXPECT_EQ(accessor.getAf().high, 0x94);
+  EXPECT_EQ(accessor.getAf().high, 0xF4);
 
   reset_flags();
   accessor.core.set_flag(Core::Flags::N, true);
   accessor.getAf().high = 0xF4;
   accessor.core.instr_daa();
-  EXPECT_EQ(accessor.getAf().high, 0x94);
+  EXPECT_EQ(accessor.getAf().high, 0xF4);
 }
 
 TEST_F(TestCoreFixture, push) {
@@ -568,7 +568,7 @@ TEST_F(TestCoreFixture, sra) {
     accessor.core.instr_sra(accessor.getBc().high);
     EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), test_bit(0, swap));
     test_flags(.c = -1, .z = -1);
-    EXPECT_EQ(accessor.getBc().high, static_cast<Byte>(i >> 1));
+    EXPECT_EQ(accessor.getBc().high, (i & 0x80) | static_cast<Byte>(i >> 1));
     EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), (i == 0x01));
   }
 }
