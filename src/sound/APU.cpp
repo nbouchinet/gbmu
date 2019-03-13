@@ -91,6 +91,8 @@ Byte APU::read(Word addr) const {
     }
   }
   if (addr >= 0xff30 and addr <= 0xff3f) return _wave_ram[addr & 0xf];
+  else if (addr >= 0xff27 and addr <= 0xff2f)
+    return 0;
   assert(false);
 }
 
@@ -123,6 +125,8 @@ void APU::write(Word addr, Byte v) {
     _wave_ram[addr & 0xf] = v;
     return;
   }
+  else if (addr >= 0xff27 and addr <= 0xff2f)
+    return;
   assert(false);
 }
 }  // namespace sound

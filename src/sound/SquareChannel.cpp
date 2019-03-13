@@ -39,7 +39,6 @@ void SquareChannel::do_clear() {
 void SquareChannel::write(Word addr, Byte v) {
   switch ((addr & 0xf) % 5) {
     case 0x0:
-      assert(_sweep_enabled);
       _sweep.set_register(v);
       break;
     case 0x1:
@@ -65,7 +64,6 @@ void SquareChannel::write(Word addr, Byte v) {
 Byte SquareChannel::read(Word addr) const {
   switch ((addr & 0xf) % 5) {
     case 0x0:
-      assert(_sweep_enabled);
       return _sweep.get_register();
     case 0x1: {
       Word buf = _waveform_selected;

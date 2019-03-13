@@ -32,6 +32,8 @@ void NoiseChannel::do_clear() {
 
 void NoiseChannel::write(Word addr, Byte v) {
   switch (addr) {
+    case 0xff1f:
+      break;
     case 0xff20:
       _length.set_length(v & 0x3f);
       break;
@@ -54,6 +56,8 @@ void NoiseChannel::write(Word addr, Byte v) {
 
 Byte NoiseChannel::read(Word addr) const {
   switch (addr) {
+    case 0xff1f:
+      return 0;
     case 0xff20:
       return (_length.length() & 0x3f);
     case 0xff21:

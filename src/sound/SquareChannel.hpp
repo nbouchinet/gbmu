@@ -23,18 +23,13 @@ class SquareChannel : public SoundChannel {
   LengthUnit _length;
   EnvelopeUnit _envelope;
 
-  bool _sweep_enabled;
-
   void do_update() override;
   void do_trigger() override;
   void do_clear() override;
 
  public:
   SquareChannel(bool sweep_enabled = true)
-      : _sweep(_timer),
-        _length(63),
-        _envelope(_volume),
-        _sweep_enabled(sweep_enabled) {
+      : _sweep(_timer), _length(63), _envelope(_volume) {
     if (sweep_enabled) bind_module(&_sweep);
     bind_module(&_length);
     bind_module(&_envelope);
