@@ -13,7 +13,7 @@ const Byte WaveChannel::s_volume_shifts[VolumeShiftCount] = {4, 0, 1, 2};
 
 void WaveChannel::do_update() {
   if (_timer == 0) {
-    assert(_frequency);
+    //assert(_frequency);
     _timer = compute_timer(_frequency);
     if (++_table_index >= _table.size()) _table_index = 0;
   }
@@ -60,15 +60,15 @@ void WaveChannel::write(Word addr, Byte v) {
 Byte WaveChannel::read(Word addr) const {
   switch ((addr & 0xf) % 5) {
     case 0x0:
-      return p_enabled << 7;
+      return (p_enabled << 7) | 0x7f;
     case 0x1:
-      return _length.length();
+      return 0xff;
     case 0x2:
-      return _volume_code << 5;
+      return (_volume_code << 5) | 0x9f;
     case 0x3:
-      return _frequency & 0xff;
+      return 0xff;
     case 0x4:
-      return (_length.is_enabled() << 6) | ((_frequency & 0x700) >> 8);
+      return (_length.is_enabled() << 6) | 0xbf;
   }
 
   assert(false);  // TODO throw some exception

@@ -57,16 +57,15 @@ void NoiseChannel::write(Word addr, Byte v) {
 Byte NoiseChannel::read(Word addr) const {
   switch (addr) {
     case 0xff1f:
-      return 0;
     case 0xff20:
-      return (_length.length() & 0x3f);
+      return 0xff;
     case 0xff21:
       return (_volume << 4) | (_envelope.does_add() << 3) |
              (_envelope.period() & 0x7);
     case 0xff22:
       return (_shift << 4) | (_width_mode << 3) | (_divisor_code & 0x7);
     case 0xff23:
-      return (_length.is_enabled() << 6);
+      return (_length.is_enabled() << 6) | 0xbf;
   }
   assert(false);
 }

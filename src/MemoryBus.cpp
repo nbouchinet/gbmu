@@ -11,6 +11,8 @@
 #include "src/sound/APU.hpp"
 #include "src/Bios.hpp"
 
+#include <iostream>
+
 #define push_component(begin, end, c)                                          \
   _ranged_components.push_back(RangedComponent{begin, end, c});
 

@@ -1,6 +1,7 @@
 #include "src/sound/ModulationUnits.hpp"
 #include "src/sound/SoundChannel.hpp"
 
+#include <iostream>
 namespace sound {
 
 bool SweepUnit::call() {
@@ -29,12 +30,13 @@ void SweepUnit::clear() {
 
 bool LengthUnit::call() {
   if (not _enabled) return true;
+  std::cerr  <<+_length  << "\n";
   if (--_length == 0) return false;
   return true;
 }
 
 void LengthUnit::trigger() {
-  if (not _length) _length = _max_length;
+  _length = _max_length;
 }
 
 void LengthUnit::clear() {

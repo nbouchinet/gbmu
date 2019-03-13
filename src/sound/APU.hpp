@@ -27,9 +27,8 @@ class APU : public IReadWrite {
   int _update_countdown = 0;
   int _sampling_countdown = 0;
   unsigned int _modulation_units_steps = 0;
-  Byte _right_volume : 3;
-  Byte _left_volume : 3;
-  bool _APU_on : 1;
+  bool _APU_on = false;
+  Byte _vin_and_volumes = 0;
   Byte _channel_to_terminal_output = 0;
 
   std::size_t _output_index = 0;
@@ -43,7 +42,10 @@ class APU : public IReadWrite {
   std::array<MemoryRangedChannel, 4> _channels;
 
   void update_clock();
+  void clear();
   float fetch_and_mix_samples(Byte enabled_channels, float vol) const;
+  float right_volume() const { return _vin_and_volumes & 0x07;}
+  float left_volume() const { return (_vin_and_volumes & 0x70) >> 4;}
 
  public:
   APU(AudioInterface*);

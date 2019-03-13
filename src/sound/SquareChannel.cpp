@@ -3,6 +3,7 @@
 #include "utils/Operations_utils.hpp"
 
 #include <cassert>
+#include <iostream>
 
 static constexpr Word compute_timer(Word freq) noexcept {
   return (2048 - freq) * 4;
@@ -14,7 +15,7 @@ const std::array<Byte, 4> SquareChannel::s_waveforms{
 
 void SquareChannel::do_update() {
   if (_timer == 0) {
-    assert(_frequency);
+//    assert(_frequency);
     _timer = compute_timer(_frequency);
     if (++_waveform_step >= 8) _waveform_step = 0;
   }
@@ -44,6 +45,7 @@ void SquareChannel::write(Word addr, Byte v) {
     case 0x1:
       _waveform_selected = (v & 0xC0) >> 6;
       _length.set_length(v & 0x3f);
+      std::cerr << "SET: " << std::hex << +v << "\n";
       break;
     case 0x2:
       _volume = (v & 0xf0) >> 4;
@@ -62,22 +64,33 @@ void SquareChannel::write(Word addr, Byte v) {
 }
 
 Byte SquareChannel::read(Word addr) const {
-  switch ((addr & 0xf) % 5) {
+  static const Byte or_table[10]{0x80, 0x3f, 0x00, 0xff, 0xbf,
+                                 0xff, 0x3f, 0x00, 0xff, 0xbf};
+  Byte ret;
+  Byte low_addr_nibble = addr & 0xf;
+  assert(low_addr_nibble < 10);
+  switch (low_addr_nibble % 5) {
     case 0x0:
-      return _sweep.get_register();
+      ret = _sweep.get_register();
+      break;
     case 0x1: {
       Word buf = _waveform_selected;
-      return (buf << 6) | (_length.length() & 0x3f);
+      ret = (buf << 6);
+      break;
     }
     case 0x2:
-      return (_volume << 4) | (_envelope.does_add() << 3) |
-             (_envelope.period() & 0x7);
+      ret = (_volume << 4) | (_envelope.does_add() << 3) |
+            (_envelope.period() & 0x7);
+      break;
     case 0x3:
-      return _frequency & 0xff;
+      ret = 0;
+      break;
     case 0x4:
-      return (_length.is_enabled() << 6) | ((_frequency & 0x700) >> 8);
+      ret = (_length.is_enabled() << 6);
+      break;
   }
-  assert(false);  // TODO throw some exception
+  ret |= or_table[low_addr_nibble];
+  return ret;
 }
 
 }  // namespace sound

@@ -3,6 +3,7 @@
 
 #include "src/sound/AudioInterface.hpp"
 
+#include <memory>
 #include <portaudiocpp/PortAudioCpp.hxx>
 
 namespace sound {

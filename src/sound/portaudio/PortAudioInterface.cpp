@@ -63,7 +63,7 @@ float PortAudioInterface::mix(const std::vector<float>& samples, float volume) c
   for (const auto& sample : samples) {
     ret += sample / samples.size();
   }
-  return ret * volume / 50.;
+  return ret * volume / 100.;
 }
 
 void PortAudioInterface::start() { _stream->start(); }
