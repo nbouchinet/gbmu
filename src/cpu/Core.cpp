@@ -3,7 +3,6 @@
 #include "src/Gameboy.hpp"
 #include "src/MemoryBus.hpp"
 #include "src/cpu/InterruptController.hpp"
-#include <iostream>
 
 #include <cassert>
 
