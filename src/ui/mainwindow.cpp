@@ -23,6 +23,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+	//Load icon
+	_pause_icon = QIcon(":resources/resources/pause.png");
+	_play_icon = QIcon(":resources/resources/play.png");
+
 	//Shortcut settings
 	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
 	ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
@@ -77,12 +81,12 @@ void MainWindow::pause_gameboy(bool stop)
 		return;
 	if (!g_gameboy->get_pause() || stop)
 	{
-		ui->actionPlay->setIcon(QIcon(":/resources/resources/play.png"));
+		ui->actionPlay->setIcon(_play_icon);
 		g_gameboy->set_pause(true);
 	}
 	else
 	{
-		ui->actionPlay->setIcon(QIcon(":/resources/resources/pause.png"));
+		ui->actionPlay->setIcon(_pause_icon);
 		g_gameboy->set_pause(false);
 	}
 }
