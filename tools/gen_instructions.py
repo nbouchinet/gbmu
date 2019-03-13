@@ -116,6 +116,9 @@ def gen_code(opcodes):
 
         if mnemonic == "ld" and operand2 == "SP+r8":
             mnemonic = "ldhl"
+            operand1 = operand2
+            operand2 = None
+
         cpp_op1 = get_reg(mnemonic, operand1)
         cpp_op2 = get_reg(mnemonic, operand2)
 
@@ -169,6 +172,7 @@ def gen_code(opcodes):
         else:
             print('std::printf("%04x: {}\\n", _pc.word);'.format(mnemonic))
         print("#endif")
+        print("  " + "_current_opcode = " + addr + ";");
         print("  " + exec_instruction + ";")
         print("  break;")
 

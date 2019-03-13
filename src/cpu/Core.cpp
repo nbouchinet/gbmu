@@ -35,19 +35,16 @@ void Core::instr_ldi(Byte &a, Byte b) {
 }
 
 void Core::instr_ldhl(Byte n) {
-  bool neg = test_bit(7, n);
-  _hl.word = _sp.word;
-  if (neg) {
-    set_flag(Flags::H, (_hl.word & 0xf) < (n & 0xf));
-    set_flag(Flags::C, _hl.word < n);
+  int8_t e = static_cast<int8_t>(n);
 
-	int8_t sn = n;
-    _hl.word += sn;
-  } else {
-    instr_add(_hl.word, static_cast<Word>(n));
-  }
-  set_flag(Flags::Z, false);
-  set_flag(Flags::N, false);
+  _af.low = 0u;
+  Word result = _sp.word + e;
+  Word check = _sp.word ^ e ^ result;
+
+  set_flag(Flags::C, ((check & 0x100) == 0x100));
+  set_flag(Flags::H, ((check & 0x10) == 0x10));
+
+  _hl.word = result;
 }
 
 // ----------------------------------------------------------------------------
@@ -62,6 +59,10 @@ void Core::instr_push(Word v) {
 void Core::instr_pop(Word &dest) {
   dest = _components.mem_bus->read<Byte>(_sp.word++);
   dest |= static_cast<Word>(_components.mem_bus->read<Byte>(_sp.word++)) << 8;
+
+  if (_current_opcode == 0xF1) {
+    _af.low &= 0xF0;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -81,6 +82,7 @@ void Core::instr_sub(Byte &a, Byte b) {
   set_flag(Flags::C, a < b);
   a -= b;
   set_flag(Flags::Z, a == 0u);
+  set_flag(Flags::N, true);
 }
 
 void Core::instr_sbc(Byte &a, Byte b) {
@@ -123,8 +125,8 @@ void Core::instr_cp(Byte &a, Byte b) {
 // ----------------------------------------------------------------------------
 
 void Core::instr_inc(Byte &b) {
-  set_flag(Flags::N, false);
   set_flag(Flags::H, (b & 0xf) == 0xf);
+  set_flag(Flags::N, false);
   ++b;
   set_flag(Flags::Z, b == 0u);
 }
@@ -150,18 +152,28 @@ void Core::instr_dec(Word &b) { --b; }
  * ex: A = (0000 1000)bcd, B = (0100 0010)bcd
  *  ADD A, B -> A = (0100 1010)b # Incorrect BCD value
  *  DAA -> A = (0101 0000)b # correct BCD addition result
+ *  need to debug
  */
 void Core::instr_daa() {
-  Byte correction_mask = 0u;
-
-  if (get_flag(Flags::H) || ((_af.high & 0xf) > 0x9)) correction_mask |= 0x6;
-  if (get_flag(Flags::C) || _af.high > 0x99) {
-    correction_mask |= 0x60;
-    set_flag(Flags::C, true);
+  if (get_flag(Flags::N)) {
+    if (get_flag(Flags::C)) {
+      _af.high -= 0x60;
+    }
+    if (get_flag(Flags::H)) {
+      _af.high -= 0x06;
+    }
+  } else {
+    if (get_flag(Flags::C) || (_af.high & 0xFF) > 0x99) {
+      _af.high += 0x60;
+      set_flag(Flags::C, true);
+    }
+    if (get_flag(Flags::H) || (_af.high & 0x0F) > 0x09) {
+      _af.high += 0x06;
+    }
   }
-  (get_flag(Flags::N)) ? _af.high -= correction_mask
-                       : _af.high += correction_mask;
+
   set_flag(Flags::Z, _af.high == 0);
+  set_flag(Flags::H, false);
 }
 
 void Core::instr_halt() { _halt = true; }
@@ -194,14 +206,14 @@ void Core::instr_ei() { _components.interrupt_controller->set_IME(1); }
 
 bool Core::can_jump(JumpCondition jc) {
   switch (jc) {
-    case JumpCondition::NonZero:
-      return !get_flag(Flags::Z);
-    case JumpCondition::Zero:
-      return get_flag(Flags::Z);
-    case JumpCondition::NonCarry:
-      return !get_flag(Flags::C);
-    case JumpCondition::Carry:
-      return get_flag(Flags::C);
+  case JumpCondition::NonZero:
+    return !get_flag(Flags::Z);
+  case JumpCondition::Zero:
+    return get_flag(Flags::Z);
+  case JumpCondition::NonCarry:
+    return !get_flag(Flags::C);
+  case JumpCondition::Carry:
+    return get_flag(Flags::C);
   }
   return false;
 }
@@ -300,6 +312,7 @@ void Core::instr_rlc(Byte &reg) {
         bool bit7 = test_bit(7, reg);
         set_flag(Flags::C, bit7);
         reg <<= 1;
+        get_flag(Flags::C) ? set_bit(0, reg) : reset_bit(0, reg);
         reg |= bit7;
       },
       reg);
@@ -351,7 +364,7 @@ void Core::instr_sra(Byte &reg) {
   flag_handle(
       [this](Byte &reg) {
         set_flag(Flags::C, test_bit(0, reg));
-        reg >>= 1;
+        reg = (reg >> 1) | (reg & 0x80);
       },
       reg);
 }
@@ -366,7 +379,11 @@ void Core::instr_srl(Byte &reg) {
       reg);
 }
 
-void Core::instr_swap(Byte &reg) { reg = (reg >> 4) | (reg << 4); }
+void Core::instr_swap(Byte &reg) {
+  _af.low = 0u;
+  reg = (reg >> 4) | (reg << 4);
+  set_flag(Flags::Z, reg == 0);
+}
 
 // ----------------------------------------------------------------------------
 // Bitwise operations

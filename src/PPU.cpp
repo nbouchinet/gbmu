@@ -683,7 +683,7 @@ void				PPU::render_tiles()
 		//	if (test_bit(tile_attr, 6) == true) // we check the vertical flip flag, only in CGB
 		//		pixel_line_in_tile = 7 - pixel_line_in_tile;
 		//	if (test_bit(tile_attr, 5) == true) // we check horizontal flip flag, only in CGB
-		//		pixel_in_tile_line = 7 - pixel_in_tile_line
+		pixel_in_tile_line = 7 - pixel_in_tile_line;
 		//}
 
 		uint16_t		tile_line = (pixel_line_in_tile * 2);						// 16 bits (2 bytes) per 8 pixels, get the right horizontal line of pixels
