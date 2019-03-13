@@ -42,10 +42,11 @@ Byte InterruptController::read(Word addr) const {
 }
 
 void InterruptController::parse_interrupt() {
-  if (_rIF) {
+  Byte enabled = (_rIE & _rIF) & 0x0F;
+
+  if (enabled) {
     for (Byte i = 0; i < 5; i++) {
-      if (((_rIF >> i) & 0x01) == ((_rIE >> i) & 0x01) && ((_rIE >> i) & 0x1)) {
-        _components.core->notify_interrupt();
+      if ((enabled >> i) & 0x01) {
         if (_IME) {
           execute_interrupt(i);
         }
@@ -56,7 +57,6 @@ void InterruptController::parse_interrupt() {
 
 void InterruptController::execute_interrupt(Byte interrupt) {
   _IME = false;
-  _rIF = (_rIF & ~(0x01 << interrupt));
   switch (interrupt) {
   case 0:
     _components.core->start_interrupt(VBI);
@@ -74,25 +74,26 @@ void InterruptController::execute_interrupt(Byte interrupt) {
     _components.core->start_interrupt(JOYI);
     break;
   }
-  _IME = true;
+  _rIF = (_rIF & ~(0x01 << interrupt));
 }
 
 void InterruptController::request_interrupt(Word interrupt) {
   switch (interrupt) {
   case VBI:
-    _rIF |= 1;
+    _rIF |= 0x01;
     break;
   case LCDCSI:
-    _rIF |= 2;
+    _rIF |= 0x02;
     break;
   case TOI:
-    _rIF |= 4;
+    _rIF |= 0x04;
     break;
   case STCI:
-    _rIF |= 8;
+    _rIF |= 0x08;
     break;
   case JOYI:
-    _rIF |= 16;
+    _rIF |= 0x0F;
     break;
   }
+  _components.core->notify_interrupt();
 }
