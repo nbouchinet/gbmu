@@ -530,7 +530,7 @@ bool				PPU::is_lcd_enabled()
 //------------------------------------------------------------------------------
 bool				PPU::is_screen_filled()
 {
-	if (_ly >= LCD_HEIGHT)
+	if (_ly == 144)
 		return (true);
 	return (false);
 }
@@ -594,8 +594,8 @@ void				PPU::get_sprites_for_line() // takes up to MAX_SPRITE_PER_LINE sprites a
 	for (int sprite = 0; sprite < 40; sprite++)
 	{
 		sprite_attributes_offset = sprite * 4; // 4 bytes of attributes data per sprite;
-		y_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset); // in screen !!
-		x_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset + 1); // in screen !!
+		y_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset) - 16; // in screen !!
+		x_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset + 1) - 8; // in screen !!
 		if (_ly >= y_pos_tmp && (_ly < (y_pos_tmp + _sprite_size)) && x_pos_tmp != 0) // IMPORTANT : _sprite_size here might be a flat 16 instead !
 		{
 			_sprites_line[_nb_sprites].y_pos = y_pos_tmp; // -16 !!!!
@@ -603,6 +603,8 @@ void				PPU::get_sprites_for_line() // takes up to MAX_SPRITE_PER_LINE sprites a
 			_sprites_line[_nb_sprites].tile_number = read(sprite_attributes_table_start + sprite_attributes_offset + 2); // the number of the tile data we have to read for pixel values
 			_sprites_line[_nb_sprites].flags = read(sprite_attributes_table_start + sprite_attributes_offset + 3); // for flips and other datas
 			_sprites_line[_nb_sprites].obj_number = sprite;
+			if (_sprite_size == 16)
+				unset_bit(_sprites_line[_nb_sprites].tile_number, 0);
 			_nb_sprites++;
 		}
 		if (_nb_sprites >= MAX_SPRITE_PER_LINE) // this allows to only take up to 10 sprites by default
@@ -713,9 +715,9 @@ void				PPU::render_sprites()
 			if (x_flip == true)
 				line_pixel = (line_pixel - 7) * (-1);
 			if (test_bit(data1, line_pixel) == true)
-				color_id += 2;
-			if (test_bit(data2, line_pixel) == true)
 				color_id += 1;
+			if (test_bit(data2, line_pixel) == true)
+				color_id += 2;
 
 			if (_sprites_line[sprite].x_pos + pixel > 7 && _sprites_line[sprite].x_pos + pixel < LCD_WIDTH)
 			{
@@ -734,9 +736,6 @@ uint16_t			PPU::get_tile_data_address(uint8_t tileIdentifier)
 	uint8_t		offset = 128;
 	uint8_t		tile_memory_size = 16; // 2 bytes per line of pixels
 	uint16_t	tile_data_address;
-
-	//if (_sprite_size == 16)
-	//	unset_bit(tileIdentifier, 0);
 
 	if (_unsigned_tile_numbers == true)
 		tile_data_address = _background_data_start + (tileIdentifier * tile_memory_size);
@@ -791,6 +790,7 @@ void				PPU::render_tiles()
 			x_pos = _scx + i;
 			y_pos = _scy + _ly;
 		}
+
 		tile_number_address = determine_tile_number_address(y_pos, x_pos, boi_its_a_window);
 		_vbk = 0;
 		tile_number = read(tile_number_address);
@@ -821,9 +821,9 @@ void				PPU::render_tiles()
 		//extract the color value from each byte's corresponding bit 
 		uint8_t			color_id = 0;
 		if (test_bit(first_byte, pixel_in_tile_line) == true)
-			color_id += 2;
-		if (test_bit(second_byte, pixel_in_tile_line) == true)
 			color_id += 1;
+		if (test_bit(second_byte, pixel_in_tile_line) == true)
+			color_id += 2;
 
 		//put in pipeline
 		_pixel_pipeline[i].value = color_id;
@@ -867,6 +867,10 @@ void				PPU::send_pixel_pipeline()
 			}
 		}
 	}
+	set_pixel(0, 0, 0xFF0000FF);
+	set_pixel(0, 159, 0x00FF00FF);
+	set_pixel(143, 159, 0x0000FFFF);
+	set_pixel(143, 0, 0xFF00FFFF);
 }
 
 //------------------------------------------------------------------------------
@@ -926,9 +930,9 @@ uint32_t				PPU::translate_dmg_color_value(uint8_t value)
 		case 0:
 			return (0xFFFFFFFF);
 		case 1:
-			return (0x555555FF);
+			return (0xCCCCCCFF);
 		case 2:
-			return (0xAAAAAAFF);
+			return (0x777777FF);
 		case 3:
 			return (0x000000FF);
 	}
@@ -948,23 +952,6 @@ void					PPU::translate_dmg_palettes()
 		_sprites_dmg_palettes_translated[0][i] = translate_dmg_color_value(extract_value(_obp0, (i * 2), (i * 2) + 1));
 		_sprites_dmg_palettes_translated[1][i] = translate_dmg_color_value(extract_value(_obp1, (i * 2), (i * 2) + 1));
 	}
-
-	std::cerr << "tramslate called " << "bgp = " << std::bitset<8>(_bgp) << std::endl;
-	for (int i = 0; i < 4; i++)
-	{
-		std::cerr << "_background_dmg_palette[" << i << "] = " << static_cast<uint32_t>(_background_dmg_palette[i]) << " | translated = " << std::hex << _background_dmg_palette_translated[i] << std::endl;
-	}
-	
-//	std::cerr << "obp0 = " << std::bitset<8>(_obp0) << std::endl;
-//	for (int i = 0; i < 4; i++)
-//	{
-//		std::cerr << "_sprites_dmg_palettes[0][" << i << "] = " << static_cast<uint32_t>(_sprites_dmg_palettes[0][i]) << " | translated = " << _sprites_dmg_palettes_translated[0][i] << std::endl;
-//	}
-//	std::cerr << "obp1 = " << std::bitset<8>(_obp1) << std::endl;
-//	for (int i = 0; i < 4; i++)
-//	{
-//		std::cerr << "_sprites_dmg_palettes[1][" << i << "] = " << static_cast<uint32_t>(_sprites_dmg_palettes[1][i]) << " | translated = " << _sprites_dmg_palettes_translated[1][i] << std::endl;
-//	}
 }
 
 //------------------------------------------------------------------------------
@@ -993,7 +980,6 @@ void					PPU::update_lcd_status()
 		set_bit(status_tmp, 0);
 		unset_bit(status_tmp, 1);
 		RequestInterrupt_flag = test_bit(status_tmp, 4);
-		_h_blank_hdma_step_done = false;
 	}
 	else
 	{
@@ -1046,10 +1032,7 @@ void					PPU::update_lcd_status()
 //------------------------------------------------------------------------------
 void					PPU::update_graphics(Word cycles)
 {
-	uint8_t				current_scanline;
-
 	update_lcd_status();
-
 
 	if (is_lcd_enabled())
 	{
@@ -1063,15 +1046,20 @@ void					PPU::update_graphics(Word cycles)
 
 	if (_scanline_counter <= 0)
 	{
-		_ly++;
-		current_scanline = _ly;
+
+		_h_blank_hdma_step_done = false;
 		_scanline_counter = 456;
-		if (current_scanline == 144)
+		if (_ly == 144)
+		{
 			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->VBI);
-		if (current_scanline > 153)
-			_ly = 0;
-		else if (current_scanline < 144)
+			_components.driver_screen->transfer_dirty_to_clean();
+		}
+		if (_ly < 144)
 			render_scanline();
+		if (_ly <= 153)
+			_ly++;
+		else
+			_ly = 0;
 	}
 }
 
