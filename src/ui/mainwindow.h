@@ -47,10 +47,13 @@ private:
 	Worker			*_gameboy_worker = nullptr;
 	QTimer			*_timer_screen = nullptr;
 	GbmuScreen		*_gameboy_screen = nullptr;
+	QIcon			_pause_icon;
+	QIcon			_play_icon;
 
 
 	//Key Event function
 	void keyPressEvent(QKeyEvent *event);
+	void pause_gameboy(bool stop = false);
 };
 
 #endif // MAINWINDOW_H

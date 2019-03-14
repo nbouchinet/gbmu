@@ -27,10 +27,11 @@ public:
 	void init_registers_view();
 	void refresh_info();
 	void refresh_registers();
-	void refresh_instr();
-	void refresh_memory_map();
+	void refresh_instr(bool init = false);
+	void refresh_memory_map(bool init = false);
 	void addBreakpoint();
 	void add_watchpoint(const QString &label, const QString &addrText);
+	void add_watchpoint_manual();
 	bool duplicateInListWidgetItem(const QString &value, const QListWidget *list);
 	void reset_color(QTableWidget *widget, int column);
 	inline QString qstring_hex_pad(uint32_t value, int padding);
@@ -40,12 +41,16 @@ private slots:
     void on_runOneFrameButton_clicked();
     void on_runDurationButton_clicked();
 	void on_addBreakpointButton_clicked();
-	void on_breakpointsEdit_editingFinished();
+	void on_breakpointsEdit_returnPressed();
 	void on_deleteBreakpointButton_clicked();
 	void on_DebuggerWindow_rejected();
 	void on_deleteWatchpointButton_clicked();
 	void on_memoryLineEdit_editingFinished();
     void on_resetButton_clicked();
+    void on_runCpuSecondButton_clicked();
+    void on_watchpointsAddrEdit_returnPressed();
+    void on_watchpointsValueEdit_returnPressed();
+    void on_addWatchpointButton_clicked();
 
 private:
     Ui::DebuggerWindow *ui;

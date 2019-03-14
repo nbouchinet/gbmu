@@ -21,6 +21,7 @@ public:
   MemoryBus(ComponentsContainer &components);
 
   void disable_bios();
+  void enable_bios(Bios *bios);
   void reset(ComponentsContainer &components);
 
   template <typename T> T read(Word addr) const {

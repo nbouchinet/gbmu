@@ -83,7 +83,7 @@
   <action name="actionPlay">
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/resources/resources/play.png</normaloff>:/resources/resources/play.png</iconset>
+     <normaloff>:/resources/resources/pause.png</normaloff>:/resources/resources/pause.png</iconset>
    </property>
    <property name="text">
     <string>Play</string>
