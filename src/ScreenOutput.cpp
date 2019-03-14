@@ -20,7 +20,8 @@ void					ScreenOutput::reset_screen()
 	{
 		for (int x = 0; x < LCD_WIDTH; x++)
 		{
-			set_rgba(y, x, 0xFFFFFFFF);
+			_buffer_dirty[y][x] = 0xFFFFFFFF;
+			_buffer_clean[y][x] = 0xFFFFFFFF;
 		}
 	}
 	return;
@@ -36,7 +37,7 @@ uint8_t					ScreenOutput::get_r(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = _screen[y][x] & 0xFF000000;
+	tmp = _buffer_clean[y][x] & 0xFF000000;
 	tmp = tmp >> 24;
 	return (static_cast<uint8_t>(tmp));
 }
@@ -51,7 +52,7 @@ uint8_t					ScreenOutput::get_g(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = _screen[y][x] & 0x00FF0000;
+	tmp = _buffer_clean[y][x] & 0x00FF0000;
 	tmp = tmp >> 16;
 	return (static_cast<uint8_t>(tmp));
 }
@@ -66,7 +67,7 @@ uint8_t					ScreenOutput::get_b(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = _screen[y][x] & 0x0000FF00;
+	tmp = _buffer_clean[y][x] & 0x0000FF00;
 	tmp = tmp >> 8;
 
 	return (static_cast<uint8_t>(tmp));
@@ -82,7 +83,7 @@ uint8_t					ScreenOutput::get_a(uint8_t y, uint8_t x) const
 		throw (OutOfScreenException());
 	}
 
-	tmp = _screen[y][x] & 0x000000FF;
+	tmp = _buffer_clean[y][x] & 0x000000FF;
 
 	return (static_cast<uint8_t>(tmp));
 }
@@ -94,7 +95,7 @@ uint32_t				ScreenOutput::get_rgba(uint8_t y, uint8_t x) const
 	{
 		throw (OutOfScreenException());
 	}
-	return (_screen[y][x]);
+	return (_buffer_clean[y][x]);
 }
 
 //------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ void					ScreenOutput::set_rgba(uint8_t y, uint8_t x, uint32_t rgba)
 	{
 		throw (OutOfScreenException());
 	}
-	_screen[y][x] = rgba;
+	_buffer_dirty[y][x] = rgba;
 }
 
 //------------------------------------------------------------------------------
@@ -123,7 +124,7 @@ void					ScreenOutput::set_rgba(uint8_t y, uint8_t x, uint8_t r, uint8_t g, uint
 	g_part = ((static_cast<uint32_t>(g)) << 16);
 	b_part = ((static_cast<uint32_t>(b)) << 8);
 
-	_screen[y][x] = (r_part + g_part + b_part + a);
+	_buffer_dirty[y][x] = (r_part + g_part + b_part + a);
 }
 
 //==============================================================================
