@@ -37,10 +37,13 @@ public:
 
 	void				set_rgba(uint8_t y, uint8_t x, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 	void				set_rgba(uint8_t y, uint8_t x, uint32_t rgba);
-	std::array<std::array<uint32_t, LCD_HEIGHT>, LCD_WIDTH> & 		get_screen() { return _screen; }
+	void				transfer_dirty_to_clean() { _buffer_clean = _buffer_dirty; }
+	std::array<std::array<uint32_t, LCD_WIDTH>, LCD_HEIGHT> & 		get_buffer_dirty() { return _buffer_dirty; }
+	std::array<std::array<uint32_t, LCD_WIDTH>, LCD_HEIGHT> & 		get_buffer_clean() { return _buffer_clean; }
 
 private:
-	std::array<std::array<uint32_t, LCD_HEIGHT>, LCD_WIDTH>			_screen;
+	std::array<std::array<uint32_t, LCD_WIDTH>, LCD_HEIGHT>			_buffer_dirty;
+	std::array<std::array<uint32_t, LCD_WIDTH>, LCD_HEIGHT>			_buffer_clean;
 };
 
 #endif

@@ -75,6 +75,10 @@ public:
 	static constexpr Word	OCPS = 0xFF6A;
 	static constexpr Word	OCPD = 0xFF6B;
 
+	static constexpr Byte	MODE_GB_NOMODE = 0x00;
+	static constexpr Byte	MODE_GB_DMG = 0x01;
+	static constexpr Byte	MODE_GB_CGB = 0x02;
+
 private:
 	uint16_t				get_tile_data_address(uint8_t tile_identifier);
 	uint16_t				determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool boi_its_a_window);
@@ -83,6 +87,15 @@ private:
 	void					setup_window();
 	void					setup_background_data();
 	void					setup_sprite_data();
+	Byte					handle_cgb_bg_palette_read() const;
+	Byte					handle_cgb_obj_palette_read() const;
+	void					handle_cgb_bg_palette_write(uint8_t bcpd_arg);
+	void					handle_cgb_obj_palette_write(uint8_t ocpd_arg);
+	void					handle_hdma_transfer(uint8_t hdma5_arg);
+	bool					is_hdma_active();
+	void					hdma_h_blank_step();
+	void					initiate_hdma_transfer(uint8_t hdma5_arg);
+	void					dma_transfer(uint16_t address);
 	bool					is_lcd_enabled();
 	void					render_scanline();
 	void					set_pixel(uint8_t y, uint8_t x, uint32_t value);
@@ -91,7 +104,7 @@ private:
 	void					get_sprites_for_line();
 	void					send_pixel_pipeline();
 	void					blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender);
-	void					translate_palettes();
+	void					translate_dmg_palettes();
 	uint32_t				translate_cgb_color_value(uint16_t value);
 	uint32_t				translate_dmg_color_value(uint8_t value);
 	uint16_t				color_palette_array_case_wrapper(uint8_t specifier) const;
@@ -123,7 +136,6 @@ private:
 	uint8_t					_ocps;					// (0xFF6A)
 	uint8_t					_ocpd;					// (0xFF6B)
 
-
 	uint32_t				_scanline_counter;
 	uint16_t				_background_data_start;
 	uint16_t				_background_chr_attr_start;
@@ -132,6 +144,11 @@ private:
 	uint8_t					_sprite_size;
 	bool					_unsigned_tile_numbers;
 	bool					_windowing_on;
+	uint8_t					_gb_mode;
+
+	uint16_t				_h_blank_hdma_src_addr;
+	uint16_t				_h_blank_hdma_dst_addr;
+	bool					_h_blank_hdma_step_done;
 
 	uint32_t				_background_color_palettes_translated[8][4];
 	uint32_t				_sprite_color_palettes_translated[8][4];
@@ -148,7 +165,7 @@ private:
 	t_sprite_info			_sprites_line[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
 	uint8_t					_nb_sprites;
 
-	std::array<Byte, 8192>		_lcd_memory_bank_0; // (0x8000-0x97FF) Tiles RAM bank 0
+	std::array<Byte, 8192>		_lcd_memory_bank_0; // (0x8000-0x9FFF) Tiles RAM bank 0
 	std::array<Byte, 8192>		_lcd_memory_bank_1;
 	std::array<Byte, 160>		_lcd_oam_ram; // (0xFE00 - 0xFE9F) Sprite attr RAM
 
