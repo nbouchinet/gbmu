@@ -42,3 +42,10 @@ void MemoryBus::disable_bios() {
     _bios_is_enabled = false;
   }
 }
+
+void MemoryBus::enable_bios(Bios *bios) {
+	if (!_bios_is_enabled) {
+		_ranged_components.insert(_ranged_components.begin(), RangedComponent{0x0000, 0x00FF, bios});
+		_bios_is_enabled = true;
+	}
+}

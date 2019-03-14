@@ -22,28 +22,17 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-	/*
-	ui->graphicsView->setAutoFillBackground(false);
-	ui->graphicsView->move(100, 100);
-	ui->graphicsView->resize(width(), height());
-	g_gameboy = new Gameboy("/Users/hublanc/Documents/gbInput/tools/Tetris.gb");
 
-	//Setting up gameboy's screen
-    GbmuScreen *gbs = new GbmuScreen(this);
-    QTimer *st = new QTimer(this);
-    connect(st, &QTimer::timeout, gbs, &GbmuScreen::updateGbScreen);
-    st->start(17);
+	//Load icon
+	_pause_icon = QIcon(":resources/resources/pause.png");
+	_play_icon = QIcon(":resources/resources/play.png");
 
-	//Setting Controller
-	QThread *gt = new QThread;
-	Worker *gw = new Worker();
-	gw->moveToThread(gt);
-	connect(gt, SIGNAL (started()), gw, SLOT (process()));
-	connect(gw, SIGNAL (finished()), gt, SLOT (quit()));
-	//connect(_gameboy_worker, SIGNAL (finished()), _gameboy_worker, SLOT (deleteLater()));
-	//connect(_gameboy_thread, SIGNAL (finished()), _gameboy_thread, SLOT (deleteLater()));
-	gt->start();
-	*/
+	//Shortcut settings
+	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+	ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+	ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+	ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
 }
 
 MainWindow::~MainWindow()
@@ -86,14 +75,34 @@ void MainWindow::on_actionOpen_triggered()
 	setCentralWidget(_gameboy_screen);
 }
 
+void MainWindow::pause_gameboy(bool stop)
+{
+	if (g_gameboy == nullptr)
+		return;
+	if (!g_gameboy->get_pause() || stop)
+	{
+		ui->actionPlay->setIcon(_play_icon);
+		g_gameboy->set_pause(true);
+	}
+	else
+	{
+		ui->actionPlay->setIcon(_pause_icon);
+		g_gameboy->set_pause(false);
+	}
+}
+
 void MainWindow::on_actionPlay_triggered()
 {
-    QMessageBox::information(this, "tit", "Play the game");
+	pause_gameboy();
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    QMessageBox::information(this, "tit", "Stop the game");
+	if (g_gameboy)
+	{
+		g_gameboy->reset();
+		pause_gameboy(true);
+	}
 }
 
 void MainWindow::on_actionMute_triggered()

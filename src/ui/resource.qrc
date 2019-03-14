@@ -5,5 +5,6 @@
         <file>resources/mute.png</file>
         <file>resources/play.png</file>
         <file>resources/stop.png</file>
+        <file>resources/pause.png</file>
     </qresource>
 </RCC>

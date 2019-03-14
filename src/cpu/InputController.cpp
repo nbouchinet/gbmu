@@ -15,8 +15,8 @@ void InputController::reset() {
 }
 
 void InputController::write(Word addr, Byte val) {
-	(void)_components;
-	if (addr == 0xFF00) {
+	if (addr == 0xFF00)
+	{
 		_rP1 = val;
 	}
 }
