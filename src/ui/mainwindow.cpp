@@ -53,7 +53,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionOpen_triggered()
 {
-	_rom_path = QFileDialog::getOpenFileName(this, tr("Open ROM"), "/home", tr("*.gb *.gbc"));
+	_rom_path = QFileDialog::getOpenFileName(this, tr("Open ROM"), "/Users/oyagci/Workspace/42/gbmu/tools/blargg-test-roms", tr("*.gb *.gbc"));
 	if (_rom_path.isEmpty())
 		return ;
 	if (g_gameboy && _gameboy_thread && _gameboy_worker && _timer_screen && _gameboy_screen)

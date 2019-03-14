@@ -93,7 +93,7 @@ def get_reg(mnemonic, operand):
         return operand
     return reg
 
-def gen_code(opcodes):
+def gen_code(opcodes, cb=False):
     for key, opcode in opcodes.items():
         deref               = None
         addr                = opcode["addr"]
@@ -104,6 +104,10 @@ def gen_code(opcodes):
         first_is_deref      = False
 
         cycles              = opcode.get("cycles")
+
+        if cb:
+            cycles[0] += 4
+
         if len(cycles) > 1:
             cycles = str(cycles[0]) + ", " + str(cycles[1])
         else:
@@ -182,7 +186,7 @@ def main():
     gen_code(opcodes.get("unprefixed"))
     print("  case 0xCB:")
     print("switch (" + fetch_byte + ") {")
-    gen_code(opcodes.get("cbprefixed"))
+    gen_code(opcodes.get("cbprefixed"), cb=True)
     print("}")
 
 if __name__ == "__main__":
