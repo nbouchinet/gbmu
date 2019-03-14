@@ -165,7 +165,7 @@ private:
 	t_sprite_info			_sprites_line[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
 	uint8_t					_nb_sprites;
 
-	std::array<Byte, 8192>		_lcd_memory_bank_0; // (0x8000-0x97FF) Tiles RAM bank 0
+	std::array<Byte, 8192>		_lcd_memory_bank_0; // (0x8000-0x9FFF) Tiles RAM bank 0
 	std::array<Byte, 8192>		_lcd_memory_bank_1;
 	std::array<Byte, 160>		_lcd_oam_ram; // (0xFE00 - 0xFE9F) Sprite attr RAM
 

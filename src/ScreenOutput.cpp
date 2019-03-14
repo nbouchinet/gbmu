@@ -20,8 +20,8 @@ void					ScreenOutput::reset_screen()
 	{
 		for (int x = 0; x < LCD_WIDTH; x++)
 		{
-			_buffer_clean[y][x] = 0xFFFFFFFF;
 			_buffer_dirty[y][x] = 0xFFFFFFFF;
+			_buffer_clean[y][x] = 0xFFFFFFFF;
 		}
 	}
 	return;
@@ -105,7 +105,7 @@ void					ScreenOutput::set_rgba(uint8_t y, uint8_t x, uint32_t rgba)
 	{
 		throw (OutOfScreenException());
 	}
-	_buffer_clean[y][x] = rgba;
+	_buffer_dirty[y][x] = rgba;
 }
 
 //------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ void					ScreenOutput::set_rgba(uint8_t y, uint8_t x, uint8_t r, uint8_t g, uint
 	g_part = ((static_cast<uint32_t>(g)) << 16);
 	b_part = ((static_cast<uint32_t>(b)) << 8);
 
-	_buffer_clean[y][x] = (r_part + g_part + b_part + a);
+	_buffer_dirty[y][x] = (r_part + g_part + b_part + a);
 }
 
 //==============================================================================

@@ -303,7 +303,7 @@ void				PPU::write(Word address, Byte value)
 			_lyc = value;
 			break;
 		case 0xFF46:
-			dma_transfer(address);
+			dma_transfer(value);
 			break;
 		case 0xFF47:
 			_bgp = value;
@@ -547,7 +547,7 @@ void				PPU::setup_sprite_data()
 //------------------------------------------------------------------------------
 void				PPU::setup_window()
 {
-	if (test_bit(_lcdc, 5) == true && (_wy <= _ly))
+	if (test_bit(_lcdc, 5) == true)
 		_windowing_on = true;
 
 	if (test_bit(_lcdc, 6) == true)
@@ -692,15 +692,16 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 void				PPU::render_sprites()
 {
 	get_sprites_for_line();
+
 	for (int sprite = _nb_sprites - 1; sprite >= 0; sprite--) // up to 10 sprites on the line
 	{
-		bool		x_flip = test_bit(_sprites_line[sprite].flags, 5) == true ? true : false;
+		bool		x_flip = test_bit(_sprites_line[sprite].flags, 5) == true ? false : true;
 		bool		y_flip = test_bit(_sprites_line[sprite].flags, 6) == true ? true : false;
 
 		int		sprite_line = _ly - _sprites_line[sprite].y_pos; // which line of the sprite does the scanline go through ?
 		if (y_flip == true)
 			sprite_line = (sprite_line - (_sprite_size - 1)) * (-1);
-		uint16_t	tile_line_data_address = (_sprite_data_start + (_sprites_line[sprite].tile_number * 16)) + sprite_line;
+		uint16_t	tile_line_data_address = (_sprite_data_start + (_sprites_line[sprite].tile_number * 16)) + (sprite_line * 2);
 
 		_vbk = test_bit(_sprites_line[sprite].flags, 3) == true ? 1 : 0;
 		uint8_t data1 = read(tile_line_data_address);
@@ -719,12 +720,12 @@ void				PPU::render_sprites()
 			if (test_bit(data2, line_pixel) == true)
 				color_id += 2;
 
-			if (_sprites_line[sprite].x_pos + pixel > 7 && _sprites_line[sprite].x_pos + pixel < LCD_WIDTH)
+			if (_sprites_line[sprite].x_pos + pixel < LCD_WIDTH)
 			{
 				contender.value = color_id;
 				contender.is_sprite = true;
 				contender.sprite_info = _sprites_line[sprite];
-				blend_pixels(_pixel_pipeline[contender.sprite_info.x_pos], contender);
+				blend_pixels(_pixel_pipeline[contender.sprite_info.x_pos + pixel], contender);
 			}
 		}
 	}
@@ -759,7 +760,8 @@ uint16_t			PPU::determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool
 
 	if (boi_its_a_window == true)
 		tile_number_address = _window_chr_attr_start + tile_row + tile_col;	// 1 byte per tile number (uint8_t), just the tile number
-	tile_number_address = _background_chr_attr_start + tile_row + tile_col;
+	else
+		tile_number_address = _background_chr_attr_start + tile_row + tile_col;
 
 	return (tile_number_address);
 }
@@ -773,7 +775,7 @@ void				PPU::render_tiles()
 	uint16_t		tile_number_address; // from tile_number_address we get the tile_number (in BG display Data)
 	uint8_t			tile_number; // from BG display data we get tile_number
 	uint16_t		tile_location; // from tile_number we deduce where the data for each pixel of the tile starts
-	uint8_t			tile_attr = 0; // needed for CGB, same location as tile_number_address in the BG display Data except in the Bank 1 
+	uint8_t			tile_attr; // needed for CGB, same location as tile_number_address in the BG display Data except in the Bank 1 
 
 	for (int i = 0; i < 160; i++)
 	{
@@ -782,8 +784,9 @@ void				PPU::render_tiles()
 
 		if (boi_its_a_window == true)
 		{
-			x_pos = i - _wx - 7;
+			x_pos = i - (_wx - 7);
 			y_pos = _ly - _wy;
+
 		}
 		else
 		{
@@ -792,9 +795,11 @@ void				PPU::render_tiles()
 		}
 
 		tile_number_address = determine_tile_number_address(y_pos, x_pos, boi_its_a_window);
+
 		_vbk = 0;
 		tile_number = read(tile_number_address);
 
+		tile_attr = 0;
 		if (_gb_mode == MODE_GB_CGB)
 		{
 			_vbk = 1;
