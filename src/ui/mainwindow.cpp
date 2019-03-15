@@ -123,41 +123,82 @@ void MainWindow::on_actionDebug_triggered()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-	mutexGb.lock();
+//	mutexGb.lock();
 	switch (event->key())
 	{
 		case Qt::Key_W:
 			std::cout << "I PRESSED W (UP)" << std::endl;
-			g_gameboy->handle_input_wraper(0xEB);
+			g_gameboy->key_pressed_wraper(2);
 			break;
 		case Qt::Key_S:
 			std::cout << "I PRESSED S (DOWN)" << std::endl;
-			g_gameboy->handle_input_wraper(0xE7);
+			g_gameboy->key_pressed_wraper(3);
 			break;
 		case Qt::Key_A:
 			std::cout << "I PRESSED A (LEFT)" << std::endl;
-			g_gameboy->handle_input_wraper(0xED);
+			g_gameboy->key_pressed_wraper(1);
 			break;
 		case Qt::Key_D:
 			std::cout << "I PRESSED D (RIGHT)" << std::endl;
-			g_gameboy->handle_input_wraper(0xEE);
+			g_gameboy->key_pressed_wraper(0);
 			break;
 		case Qt::Key_J:
 			std::cout << "I PRESSED J (A)" << std::endl;
-			g_gameboy->handle_input_wraper(0xDE);
+			g_gameboy->key_pressed_wraper(4);
 			break;
 		case Qt::Key_K:
 			std::cout << "I PRESSED K (B)" << std::endl;
-			g_gameboy->handle_input_wraper(0xDD);
+			g_gameboy->key_pressed_wraper(5);
 			break;
 		case Qt::Key_N:
 			std::cout << "I PRESSED N (START)" << std::endl;
-			g_gameboy->handle_input_wraper(0xD7);
+			g_gameboy->key_pressed_wraper(7);
 			break;
 		case Qt::Key_M:
 			std::cout << "I PRESSED M (SELECT)" << std::endl;
-			g_gameboy->handle_input_wraper(0xDB);
+			g_gameboy->key_pressed_wraper(6);
 			break;
 	}
-	mutexGb.unlock();
+//	mutexGb.unlock();
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *event)
+{
+//	mutexGb.lock();
+	switch (event->key())
+	{
+		case Qt::Key_W:
+			std::cout << "I RELEASED W (UP)" << std::endl;
+			g_gameboy->key_released_wraper(2);
+			break;
+		case Qt::Key_S:
+			std::cout << "I RELEASED S (DOWN)" << std::endl;
+			g_gameboy->key_released_wraper(3);
+			break;
+		case Qt::Key_A:
+			std::cout << "I RELEASED A (LEFT)" << std::endl;
+			g_gameboy->key_released_wraper(1);
+			break;
+		case Qt::Key_D:
+			std::cout << "I RELEASED D (RIGHT)" << std::endl;
+			g_gameboy->key_released_wraper(0);
+			break;
+		case Qt::Key_J:
+			std::cout << "I RELEASED J (A)" << std::endl;
+			g_gameboy->key_released_wraper(4);
+			break;
+		case Qt::Key_K:
+			std::cout << "I RELEASED K (B)" << std::endl;
+			g_gameboy->key_released_wraper(5);
+			break;
+		case Qt::Key_N:
+			std::cout << "I RELEASED N (START)" << std::endl;
+			g_gameboy->key_released_wraper(7);
+			break;
+		case Qt::Key_M:
+			std::cout << "I RELEASED M (SELECT)" << std::endl;
+			g_gameboy->key_released_wraper(6);
+			break;
+	}
+//	mutexGb.unlock();
 }
