@@ -1713,1791 +1713,1791 @@ case 0x0:
 std::printf("%04x: rlc B\n", _pc.word);
 #endif
   _current_opcode = 0x0;
-  exec_instruction([&] () { instr_rlc(_bc.high); }, 12);
+  exec_instruction([&] () { instr_rlc(_bc.high); }, 8);
   break;
 case 0x1:
 #ifdef DEBUG_CORE
 std::printf("%04x: rlc C\n", _pc.word);
 #endif
   _current_opcode = 0x1;
-  exec_instruction([&] () { instr_rlc(_bc.low); }, 12);
+  exec_instruction([&] () { instr_rlc(_bc.low); }, 8);
   break;
 case 0x2:
 #ifdef DEBUG_CORE
 std::printf("%04x: rlc D\n", _pc.word);
 #endif
   _current_opcode = 0x2;
-  exec_instruction([&] () { instr_rlc(_de.high); }, 12);
+  exec_instruction([&] () { instr_rlc(_de.high); }, 8);
   break;
 case 0x3:
 #ifdef DEBUG_CORE
 std::printf("%04x: rlc E\n", _pc.word);
 #endif
   _current_opcode = 0x3;
-  exec_instruction([&] () { instr_rlc(_de.low); }, 12);
+  exec_instruction([&] () { instr_rlc(_de.low); }, 8);
   break;
 case 0x4:
 #ifdef DEBUG_CORE
 std::printf("%04x: rlc H\n", _pc.word);
 #endif
   _current_opcode = 0x4;
-  exec_instruction([&] () { instr_rlc(_hl.high); }, 12);
+  exec_instruction([&] () { instr_rlc(_hl.high); }, 8);
   break;
 case 0x5:
 #ifdef DEBUG_CORE
 std::printf("%04x: rlc L\n", _pc.word);
 #endif
   _current_opcode = 0x5;
-  exec_instruction([&] () { instr_rlc(_hl.low); }, 12);
+  exec_instruction([&] () { instr_rlc(_hl.low); }, 8);
   break;
 case 0x6:
 #ifdef DEBUG_CORE
 std::printf("%04x: rlc (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x6;
-  exec_instruction([&] (Byte &v) { instr_rlc(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_rlc(v); }, _hl.word, 16);
   break;
 case 0x7:
 #ifdef DEBUG_CORE
 std::printf("%04x: rlc A\n", _pc.word);
 #endif
   _current_opcode = 0x7;
-  exec_instruction([&] () { instr_rlc(_af.high); }, 12);
+  exec_instruction([&] () { instr_rlc(_af.high); }, 8);
   break;
 case 0x8:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc B\n", _pc.word);
 #endif
   _current_opcode = 0x8;
-  exec_instruction([&] () { instr_rrc(_bc.high); }, 12);
+  exec_instruction([&] () { instr_rrc(_bc.high); }, 8);
   break;
 case 0x9:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc C\n", _pc.word);
 #endif
   _current_opcode = 0x9;
-  exec_instruction([&] () { instr_rrc(_bc.low); }, 12);
+  exec_instruction([&] () { instr_rrc(_bc.low); }, 8);
   break;
 case 0xa:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc D\n", _pc.word);
 #endif
   _current_opcode = 0xa;
-  exec_instruction([&] () { instr_rrc(_de.high); }, 12);
+  exec_instruction([&] () { instr_rrc(_de.high); }, 8);
   break;
 case 0xb:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc E\n", _pc.word);
 #endif
   _current_opcode = 0xb;
-  exec_instruction([&] () { instr_rrc(_de.low); }, 12);
+  exec_instruction([&] () { instr_rrc(_de.low); }, 8);
   break;
 case 0xc:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc H\n", _pc.word);
 #endif
   _current_opcode = 0xc;
-  exec_instruction([&] () { instr_rrc(_hl.high); }, 12);
+  exec_instruction([&] () { instr_rrc(_hl.high); }, 8);
   break;
 case 0xd:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc L\n", _pc.word);
 #endif
   _current_opcode = 0xd;
-  exec_instruction([&] () { instr_rrc(_hl.low); }, 12);
+  exec_instruction([&] () { instr_rrc(_hl.low); }, 8);
   break;
 case 0xe:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xe;
-  exec_instruction([&] (Byte &v) { instr_rrc(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_rrc(v); }, _hl.word, 16);
   break;
 case 0xf:
 #ifdef DEBUG_CORE
 std::printf("%04x: rrc A\n", _pc.word);
 #endif
   _current_opcode = 0xf;
-  exec_instruction([&] () { instr_rrc(_af.high); }, 12);
+  exec_instruction([&] () { instr_rrc(_af.high); }, 8);
   break;
 case 0x10:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl B\n", _pc.word);
 #endif
   _current_opcode = 0x10;
-  exec_instruction([&] () { instr_rl(_bc.high); }, 12);
+  exec_instruction([&] () { instr_rl(_bc.high); }, 8);
   break;
 case 0x11:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl C\n", _pc.word);
 #endif
   _current_opcode = 0x11;
-  exec_instruction([&] () { instr_rl(_bc.low); }, 12);
+  exec_instruction([&] () { instr_rl(_bc.low); }, 8);
   break;
 case 0x12:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl D\n", _pc.word);
 #endif
   _current_opcode = 0x12;
-  exec_instruction([&] () { instr_rl(_de.high); }, 12);
+  exec_instruction([&] () { instr_rl(_de.high); }, 8);
   break;
 case 0x13:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl E\n", _pc.word);
 #endif
   _current_opcode = 0x13;
-  exec_instruction([&] () { instr_rl(_de.low); }, 12);
+  exec_instruction([&] () { instr_rl(_de.low); }, 8);
   break;
 case 0x14:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl H\n", _pc.word);
 #endif
   _current_opcode = 0x14;
-  exec_instruction([&] () { instr_rl(_hl.high); }, 12);
+  exec_instruction([&] () { instr_rl(_hl.high); }, 8);
   break;
 case 0x15:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl L\n", _pc.word);
 #endif
   _current_opcode = 0x15;
-  exec_instruction([&] () { instr_rl(_hl.low); }, 12);
+  exec_instruction([&] () { instr_rl(_hl.low); }, 8);
   break;
 case 0x16:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x16;
-  exec_instruction([&] (Byte &v) { instr_rl(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_rl(v); }, _hl.word, 16);
   break;
 case 0x17:
 #ifdef DEBUG_CORE
 std::printf("%04x: rl A\n", _pc.word);
 #endif
   _current_opcode = 0x17;
-  exec_instruction([&] () { instr_rl(_af.high); }, 12);
+  exec_instruction([&] () { instr_rl(_af.high); }, 8);
   break;
 case 0x18:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr B\n", _pc.word);
 #endif
   _current_opcode = 0x18;
-  exec_instruction([&] () { instr_rr(_bc.high); }, 12);
+  exec_instruction([&] () { instr_rr(_bc.high); }, 8);
   break;
 case 0x19:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr C\n", _pc.word);
 #endif
   _current_opcode = 0x19;
-  exec_instruction([&] () { instr_rr(_bc.low); }, 12);
+  exec_instruction([&] () { instr_rr(_bc.low); }, 8);
   break;
 case 0x1a:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr D\n", _pc.word);
 #endif
   _current_opcode = 0x1a;
-  exec_instruction([&] () { instr_rr(_de.high); }, 12);
+  exec_instruction([&] () { instr_rr(_de.high); }, 8);
   break;
 case 0x1b:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr E\n", _pc.word);
 #endif
   _current_opcode = 0x1b;
-  exec_instruction([&] () { instr_rr(_de.low); }, 12);
+  exec_instruction([&] () { instr_rr(_de.low); }, 8);
   break;
 case 0x1c:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr H\n", _pc.word);
 #endif
   _current_opcode = 0x1c;
-  exec_instruction([&] () { instr_rr(_hl.high); }, 12);
+  exec_instruction([&] () { instr_rr(_hl.high); }, 8);
   break;
 case 0x1d:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr L\n", _pc.word);
 #endif
   _current_opcode = 0x1d;
-  exec_instruction([&] () { instr_rr(_hl.low); }, 12);
+  exec_instruction([&] () { instr_rr(_hl.low); }, 8);
   break;
 case 0x1e:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x1e;
-  exec_instruction([&] (Byte &v) { instr_rr(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_rr(v); }, _hl.word, 16);
   break;
 case 0x1f:
 #ifdef DEBUG_CORE
 std::printf("%04x: rr A\n", _pc.word);
 #endif
   _current_opcode = 0x1f;
-  exec_instruction([&] () { instr_rr(_af.high); }, 12);
+  exec_instruction([&] () { instr_rr(_af.high); }, 8);
   break;
 case 0x20:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla B\n", _pc.word);
 #endif
   _current_opcode = 0x20;
-  exec_instruction([&] () { instr_sla(_bc.high); }, 12);
+  exec_instruction([&] () { instr_sla(_bc.high); }, 8);
   break;
 case 0x21:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla C\n", _pc.word);
 #endif
   _current_opcode = 0x21;
-  exec_instruction([&] () { instr_sla(_bc.low); }, 12);
+  exec_instruction([&] () { instr_sla(_bc.low); }, 8);
   break;
 case 0x22:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla D\n", _pc.word);
 #endif
   _current_opcode = 0x22;
-  exec_instruction([&] () { instr_sla(_de.high); }, 12);
+  exec_instruction([&] () { instr_sla(_de.high); }, 8);
   break;
 case 0x23:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla E\n", _pc.word);
 #endif
   _current_opcode = 0x23;
-  exec_instruction([&] () { instr_sla(_de.low); }, 12);
+  exec_instruction([&] () { instr_sla(_de.low); }, 8);
   break;
 case 0x24:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla H\n", _pc.word);
 #endif
   _current_opcode = 0x24;
-  exec_instruction([&] () { instr_sla(_hl.high); }, 12);
+  exec_instruction([&] () { instr_sla(_hl.high); }, 8);
   break;
 case 0x25:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla L\n", _pc.word);
 #endif
   _current_opcode = 0x25;
-  exec_instruction([&] () { instr_sla(_hl.low); }, 12);
+  exec_instruction([&] () { instr_sla(_hl.low); }, 8);
   break;
 case 0x26:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x26;
-  exec_instruction([&] (Byte &v) { instr_sla(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_sla(v); }, _hl.word, 16);
   break;
 case 0x27:
 #ifdef DEBUG_CORE
 std::printf("%04x: sla A\n", _pc.word);
 #endif
   _current_opcode = 0x27;
-  exec_instruction([&] () { instr_sla(_af.high); }, 12);
+  exec_instruction([&] () { instr_sla(_af.high); }, 8);
   break;
 case 0x28:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra B\n", _pc.word);
 #endif
   _current_opcode = 0x28;
-  exec_instruction([&] () { instr_sra(_bc.high); }, 12);
+  exec_instruction([&] () { instr_sra(_bc.high); }, 8);
   break;
 case 0x29:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra C\n", _pc.word);
 #endif
   _current_opcode = 0x29;
-  exec_instruction([&] () { instr_sra(_bc.low); }, 12);
+  exec_instruction([&] () { instr_sra(_bc.low); }, 8);
   break;
 case 0x2a:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra D\n", _pc.word);
 #endif
   _current_opcode = 0x2a;
-  exec_instruction([&] () { instr_sra(_de.high); }, 12);
+  exec_instruction([&] () { instr_sra(_de.high); }, 8);
   break;
 case 0x2b:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra E\n", _pc.word);
 #endif
   _current_opcode = 0x2b;
-  exec_instruction([&] () { instr_sra(_de.low); }, 12);
+  exec_instruction([&] () { instr_sra(_de.low); }, 8);
   break;
 case 0x2c:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra H\n", _pc.word);
 #endif
   _current_opcode = 0x2c;
-  exec_instruction([&] () { instr_sra(_hl.high); }, 12);
+  exec_instruction([&] () { instr_sra(_hl.high); }, 8);
   break;
 case 0x2d:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra L\n", _pc.word);
 #endif
   _current_opcode = 0x2d;
-  exec_instruction([&] () { instr_sra(_hl.low); }, 12);
+  exec_instruction([&] () { instr_sra(_hl.low); }, 8);
   break;
 case 0x2e:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x2e;
-  exec_instruction([&] (Byte &v) { instr_sra(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_sra(v); }, _hl.word, 16);
   break;
 case 0x2f:
 #ifdef DEBUG_CORE
 std::printf("%04x: sra A\n", _pc.word);
 #endif
   _current_opcode = 0x2f;
-  exec_instruction([&] () { instr_sra(_af.high); }, 12);
+  exec_instruction([&] () { instr_sra(_af.high); }, 8);
   break;
 case 0x30:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap B\n", _pc.word);
 #endif
   _current_opcode = 0x30;
-  exec_instruction([&] () { instr_swap(_bc.high); }, 12);
+  exec_instruction([&] () { instr_swap(_bc.high); }, 8);
   break;
 case 0x31:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap C\n", _pc.word);
 #endif
   _current_opcode = 0x31;
-  exec_instruction([&] () { instr_swap(_bc.low); }, 12);
+  exec_instruction([&] () { instr_swap(_bc.low); }, 8);
   break;
 case 0x32:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap D\n", _pc.word);
 #endif
   _current_opcode = 0x32;
-  exec_instruction([&] () { instr_swap(_de.high); }, 12);
+  exec_instruction([&] () { instr_swap(_de.high); }, 8);
   break;
 case 0x33:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap E\n", _pc.word);
 #endif
   _current_opcode = 0x33;
-  exec_instruction([&] () { instr_swap(_de.low); }, 12);
+  exec_instruction([&] () { instr_swap(_de.low); }, 8);
   break;
 case 0x34:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap H\n", _pc.word);
 #endif
   _current_opcode = 0x34;
-  exec_instruction([&] () { instr_swap(_hl.high); }, 12);
+  exec_instruction([&] () { instr_swap(_hl.high); }, 8);
   break;
 case 0x35:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap L\n", _pc.word);
 #endif
   _current_opcode = 0x35;
-  exec_instruction([&] () { instr_swap(_hl.low); }, 12);
+  exec_instruction([&] () { instr_swap(_hl.low); }, 8);
   break;
 case 0x36:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x36;
-  exec_instruction([&] (Byte &v) { instr_swap(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_swap(v); }, _hl.word, 16);
   break;
 case 0x37:
 #ifdef DEBUG_CORE
 std::printf("%04x: swap A\n", _pc.word);
 #endif
   _current_opcode = 0x37;
-  exec_instruction([&] () { instr_swap(_af.high); }, 12);
+  exec_instruction([&] () { instr_swap(_af.high); }, 8);
   break;
 case 0x38:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl B\n", _pc.word);
 #endif
   _current_opcode = 0x38;
-  exec_instruction([&] () { instr_srl(_bc.high); }, 12);
+  exec_instruction([&] () { instr_srl(_bc.high); }, 8);
   break;
 case 0x39:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl C\n", _pc.word);
 #endif
   _current_opcode = 0x39;
-  exec_instruction([&] () { instr_srl(_bc.low); }, 12);
+  exec_instruction([&] () { instr_srl(_bc.low); }, 8);
   break;
 case 0x3a:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl D\n", _pc.word);
 #endif
   _current_opcode = 0x3a;
-  exec_instruction([&] () { instr_srl(_de.high); }, 12);
+  exec_instruction([&] () { instr_srl(_de.high); }, 8);
   break;
 case 0x3b:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl E\n", _pc.word);
 #endif
   _current_opcode = 0x3b;
-  exec_instruction([&] () { instr_srl(_de.low); }, 12);
+  exec_instruction([&] () { instr_srl(_de.low); }, 8);
   break;
 case 0x3c:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl H\n", _pc.word);
 #endif
   _current_opcode = 0x3c;
-  exec_instruction([&] () { instr_srl(_hl.high); }, 12);
+  exec_instruction([&] () { instr_srl(_hl.high); }, 8);
   break;
 case 0x3d:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl L\n", _pc.word);
 #endif
   _current_opcode = 0x3d;
-  exec_instruction([&] () { instr_srl(_hl.low); }, 12);
+  exec_instruction([&] () { instr_srl(_hl.low); }, 8);
   break;
 case 0x3e:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x3e;
-  exec_instruction([&] (Byte &v) { instr_srl(v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_srl(v); }, _hl.word, 16);
   break;
 case 0x3f:
 #ifdef DEBUG_CORE
 std::printf("%04x: srl A\n", _pc.word);
 #endif
   _current_opcode = 0x3f;
-  exec_instruction([&] () { instr_srl(_af.high); }, 12);
+  exec_instruction([&] () { instr_srl(_af.high); }, 8);
   break;
 case 0x40:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 B\n", _pc.word);
 #endif
   _current_opcode = 0x40;
-  exec_instruction([&] () { instr_bit(0, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(0, _bc.high); }, 8);
   break;
 case 0x41:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 C\n", _pc.word);
 #endif
   _current_opcode = 0x41;
-  exec_instruction([&] () { instr_bit(0, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(0, _bc.low); }, 8);
   break;
 case 0x42:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 D\n", _pc.word);
 #endif
   _current_opcode = 0x42;
-  exec_instruction([&] () { instr_bit(0, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(0, _de.high); }, 8);
   break;
 case 0x43:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 E\n", _pc.word);
 #endif
   _current_opcode = 0x43;
-  exec_instruction([&] () { instr_bit(0, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(0, _de.low); }, 8);
   break;
 case 0x44:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 H\n", _pc.word);
 #endif
   _current_opcode = 0x44;
-  exec_instruction([&] () { instr_bit(0, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(0, _hl.high); }, 8);
   break;
 case 0x45:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 L\n", _pc.word);
 #endif
   _current_opcode = 0x45;
-  exec_instruction([&] () { instr_bit(0, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(0, _hl.low); }, 8);
   break;
 case 0x46:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x46;
-  exec_instruction([&] (Byte &v) { instr_bit(0, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(0, v); }, _hl.word, 12);
   break;
 case 0x47:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 0 A\n", _pc.word);
 #endif
   _current_opcode = 0x47;
-  exec_instruction([&] () { instr_bit(0, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(0, _af.high); }, 8);
   break;
 case 0x48:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 B\n", _pc.word);
 #endif
   _current_opcode = 0x48;
-  exec_instruction([&] () { instr_bit(1, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(1, _bc.high); }, 8);
   break;
 case 0x49:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 C\n", _pc.word);
 #endif
   _current_opcode = 0x49;
-  exec_instruction([&] () { instr_bit(1, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(1, _bc.low); }, 8);
   break;
 case 0x4a:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 D\n", _pc.word);
 #endif
   _current_opcode = 0x4a;
-  exec_instruction([&] () { instr_bit(1, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(1, _de.high); }, 8);
   break;
 case 0x4b:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 E\n", _pc.word);
 #endif
   _current_opcode = 0x4b;
-  exec_instruction([&] () { instr_bit(1, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(1, _de.low); }, 8);
   break;
 case 0x4c:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 H\n", _pc.word);
 #endif
   _current_opcode = 0x4c;
-  exec_instruction([&] () { instr_bit(1, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(1, _hl.high); }, 8);
   break;
 case 0x4d:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 L\n", _pc.word);
 #endif
   _current_opcode = 0x4d;
-  exec_instruction([&] () { instr_bit(1, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(1, _hl.low); }, 8);
   break;
 case 0x4e:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x4e;
-  exec_instruction([&] (Byte &v) { instr_bit(1, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(1, v); }, _hl.word, 12);
   break;
 case 0x4f:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 1 A\n", _pc.word);
 #endif
   _current_opcode = 0x4f;
-  exec_instruction([&] () { instr_bit(1, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(1, _af.high); }, 8);
   break;
 case 0x50:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 B\n", _pc.word);
 #endif
   _current_opcode = 0x50;
-  exec_instruction([&] () { instr_bit(2, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(2, _bc.high); }, 8);
   break;
 case 0x51:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 C\n", _pc.word);
 #endif
   _current_opcode = 0x51;
-  exec_instruction([&] () { instr_bit(2, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(2, _bc.low); }, 8);
   break;
 case 0x52:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 D\n", _pc.word);
 #endif
   _current_opcode = 0x52;
-  exec_instruction([&] () { instr_bit(2, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(2, _de.high); }, 8);
   break;
 case 0x53:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 E\n", _pc.word);
 #endif
   _current_opcode = 0x53;
-  exec_instruction([&] () { instr_bit(2, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(2, _de.low); }, 8);
   break;
 case 0x54:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 H\n", _pc.word);
 #endif
   _current_opcode = 0x54;
-  exec_instruction([&] () { instr_bit(2, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(2, _hl.high); }, 8);
   break;
 case 0x55:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 L\n", _pc.word);
 #endif
   _current_opcode = 0x55;
-  exec_instruction([&] () { instr_bit(2, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(2, _hl.low); }, 8);
   break;
 case 0x56:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x56;
-  exec_instruction([&] (Byte &v) { instr_bit(2, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(2, v); }, _hl.word, 12);
   break;
 case 0x57:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 2 A\n", _pc.word);
 #endif
   _current_opcode = 0x57;
-  exec_instruction([&] () { instr_bit(2, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(2, _af.high); }, 8);
   break;
 case 0x58:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 B\n", _pc.word);
 #endif
   _current_opcode = 0x58;
-  exec_instruction([&] () { instr_bit(3, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(3, _bc.high); }, 8);
   break;
 case 0x59:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 C\n", _pc.word);
 #endif
   _current_opcode = 0x59;
-  exec_instruction([&] () { instr_bit(3, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(3, _bc.low); }, 8);
   break;
 case 0x5a:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 D\n", _pc.word);
 #endif
   _current_opcode = 0x5a;
-  exec_instruction([&] () { instr_bit(3, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(3, _de.high); }, 8);
   break;
 case 0x5b:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 E\n", _pc.word);
 #endif
   _current_opcode = 0x5b;
-  exec_instruction([&] () { instr_bit(3, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(3, _de.low); }, 8);
   break;
 case 0x5c:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 H\n", _pc.word);
 #endif
   _current_opcode = 0x5c;
-  exec_instruction([&] () { instr_bit(3, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(3, _hl.high); }, 8);
   break;
 case 0x5d:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 L\n", _pc.word);
 #endif
   _current_opcode = 0x5d;
-  exec_instruction([&] () { instr_bit(3, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(3, _hl.low); }, 8);
   break;
 case 0x5e:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x5e;
-  exec_instruction([&] (Byte &v) { instr_bit(3, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(3, v); }, _hl.word, 12);
   break;
 case 0x5f:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 3 A\n", _pc.word);
 #endif
   _current_opcode = 0x5f;
-  exec_instruction([&] () { instr_bit(3, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(3, _af.high); }, 8);
   break;
 case 0x60:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 B\n", _pc.word);
 #endif
   _current_opcode = 0x60;
-  exec_instruction([&] () { instr_bit(4, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(4, _bc.high); }, 8);
   break;
 case 0x61:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 C\n", _pc.word);
 #endif
   _current_opcode = 0x61;
-  exec_instruction([&] () { instr_bit(4, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(4, _bc.low); }, 8);
   break;
 case 0x62:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 D\n", _pc.word);
 #endif
   _current_opcode = 0x62;
-  exec_instruction([&] () { instr_bit(4, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(4, _de.high); }, 8);
   break;
 case 0x63:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 E\n", _pc.word);
 #endif
   _current_opcode = 0x63;
-  exec_instruction([&] () { instr_bit(4, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(4, _de.low); }, 8);
   break;
 case 0x64:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 H\n", _pc.word);
 #endif
   _current_opcode = 0x64;
-  exec_instruction([&] () { instr_bit(4, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(4, _hl.high); }, 8);
   break;
 case 0x65:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 L\n", _pc.word);
 #endif
   _current_opcode = 0x65;
-  exec_instruction([&] () { instr_bit(4, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(4, _hl.low); }, 8);
   break;
 case 0x66:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x66;
-  exec_instruction([&] (Byte &v) { instr_bit(4, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(4, v); }, _hl.word, 12);
   break;
 case 0x67:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 4 A\n", _pc.word);
 #endif
   _current_opcode = 0x67;
-  exec_instruction([&] () { instr_bit(4, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(4, _af.high); }, 8);
   break;
 case 0x68:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 B\n", _pc.word);
 #endif
   _current_opcode = 0x68;
-  exec_instruction([&] () { instr_bit(5, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(5, _bc.high); }, 8);
   break;
 case 0x69:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 C\n", _pc.word);
 #endif
   _current_opcode = 0x69;
-  exec_instruction([&] () { instr_bit(5, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(5, _bc.low); }, 8);
   break;
 case 0x6a:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 D\n", _pc.word);
 #endif
   _current_opcode = 0x6a;
-  exec_instruction([&] () { instr_bit(5, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(5, _de.high); }, 8);
   break;
 case 0x6b:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 E\n", _pc.word);
 #endif
   _current_opcode = 0x6b;
-  exec_instruction([&] () { instr_bit(5, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(5, _de.low); }, 8);
   break;
 case 0x6c:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 H\n", _pc.word);
 #endif
   _current_opcode = 0x6c;
-  exec_instruction([&] () { instr_bit(5, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(5, _hl.high); }, 8);
   break;
 case 0x6d:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 L\n", _pc.word);
 #endif
   _current_opcode = 0x6d;
-  exec_instruction([&] () { instr_bit(5, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(5, _hl.low); }, 8);
   break;
 case 0x6e:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x6e;
-  exec_instruction([&] (Byte &v) { instr_bit(5, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(5, v); }, _hl.word, 12);
   break;
 case 0x6f:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 5 A\n", _pc.word);
 #endif
   _current_opcode = 0x6f;
-  exec_instruction([&] () { instr_bit(5, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(5, _af.high); }, 8);
   break;
 case 0x70:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 B\n", _pc.word);
 #endif
   _current_opcode = 0x70;
-  exec_instruction([&] () { instr_bit(6, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(6, _bc.high); }, 8);
   break;
 case 0x71:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 C\n", _pc.word);
 #endif
   _current_opcode = 0x71;
-  exec_instruction([&] () { instr_bit(6, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(6, _bc.low); }, 8);
   break;
 case 0x72:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 D\n", _pc.word);
 #endif
   _current_opcode = 0x72;
-  exec_instruction([&] () { instr_bit(6, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(6, _de.high); }, 8);
   break;
 case 0x73:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 E\n", _pc.word);
 #endif
   _current_opcode = 0x73;
-  exec_instruction([&] () { instr_bit(6, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(6, _de.low); }, 8);
   break;
 case 0x74:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 H\n", _pc.word);
 #endif
   _current_opcode = 0x74;
-  exec_instruction([&] () { instr_bit(6, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(6, _hl.high); }, 8);
   break;
 case 0x75:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 L\n", _pc.word);
 #endif
   _current_opcode = 0x75;
-  exec_instruction([&] () { instr_bit(6, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(6, _hl.low); }, 8);
   break;
 case 0x76:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x76;
-  exec_instruction([&] (Byte &v) { instr_bit(6, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(6, v); }, _hl.word, 12);
   break;
 case 0x77:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 6 A\n", _pc.word);
 #endif
   _current_opcode = 0x77;
-  exec_instruction([&] () { instr_bit(6, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(6, _af.high); }, 8);
   break;
 case 0x78:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 B\n", _pc.word);
 #endif
   _current_opcode = 0x78;
-  exec_instruction([&] () { instr_bit(7, _bc.high); }, 12);
+  exec_instruction([&] () { instr_bit(7, _bc.high); }, 8);
   break;
 case 0x79:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 C\n", _pc.word);
 #endif
   _current_opcode = 0x79;
-  exec_instruction([&] () { instr_bit(7, _bc.low); }, 12);
+  exec_instruction([&] () { instr_bit(7, _bc.low); }, 8);
   break;
 case 0x7a:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 D\n", _pc.word);
 #endif
   _current_opcode = 0x7a;
-  exec_instruction([&] () { instr_bit(7, _de.high); }, 12);
+  exec_instruction([&] () { instr_bit(7, _de.high); }, 8);
   break;
 case 0x7b:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 E\n", _pc.word);
 #endif
   _current_opcode = 0x7b;
-  exec_instruction([&] () { instr_bit(7, _de.low); }, 12);
+  exec_instruction([&] () { instr_bit(7, _de.low); }, 8);
   break;
 case 0x7c:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 H\n", _pc.word);
 #endif
   _current_opcode = 0x7c;
-  exec_instruction([&] () { instr_bit(7, _hl.high); }, 12);
+  exec_instruction([&] () { instr_bit(7, _hl.high); }, 8);
   break;
 case 0x7d:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 L\n", _pc.word);
 #endif
   _current_opcode = 0x7d;
-  exec_instruction([&] () { instr_bit(7, _hl.low); }, 12);
+  exec_instruction([&] () { instr_bit(7, _hl.low); }, 8);
   break;
 case 0x7e:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x7e;
-  exec_instruction([&] (Byte &v) { instr_bit(7, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_bit(7, v); }, _hl.word, 12);
   break;
 case 0x7f:
 #ifdef DEBUG_CORE
 std::printf("%04x: bit 7 A\n", _pc.word);
 #endif
   _current_opcode = 0x7f;
-  exec_instruction([&] () { instr_bit(7, _af.high); }, 12);
+  exec_instruction([&] () { instr_bit(7, _af.high); }, 8);
   break;
 case 0x80:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 B\n", _pc.word);
 #endif
   _current_opcode = 0x80;
-  exec_instruction([&] () { instr_res(0, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(0, _bc.high); }, 8);
   break;
 case 0x81:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 C\n", _pc.word);
 #endif
   _current_opcode = 0x81;
-  exec_instruction([&] () { instr_res(0, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(0, _bc.low); }, 8);
   break;
 case 0x82:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 D\n", _pc.word);
 #endif
   _current_opcode = 0x82;
-  exec_instruction([&] () { instr_res(0, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(0, _de.high); }, 8);
   break;
 case 0x83:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 E\n", _pc.word);
 #endif
   _current_opcode = 0x83;
-  exec_instruction([&] () { instr_res(0, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(0, _de.low); }, 8);
   break;
 case 0x84:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 H\n", _pc.word);
 #endif
   _current_opcode = 0x84;
-  exec_instruction([&] () { instr_res(0, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(0, _hl.high); }, 8);
   break;
 case 0x85:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 L\n", _pc.word);
 #endif
   _current_opcode = 0x85;
-  exec_instruction([&] () { instr_res(0, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(0, _hl.low); }, 8);
   break;
 case 0x86:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x86;
-  exec_instruction([&] (Byte &v) { instr_res(0, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(0, v); }, _hl.word, 16);
   break;
 case 0x87:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 0 A\n", _pc.word);
 #endif
   _current_opcode = 0x87;
-  exec_instruction([&] () { instr_res(0, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(0, _af.high); }, 8);
   break;
 case 0x88:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 B\n", _pc.word);
 #endif
   _current_opcode = 0x88;
-  exec_instruction([&] () { instr_res(1, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(1, _bc.high); }, 8);
   break;
 case 0x89:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 C\n", _pc.word);
 #endif
   _current_opcode = 0x89;
-  exec_instruction([&] () { instr_res(1, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(1, _bc.low); }, 8);
   break;
 case 0x8a:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 D\n", _pc.word);
 #endif
   _current_opcode = 0x8a;
-  exec_instruction([&] () { instr_res(1, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(1, _de.high); }, 8);
   break;
 case 0x8b:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 E\n", _pc.word);
 #endif
   _current_opcode = 0x8b;
-  exec_instruction([&] () { instr_res(1, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(1, _de.low); }, 8);
   break;
 case 0x8c:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 H\n", _pc.word);
 #endif
   _current_opcode = 0x8c;
-  exec_instruction([&] () { instr_res(1, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(1, _hl.high); }, 8);
   break;
 case 0x8d:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 L\n", _pc.word);
 #endif
   _current_opcode = 0x8d;
-  exec_instruction([&] () { instr_res(1, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(1, _hl.low); }, 8);
   break;
 case 0x8e:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x8e;
-  exec_instruction([&] (Byte &v) { instr_res(1, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(1, v); }, _hl.word, 16);
   break;
 case 0x8f:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 1 A\n", _pc.word);
 #endif
   _current_opcode = 0x8f;
-  exec_instruction([&] () { instr_res(1, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(1, _af.high); }, 8);
   break;
 case 0x90:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 B\n", _pc.word);
 #endif
   _current_opcode = 0x90;
-  exec_instruction([&] () { instr_res(2, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(2, _bc.high); }, 8);
   break;
 case 0x91:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 C\n", _pc.word);
 #endif
   _current_opcode = 0x91;
-  exec_instruction([&] () { instr_res(2, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(2, _bc.low); }, 8);
   break;
 case 0x92:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 D\n", _pc.word);
 #endif
   _current_opcode = 0x92;
-  exec_instruction([&] () { instr_res(2, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(2, _de.high); }, 8);
   break;
 case 0x93:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 E\n", _pc.word);
 #endif
   _current_opcode = 0x93;
-  exec_instruction([&] () { instr_res(2, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(2, _de.low); }, 8);
   break;
 case 0x94:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 H\n", _pc.word);
 #endif
   _current_opcode = 0x94;
-  exec_instruction([&] () { instr_res(2, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(2, _hl.high); }, 8);
   break;
 case 0x95:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 L\n", _pc.word);
 #endif
   _current_opcode = 0x95;
-  exec_instruction([&] () { instr_res(2, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(2, _hl.low); }, 8);
   break;
 case 0x96:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x96;
-  exec_instruction([&] (Byte &v) { instr_res(2, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(2, v); }, _hl.word, 16);
   break;
 case 0x97:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 2 A\n", _pc.word);
 #endif
   _current_opcode = 0x97;
-  exec_instruction([&] () { instr_res(2, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(2, _af.high); }, 8);
   break;
 case 0x98:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 B\n", _pc.word);
 #endif
   _current_opcode = 0x98;
-  exec_instruction([&] () { instr_res(3, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(3, _bc.high); }, 8);
   break;
 case 0x99:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 C\n", _pc.word);
 #endif
   _current_opcode = 0x99;
-  exec_instruction([&] () { instr_res(3, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(3, _bc.low); }, 8);
   break;
 case 0x9a:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 D\n", _pc.word);
 #endif
   _current_opcode = 0x9a;
-  exec_instruction([&] () { instr_res(3, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(3, _de.high); }, 8);
   break;
 case 0x9b:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 E\n", _pc.word);
 #endif
   _current_opcode = 0x9b;
-  exec_instruction([&] () { instr_res(3, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(3, _de.low); }, 8);
   break;
 case 0x9c:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 H\n", _pc.word);
 #endif
   _current_opcode = 0x9c;
-  exec_instruction([&] () { instr_res(3, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(3, _hl.high); }, 8);
   break;
 case 0x9d:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 L\n", _pc.word);
 #endif
   _current_opcode = 0x9d;
-  exec_instruction([&] () { instr_res(3, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(3, _hl.low); }, 8);
   break;
 case 0x9e:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x9e;
-  exec_instruction([&] (Byte &v) { instr_res(3, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(3, v); }, _hl.word, 16);
   break;
 case 0x9f:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 3 A\n", _pc.word);
 #endif
   _current_opcode = 0x9f;
-  exec_instruction([&] () { instr_res(3, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(3, _af.high); }, 8);
   break;
 case 0xa0:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 B\n", _pc.word);
 #endif
   _current_opcode = 0xa0;
-  exec_instruction([&] () { instr_res(4, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(4, _bc.high); }, 8);
   break;
 case 0xa1:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 C\n", _pc.word);
 #endif
   _current_opcode = 0xa1;
-  exec_instruction([&] () { instr_res(4, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(4, _bc.low); }, 8);
   break;
 case 0xa2:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 D\n", _pc.word);
 #endif
   _current_opcode = 0xa2;
-  exec_instruction([&] () { instr_res(4, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(4, _de.high); }, 8);
   break;
 case 0xa3:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 E\n", _pc.word);
 #endif
   _current_opcode = 0xa3;
-  exec_instruction([&] () { instr_res(4, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(4, _de.low); }, 8);
   break;
 case 0xa4:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 H\n", _pc.word);
 #endif
   _current_opcode = 0xa4;
-  exec_instruction([&] () { instr_res(4, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(4, _hl.high); }, 8);
   break;
 case 0xa5:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 L\n", _pc.word);
 #endif
   _current_opcode = 0xa5;
-  exec_instruction([&] () { instr_res(4, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(4, _hl.low); }, 8);
   break;
 case 0xa6:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xa6;
-  exec_instruction([&] (Byte &v) { instr_res(4, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(4, v); }, _hl.word, 16);
   break;
 case 0xa7:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 4 A\n", _pc.word);
 #endif
   _current_opcode = 0xa7;
-  exec_instruction([&] () { instr_res(4, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(4, _af.high); }, 8);
   break;
 case 0xa8:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 B\n", _pc.word);
 #endif
   _current_opcode = 0xa8;
-  exec_instruction([&] () { instr_res(5, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(5, _bc.high); }, 8);
   break;
 case 0xa9:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 C\n", _pc.word);
 #endif
   _current_opcode = 0xa9;
-  exec_instruction([&] () { instr_res(5, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(5, _bc.low); }, 8);
   break;
 case 0xaa:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 D\n", _pc.word);
 #endif
   _current_opcode = 0xaa;
-  exec_instruction([&] () { instr_res(5, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(5, _de.high); }, 8);
   break;
 case 0xab:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 E\n", _pc.word);
 #endif
   _current_opcode = 0xab;
-  exec_instruction([&] () { instr_res(5, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(5, _de.low); }, 8);
   break;
 case 0xac:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 H\n", _pc.word);
 #endif
   _current_opcode = 0xac;
-  exec_instruction([&] () { instr_res(5, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(5, _hl.high); }, 8);
   break;
 case 0xad:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 L\n", _pc.word);
 #endif
   _current_opcode = 0xad;
-  exec_instruction([&] () { instr_res(5, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(5, _hl.low); }, 8);
   break;
 case 0xae:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xae;
-  exec_instruction([&] (Byte &v) { instr_res(5, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(5, v); }, _hl.word, 16);
   break;
 case 0xaf:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 5 A\n", _pc.word);
 #endif
   _current_opcode = 0xaf;
-  exec_instruction([&] () { instr_res(5, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(5, _af.high); }, 8);
   break;
 case 0xb0:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 B\n", _pc.word);
 #endif
   _current_opcode = 0xb0;
-  exec_instruction([&] () { instr_res(6, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(6, _bc.high); }, 8);
   break;
 case 0xb1:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 C\n", _pc.word);
 #endif
   _current_opcode = 0xb1;
-  exec_instruction([&] () { instr_res(6, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(6, _bc.low); }, 8);
   break;
 case 0xb2:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 D\n", _pc.word);
 #endif
   _current_opcode = 0xb2;
-  exec_instruction([&] () { instr_res(6, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(6, _de.high); }, 8);
   break;
 case 0xb3:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 E\n", _pc.word);
 #endif
   _current_opcode = 0xb3;
-  exec_instruction([&] () { instr_res(6, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(6, _de.low); }, 8);
   break;
 case 0xb4:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 H\n", _pc.word);
 #endif
   _current_opcode = 0xb4;
-  exec_instruction([&] () { instr_res(6, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(6, _hl.high); }, 8);
   break;
 case 0xb5:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 L\n", _pc.word);
 #endif
   _current_opcode = 0xb5;
-  exec_instruction([&] () { instr_res(6, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(6, _hl.low); }, 8);
   break;
 case 0xb6:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xb6;
-  exec_instruction([&] (Byte &v) { instr_res(6, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(6, v); }, _hl.word, 16);
   break;
 case 0xb7:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 6 A\n", _pc.word);
 #endif
   _current_opcode = 0xb7;
-  exec_instruction([&] () { instr_res(6, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(6, _af.high); }, 8);
   break;
 case 0xb8:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 B\n", _pc.word);
 #endif
   _current_opcode = 0xb8;
-  exec_instruction([&] () { instr_res(7, _bc.high); }, 12);
+  exec_instruction([&] () { instr_res(7, _bc.high); }, 8);
   break;
 case 0xb9:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 C\n", _pc.word);
 #endif
   _current_opcode = 0xb9;
-  exec_instruction([&] () { instr_res(7, _bc.low); }, 12);
+  exec_instruction([&] () { instr_res(7, _bc.low); }, 8);
   break;
 case 0xba:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 D\n", _pc.word);
 #endif
   _current_opcode = 0xba;
-  exec_instruction([&] () { instr_res(7, _de.high); }, 12);
+  exec_instruction([&] () { instr_res(7, _de.high); }, 8);
   break;
 case 0xbb:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 E\n", _pc.word);
 #endif
   _current_opcode = 0xbb;
-  exec_instruction([&] () { instr_res(7, _de.low); }, 12);
+  exec_instruction([&] () { instr_res(7, _de.low); }, 8);
   break;
 case 0xbc:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 H\n", _pc.word);
 #endif
   _current_opcode = 0xbc;
-  exec_instruction([&] () { instr_res(7, _hl.high); }, 12);
+  exec_instruction([&] () { instr_res(7, _hl.high); }, 8);
   break;
 case 0xbd:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 L\n", _pc.word);
 #endif
   _current_opcode = 0xbd;
-  exec_instruction([&] () { instr_res(7, _hl.low); }, 12);
+  exec_instruction([&] () { instr_res(7, _hl.low); }, 8);
   break;
 case 0xbe:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xbe;
-  exec_instruction([&] (Byte &v) { instr_res(7, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_res(7, v); }, _hl.word, 16);
   break;
 case 0xbf:
 #ifdef DEBUG_CORE
 std::printf("%04x: res 7 A\n", _pc.word);
 #endif
   _current_opcode = 0xbf;
-  exec_instruction([&] () { instr_res(7, _af.high); }, 12);
+  exec_instruction([&] () { instr_res(7, _af.high); }, 8);
   break;
 case 0xc0:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 B\n", _pc.word);
 #endif
   _current_opcode = 0xc0;
-  exec_instruction([&] () { instr_set(0, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(0, _bc.high); }, 8);
   break;
 case 0xc1:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 C\n", _pc.word);
 #endif
   _current_opcode = 0xc1;
-  exec_instruction([&] () { instr_set(0, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(0, _bc.low); }, 8);
   break;
 case 0xc2:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 D\n", _pc.word);
 #endif
   _current_opcode = 0xc2;
-  exec_instruction([&] () { instr_set(0, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(0, _de.high); }, 8);
   break;
 case 0xc3:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 E\n", _pc.word);
 #endif
   _current_opcode = 0xc3;
-  exec_instruction([&] () { instr_set(0, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(0, _de.low); }, 8);
   break;
 case 0xc4:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 H\n", _pc.word);
 #endif
   _current_opcode = 0xc4;
-  exec_instruction([&] () { instr_set(0, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(0, _hl.high); }, 8);
   break;
 case 0xc5:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 L\n", _pc.word);
 #endif
   _current_opcode = 0xc5;
-  exec_instruction([&] () { instr_set(0, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(0, _hl.low); }, 8);
   break;
 case 0xc6:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xc6;
-  exec_instruction([&] (Byte &v) { instr_set(0, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(0, v); }, _hl.word, 16);
   break;
 case 0xc7:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 0 A\n", _pc.word);
 #endif
   _current_opcode = 0xc7;
-  exec_instruction([&] () { instr_set(0, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(0, _af.high); }, 8);
   break;
 case 0xc8:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 B\n", _pc.word);
 #endif
   _current_opcode = 0xc8;
-  exec_instruction([&] () { instr_set(1, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(1, _bc.high); }, 8);
   break;
 case 0xc9:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 C\n", _pc.word);
 #endif
   _current_opcode = 0xc9;
-  exec_instruction([&] () { instr_set(1, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(1, _bc.low); }, 8);
   break;
 case 0xca:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 D\n", _pc.word);
 #endif
   _current_opcode = 0xca;
-  exec_instruction([&] () { instr_set(1, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(1, _de.high); }, 8);
   break;
 case 0xcb:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 E\n", _pc.word);
 #endif
   _current_opcode = 0xcb;
-  exec_instruction([&] () { instr_set(1, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(1, _de.low); }, 8);
   break;
 case 0xcc:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 H\n", _pc.word);
 #endif
   _current_opcode = 0xcc;
-  exec_instruction([&] () { instr_set(1, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(1, _hl.high); }, 8);
   break;
 case 0xcd:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 L\n", _pc.word);
 #endif
   _current_opcode = 0xcd;
-  exec_instruction([&] () { instr_set(1, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(1, _hl.low); }, 8);
   break;
 case 0xce:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xce;
-  exec_instruction([&] (Byte &v) { instr_set(1, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(1, v); }, _hl.word, 16);
   break;
 case 0xcf:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 1 A\n", _pc.word);
 #endif
   _current_opcode = 0xcf;
-  exec_instruction([&] () { instr_set(1, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(1, _af.high); }, 8);
   break;
 case 0xd0:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 B\n", _pc.word);
 #endif
   _current_opcode = 0xd0;
-  exec_instruction([&] () { instr_set(2, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(2, _bc.high); }, 8);
   break;
 case 0xd1:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 C\n", _pc.word);
 #endif
   _current_opcode = 0xd1;
-  exec_instruction([&] () { instr_set(2, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(2, _bc.low); }, 8);
   break;
 case 0xd2:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 D\n", _pc.word);
 #endif
   _current_opcode = 0xd2;
-  exec_instruction([&] () { instr_set(2, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(2, _de.high); }, 8);
   break;
 case 0xd3:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 E\n", _pc.word);
 #endif
   _current_opcode = 0xd3;
-  exec_instruction([&] () { instr_set(2, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(2, _de.low); }, 8);
   break;
 case 0xd4:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 H\n", _pc.word);
 #endif
   _current_opcode = 0xd4;
-  exec_instruction([&] () { instr_set(2, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(2, _hl.high); }, 8);
   break;
 case 0xd5:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 L\n", _pc.word);
 #endif
   _current_opcode = 0xd5;
-  exec_instruction([&] () { instr_set(2, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(2, _hl.low); }, 8);
   break;
 case 0xd6:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xd6;
-  exec_instruction([&] (Byte &v) { instr_set(2, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(2, v); }, _hl.word, 16);
   break;
 case 0xd7:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 2 A\n", _pc.word);
 #endif
   _current_opcode = 0xd7;
-  exec_instruction([&] () { instr_set(2, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(2, _af.high); }, 8);
   break;
 case 0xd8:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 B\n", _pc.word);
 #endif
   _current_opcode = 0xd8;
-  exec_instruction([&] () { instr_set(3, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(3, _bc.high); }, 8);
   break;
 case 0xd9:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 C\n", _pc.word);
 #endif
   _current_opcode = 0xd9;
-  exec_instruction([&] () { instr_set(3, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(3, _bc.low); }, 8);
   break;
 case 0xda:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 D\n", _pc.word);
 #endif
   _current_opcode = 0xda;
-  exec_instruction([&] () { instr_set(3, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(3, _de.high); }, 8);
   break;
 case 0xdb:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 E\n", _pc.word);
 #endif
   _current_opcode = 0xdb;
-  exec_instruction([&] () { instr_set(3, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(3, _de.low); }, 8);
   break;
 case 0xdc:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 H\n", _pc.word);
 #endif
   _current_opcode = 0xdc;
-  exec_instruction([&] () { instr_set(3, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(3, _hl.high); }, 8);
   break;
 case 0xdd:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 L\n", _pc.word);
 #endif
   _current_opcode = 0xdd;
-  exec_instruction([&] () { instr_set(3, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(3, _hl.low); }, 8);
   break;
 case 0xde:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xde;
-  exec_instruction([&] (Byte &v) { instr_set(3, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(3, v); }, _hl.word, 16);
   break;
 case 0xdf:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 3 A\n", _pc.word);
 #endif
   _current_opcode = 0xdf;
-  exec_instruction([&] () { instr_set(3, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(3, _af.high); }, 8);
   break;
 case 0xe0:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 B\n", _pc.word);
 #endif
   _current_opcode = 0xe0;
-  exec_instruction([&] () { instr_set(4, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(4, _bc.high); }, 8);
   break;
 case 0xe1:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 C\n", _pc.word);
 #endif
   _current_opcode = 0xe1;
-  exec_instruction([&] () { instr_set(4, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(4, _bc.low); }, 8);
   break;
 case 0xe2:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 D\n", _pc.word);
 #endif
   _current_opcode = 0xe2;
-  exec_instruction([&] () { instr_set(4, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(4, _de.high); }, 8);
   break;
 case 0xe3:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 E\n", _pc.word);
 #endif
   _current_opcode = 0xe3;
-  exec_instruction([&] () { instr_set(4, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(4, _de.low); }, 8);
   break;
 case 0xe4:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 H\n", _pc.word);
 #endif
   _current_opcode = 0xe4;
-  exec_instruction([&] () { instr_set(4, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(4, _hl.high); }, 8);
   break;
 case 0xe5:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 L\n", _pc.word);
 #endif
   _current_opcode = 0xe5;
-  exec_instruction([&] () { instr_set(4, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(4, _hl.low); }, 8);
   break;
 case 0xe6:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xe6;
-  exec_instruction([&] (Byte &v) { instr_set(4, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(4, v); }, _hl.word, 16);
   break;
 case 0xe7:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 4 A\n", _pc.word);
 #endif
   _current_opcode = 0xe7;
-  exec_instruction([&] () { instr_set(4, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(4, _af.high); }, 8);
   break;
 case 0xe8:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 B\n", _pc.word);
 #endif
   _current_opcode = 0xe8;
-  exec_instruction([&] () { instr_set(5, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(5, _bc.high); }, 8);
   break;
 case 0xe9:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 C\n", _pc.word);
 #endif
   _current_opcode = 0xe9;
-  exec_instruction([&] () { instr_set(5, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(5, _bc.low); }, 8);
   break;
 case 0xea:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 D\n", _pc.word);
 #endif
   _current_opcode = 0xea;
-  exec_instruction([&] () { instr_set(5, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(5, _de.high); }, 8);
   break;
 case 0xeb:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 E\n", _pc.word);
 #endif
   _current_opcode = 0xeb;
-  exec_instruction([&] () { instr_set(5, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(5, _de.low); }, 8);
   break;
 case 0xec:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 H\n", _pc.word);
 #endif
   _current_opcode = 0xec;
-  exec_instruction([&] () { instr_set(5, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(5, _hl.high); }, 8);
   break;
 case 0xed:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 L\n", _pc.word);
 #endif
   _current_opcode = 0xed;
-  exec_instruction([&] () { instr_set(5, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(5, _hl.low); }, 8);
   break;
 case 0xee:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xee;
-  exec_instruction([&] (Byte &v) { instr_set(5, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(5, v); }, _hl.word, 16);
   break;
 case 0xef:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 5 A\n", _pc.word);
 #endif
   _current_opcode = 0xef;
-  exec_instruction([&] () { instr_set(5, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(5, _af.high); }, 8);
   break;
 case 0xf0:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 B\n", _pc.word);
 #endif
   _current_opcode = 0xf0;
-  exec_instruction([&] () { instr_set(6, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(6, _bc.high); }, 8);
   break;
 case 0xf1:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 C\n", _pc.word);
 #endif
   _current_opcode = 0xf1;
-  exec_instruction([&] () { instr_set(6, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(6, _bc.low); }, 8);
   break;
 case 0xf2:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 D\n", _pc.word);
 #endif
   _current_opcode = 0xf2;
-  exec_instruction([&] () { instr_set(6, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(6, _de.high); }, 8);
   break;
 case 0xf3:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 E\n", _pc.word);
 #endif
   _current_opcode = 0xf3;
-  exec_instruction([&] () { instr_set(6, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(6, _de.low); }, 8);
   break;
 case 0xf4:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 H\n", _pc.word);
 #endif
   _current_opcode = 0xf4;
-  exec_instruction([&] () { instr_set(6, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(6, _hl.high); }, 8);
   break;
 case 0xf5:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 L\n", _pc.word);
 #endif
   _current_opcode = 0xf5;
-  exec_instruction([&] () { instr_set(6, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(6, _hl.low); }, 8);
   break;
 case 0xf6:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xf6;
-  exec_instruction([&] (Byte &v) { instr_set(6, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(6, v); }, _hl.word, 16);
   break;
 case 0xf7:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 6 A\n", _pc.word);
 #endif
   _current_opcode = 0xf7;
-  exec_instruction([&] () { instr_set(6, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(6, _af.high); }, 8);
   break;
 case 0xf8:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 B\n", _pc.word);
 #endif
   _current_opcode = 0xf8;
-  exec_instruction([&] () { instr_set(7, _bc.high); }, 12);
+  exec_instruction([&] () { instr_set(7, _bc.high); }, 8);
   break;
 case 0xf9:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 C\n", _pc.word);
 #endif
   _current_opcode = 0xf9;
-  exec_instruction([&] () { instr_set(7, _bc.low); }, 12);
+  exec_instruction([&] () { instr_set(7, _bc.low); }, 8);
   break;
 case 0xfa:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 D\n", _pc.word);
 #endif
   _current_opcode = 0xfa;
-  exec_instruction([&] () { instr_set(7, _de.high); }, 12);
+  exec_instruction([&] () { instr_set(7, _de.high); }, 8);
   break;
 case 0xfb:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 E\n", _pc.word);
 #endif
   _current_opcode = 0xfb;
-  exec_instruction([&] () { instr_set(7, _de.low); }, 12);
+  exec_instruction([&] () { instr_set(7, _de.low); }, 8);
   break;
 case 0xfc:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 H\n", _pc.word);
 #endif
   _current_opcode = 0xfc;
-  exec_instruction([&] () { instr_set(7, _hl.high); }, 12);
+  exec_instruction([&] () { instr_set(7, _hl.high); }, 8);
   break;
 case 0xfd:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 L\n", _pc.word);
 #endif
   _current_opcode = 0xfd;
-  exec_instruction([&] () { instr_set(7, _hl.low); }, 12);
+  exec_instruction([&] () { instr_set(7, _hl.low); }, 8);
   break;
 case 0xfe:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0xfe;
-  exec_instruction([&] (Byte &v) { instr_set(7, v); }, _hl.word, 20);
+  exec_instruction([&] (Byte &v) { instr_set(7, v); }, _hl.word, 16);
   break;
 case 0xff:
 #ifdef DEBUG_CORE
 std::printf("%04x: set 7 A\n", _pc.word);
 #endif
   _current_opcode = 0xff;
-  exec_instruction([&] () { instr_set(7, _af.high); }, 12);
+  exec_instruction([&] () { instr_set(7, _af.high); }, 8);
   break;
 }
