@@ -65,8 +65,12 @@ void Gameboy::reset() {
 	_debugger.reset();
 }
 
-void Gameboy::handle_input_wraper(Byte val) {
-  _components.input_controller->handle_input(val);
+void Gameboy::key_pressed_wraper(int val) {
+  _components.input_controller->key_pressed(val);
+}
+
+void Gameboy::key_released_wraper(int val) {
+  _components.input_controller->key_released(val);
 }
 
 void Gameboy::step() {
