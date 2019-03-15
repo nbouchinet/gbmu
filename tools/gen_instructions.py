@@ -105,9 +105,6 @@ def gen_code(opcodes, cb=False):
 
         cycles              = opcode.get("cycles")
 
-        if cb:
-            cycles[0] += 4
-
         if len(cycles) > 1:
             cycles = str(cycles[0]) + ", " + str(cycles[1])
         else:
