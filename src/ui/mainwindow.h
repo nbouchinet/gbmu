@@ -53,6 +53,7 @@ private:
 
 	//Key Event function
 	void keyPressEvent(QKeyEvent *event);
+	void keyReleaseEvent(QKeyEvent *event);
 	void pause_gameboy(bool stop = false);
 };
 
