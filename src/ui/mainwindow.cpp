@@ -127,35 +127,27 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 	switch (event->key())
 	{
 		case Qt::Key_W:
-			std::cout << "I PRESSED W (UP)" << std::endl;
 			g_gameboy->key_pressed_wraper(2);
 			break;
 		case Qt::Key_S:
-			std::cout << "I PRESSED S (DOWN)" << std::endl;
 			g_gameboy->key_pressed_wraper(3);
 			break;
 		case Qt::Key_A:
-			std::cout << "I PRESSED A (LEFT)" << std::endl;
 			g_gameboy->key_pressed_wraper(1);
 			break;
 		case Qt::Key_D:
-			std::cout << "I PRESSED D (RIGHT)" << std::endl;
 			g_gameboy->key_pressed_wraper(0);
 			break;
 		case Qt::Key_J:
-			std::cout << "I PRESSED J (A)" << std::endl;
 			g_gameboy->key_pressed_wraper(4);
 			break;
 		case Qt::Key_K:
-			std::cout << "I PRESSED K (B)" << std::endl;
 			g_gameboy->key_pressed_wraper(5);
 			break;
 		case Qt::Key_N:
-			std::cout << "I PRESSED N (START)" << std::endl;
 			g_gameboy->key_pressed_wraper(7);
 			break;
 		case Qt::Key_M:
-			std::cout << "I PRESSED M (SELECT)" << std::endl;
 			g_gameboy->key_pressed_wraper(6);
 			break;
 	}
