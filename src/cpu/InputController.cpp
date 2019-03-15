@@ -54,7 +54,6 @@ Byte InputController::get_joypad_state() const
 		arrow_section |= 0xF0;
 		ret &= arrow_section;
 	}
-	//std::cout << "return value: " << std::hex << +ret << std::endl;
 	return ret;
 }
 
@@ -81,7 +80,6 @@ void InputController::key_pressed(int val)
 		|| (!is_button && !test_bit(4, key_requested)))
 		&& (was_unset))
 	{
-		std::cout << "INTERRUPT REQUESTED" << std::endl;
 		//_components.interrupt_controller->request_interrupt(InterruptController::JOYI);
 	}
 }

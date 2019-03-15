@@ -9,8 +9,8 @@
 
 class MemoryBankController1 : public AMemoryBankController {
 private:
-  uint8_t ramBank : 2;
   uint8_t romBank : 7;
+  uint8_t romRamBankUpper : 2;
   bool isRomBanking; // ROM or RAM banking
   bool isRamEnabled;
 
@@ -19,8 +19,8 @@ private:
 
 public:
   MemoryBankController1(ROMContainer &rom, RAMContainer &ram)
-      : AMemoryBankController(rom, ram), ramBank(0), romBank(1),
-        isRomBanking(true), isRamEnabled(false) {}
+      : AMemoryBankController(rom, ram), romBank(1),
+        romRamBankUpper(0), isRomBanking(true), isRamEnabled(false) {}
 
   bool getRamEnabled() const { return isRamEnabled; }
   uint8_t getRomBank() const { return romBank; };
@@ -35,15 +35,13 @@ public:
     case 0x3000: /* 0x2000 to 0x3FFF */
       if (value == 0)
         value = 1;
-      romBank = (romBank & 0x60) | (value & 0x1F);
+      romBank = (value & 0x1F);
+      if (romBank == 0)
+        romBank++;
       break;
     case 0x4000:
     case 0x5000: /* 0x4000 to 0x5FFF */
-      value &= 0x3;
-      if (isRomBanking)
-        romBank = (romBank & 0x1F) | (value << 5);
-      else
-        ramBank = value & 0x3;
+      romRamBankUpper = value & 0x3;
       break;
     case 0x6000:
     case 0x7000: /* 0x6000 to 0x7FFF */
@@ -51,10 +49,17 @@ public:
       break;
     case 0xA000:
     case 0xB000: /* 0xA000 to 0xBFFF */
+    {
       if (!isRamEnabled)
         break;
-      ramData[(addr - 0xA000) + ramBank * 0x2000] = value;
-      break;
+
+      Word real_addr = addr - 0xA000;
+
+	  if (!isRomBanking)
+		  real_addr += (0x2000 * romRamBankUpper);
+
+      ramData[real_addr] = value;
+    } break;
     default:
       break;
     }
@@ -76,7 +81,15 @@ public:
       return romData[(addr - 0x4000) + romBank * 0x4000];
     case 0xA000:
     case 0xB000:
-      return ramData[(addr - 0xA000) + ramBank * 0x2000];
+      if (!isRamEnabled)
+        break;
+
+      Word real_addr = addr - 0xA000;
+
+	  if (!isRomBanking)
+		  real_addr += (0x2000 * romRamBankUpper);
+
+      return ramData[real_addr];
     }
     return 0;
   }
