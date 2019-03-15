@@ -44,19 +44,17 @@ Byte InputController::get_joypad_state() const
 	//ret ^= 0xFF;
 	if (!test_bit(5, ret))
 	{
-		std::cout << "BUTTON" << std::endl;
 		Byte button_section = _joypad_state.load() >> 4;
 		button_section |= 0xF0;
 		ret &= button_section;
 	}
 	else if (!test_bit(4, ret))
 	{
-		std::cout << "ARROW" << std::endl;
 		Byte arrow_section = _joypad_state.load() & 0xF;
 		arrow_section |= 0xF0;
 		ret &= arrow_section;
 	}
-	std::cout << "return value: " << std::hex << +ret << std::endl;
+	//std::cout << "return value: " << std::hex << +ret << std::endl;
 	return ret;
 }
 
@@ -86,8 +84,6 @@ void InputController::key_pressed(int val)
 		std::cout << "INTERRUPT REQUESTED" << std::endl;
 		//_components.interrupt_controller->request_interrupt(InterruptController::JOYI);
 	}
-	//Dunno if we have to keep that
-	//this->write(0xFF00, val);
 }
 
 void InputController::key_released(int val)
