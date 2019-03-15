@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+constexpr Word Timer::Frequencies[];
+
 void Timer::reset() {
   _rTAC = 0;
   _rDIV = 0x00;
@@ -12,14 +14,17 @@ void Timer::reset() {
   _rTMA = 0x00;
   _counter = 0x400;
   _rDIVCounter = 0x00;
+
+  _divider_counter = Counter(0x03);
+  _timer_counter = Counter(0x00);
 }
 
 uint8_t Timer::read(Word addr) const {
   switch (addr) {
   case DIV:
-    return _rDIV;
+    return _divider_counter.get_value();
   case TIMA:
-    return _rTIMA;
+    return _timer_counter.get_value();
   case TMA:
     return _rTMA;
   case TAC:
@@ -30,27 +35,23 @@ uint8_t Timer::read(Word addr) const {
 }
 
 void Timer::write(Word addr, uint8_t val) {
-  uint8_t currentFrequence;
-  uint8_t newFrequence;
-
   switch (addr) {
   case DIV:
-    _rDIV = 0x0;
+    _divider_counter.set_value(0x0);
     break;
   case TIMA:
-    _rTIMA = val;
+    _timer_counter.set_value(val);
     break;
   case TMA:
     _rTMA = val;
     break;
   case TAC:
-    currentFrequence = get_frequence();
-    _rTAC = val & 0x7;
-    newFrequence = get_frequence();
-    if (currentFrequence !=
-        newFrequence) { // Check if game try to change frequence
-      set_frequence();
-    }
+	if (test_bit(2, val)) {
+	  _timer_counter.start();
+	} else {
+	  _timer_counter.stop();
+	}
+    _timer_counter.set_frequency(val & 0x3);
     break;
   }
 }
@@ -73,27 +74,39 @@ void Timer::set_frequence() {
 }
 
 void Timer::update(Word cycles) {
-  update_divider(cycles);
+  _divider_counter.step(cycles);
 
-  if (timer_enabled()) {
-    _counter -= cycles;
-    if (_counter <= 0) {
-      set_frequence();
-      if (_rTIMA == 255) { // Check if Timer Counter will overflow
-        _rTIMA = _rTMA;    // Load Timer modulator value
-        _components.interrupt_controller->request_interrupt(
-            InterruptController::TOI); // Request timer overflow interrupt
-      } else {
-        _rTIMA++; // Increment Timer counter
-      }
-    }
+  if (_timer_counter.step(cycles)) {
+    _timer_counter.set_value(_rTMA);
+    _components.interrupt_controller->request_interrupt(
+        InterruptController::TOI);
   }
 }
 
 void Timer::update_divider(Word cycles) {
   if (_rDIVCounter + cycles >= 255) {
-	  _rDIVCounter = (_rDIVCounter + cycles) - 255;
+    _rDIVCounter = (_rDIVCounter + cycles) - 255;
+    _rDIV++;
   } else {
     _rDIVCounter += cycles;
   }
+}
+
+Timer::Counter::Counter(Byte freq)
+    : _is_running(true), _value(0), _freq(freq),
+      _cycles(Timer::Frequencies[freq]) {}
+
+bool Timer::Counter::step(Word cycles) {
+  if (!_is_running)
+    return false;
+
+  _cycles -= cycles;
+  while (_cycles <= 0) {
+    _cycles += Timer::Frequencies[_freq];
+    _value++;
+    if (_value == 0x00) {
+      return true;
+    }
+  }
+  return false;
 }
