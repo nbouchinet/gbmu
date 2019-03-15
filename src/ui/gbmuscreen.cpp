@@ -19,7 +19,7 @@ GbmuScreen::GbmuScreen(QWidget *parent)
 
 void GbmuScreen::updateGbScreen(void) {
   if (_parent->width() != width() || _parent->height() != height())
-    resize(_parent->width(), _parent->height());
+    resize(_parent->width(), _parent->height() - SKIP_TOOLBAR * 2);
 
   if (g_gameboy->is_cycling())
     return;

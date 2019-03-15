@@ -78,7 +78,7 @@ void Gameboy::step() {
     _debugger.fetch(_components.core->pc());
   }
 
-  if (_cycles > 69905) {
+  if (_cycles > 70221) {
     _wait.store(true);
     _cycles = 0;
   }

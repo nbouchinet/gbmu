@@ -11,7 +11,7 @@
 # define GB_WIDTH 160
 # define GB_HEIGTH 144
 # define FIT_VIEW_W 0
-# define FIT_VIEW_H 27
+# define FIT_VIEW_H 28
 # define SKIP_TOOLBAR 18
 
 class Helper;

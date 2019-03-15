@@ -160,35 +160,27 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 	switch (event->key())
 	{
 		case Qt::Key_W:
-			std::cout << "I RELEASED W (UP)" << std::endl;
 			g_gameboy->key_released_wraper(2);
 			break;
 		case Qt::Key_S:
-			std::cout << "I RELEASED S (DOWN)" << std::endl;
 			g_gameboy->key_released_wraper(3);
 			break;
 		case Qt::Key_A:
-			std::cout << "I RELEASED A (LEFT)" << std::endl;
 			g_gameboy->key_released_wraper(1);
 			break;
 		case Qt::Key_D:
-			std::cout << "I RELEASED D (RIGHT)" << std::endl;
 			g_gameboy->key_released_wraper(0);
 			break;
 		case Qt::Key_J:
-			std::cout << "I RELEASED J (A)" << std::endl;
 			g_gameboy->key_released_wraper(4);
 			break;
 		case Qt::Key_K:
-			std::cout << "I RELEASED K (B)" << std::endl;
 			g_gameboy->key_released_wraper(5);
 			break;
 		case Qt::Key_N:
-			std::cout << "I RELEASED N (START)" << std::endl;
 			g_gameboy->key_released_wraper(7);
 			break;
 		case Qt::Key_M:
-			std::cout << "I RELEASED M (SELECT)" << std::endl;
 			g_gameboy->key_released_wraper(6);
 			break;
 	}
