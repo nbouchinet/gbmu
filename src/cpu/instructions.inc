@@ -2203,7 +2203,7 @@ case 0x46:
 std::printf("%04x: bit 0 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x46;
-  exec_instruction([&] (Byte &v) { instr_bit(0, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(0, v); }, _hl.word, 12);
   break;
 case 0x47:
 #ifdef DEBUG_CORE
@@ -2259,7 +2259,7 @@ case 0x4e:
 std::printf("%04x: bit 1 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x4e;
-  exec_instruction([&] (Byte &v) { instr_bit(1, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(1, v); }, _hl.word, 12);
   break;
 case 0x4f:
 #ifdef DEBUG_CORE
@@ -2315,7 +2315,7 @@ case 0x56:
 std::printf("%04x: bit 2 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x56;
-  exec_instruction([&] (Byte &v) { instr_bit(2, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(2, v); }, _hl.word, 12);
   break;
 case 0x57:
 #ifdef DEBUG_CORE
@@ -2371,7 +2371,7 @@ case 0x5e:
 std::printf("%04x: bit 3 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x5e;
-  exec_instruction([&] (Byte &v) { instr_bit(3, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(3, v); }, _hl.word, 12);
   break;
 case 0x5f:
 #ifdef DEBUG_CORE
@@ -2427,7 +2427,7 @@ case 0x66:
 std::printf("%04x: bit 4 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x66;
-  exec_instruction([&] (Byte &v) { instr_bit(4, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(4, v); }, _hl.word, 12);
   break;
 case 0x67:
 #ifdef DEBUG_CORE
@@ -2483,7 +2483,7 @@ case 0x6e:
 std::printf("%04x: bit 5 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x6e;
-  exec_instruction([&] (Byte &v) { instr_bit(5, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(5, v); }, _hl.word, 12);
   break;
 case 0x6f:
 #ifdef DEBUG_CORE
@@ -2539,7 +2539,7 @@ case 0x76:
 std::printf("%04x: bit 6 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x76;
-  exec_instruction([&] (Byte &v) { instr_bit(6, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(6, v); }, _hl.word, 12);
   break;
 case 0x77:
 #ifdef DEBUG_CORE
@@ -2595,7 +2595,7 @@ case 0x7e:
 std::printf("%04x: bit 7 (HL)\n", _pc.word);
 #endif
   _current_opcode = 0x7e;
-  exec_instruction([&] (Byte &v) { instr_bit(7, v); }, _hl.word, 16);
+  exec_instruction([&] (Byte &v) { instr_bit(7, v); }, _hl.word, 12);
   break;
 case 0x7f:
 #ifdef DEBUG_CORE
