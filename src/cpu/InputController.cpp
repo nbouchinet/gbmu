@@ -13,7 +13,7 @@ InputController::InputController(ComponentsContainer& components)
 
 void InputController::reset() {
 	_rP1.store(0xCF);
-	_joypad_state.store(0);
+	_joypad_state.store(0xFF);
 }
 
 void InputController::write(Word addr, Byte val) {
