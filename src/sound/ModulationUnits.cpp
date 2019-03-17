@@ -30,7 +30,6 @@ void SweepUnit::clear() {
 
 bool LengthUnit::call() {
   if (not _enabled) return true;
-  std::cerr  <<+_length  << "\n";
   if (--_length == 0) return false;
   return true;
 }

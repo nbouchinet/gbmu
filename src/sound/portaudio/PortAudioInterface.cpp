@@ -1,8 +1,8 @@
 #include "PortAudioInterface.hpp"
 
 #include <cassert>
-#include <vector>
 #include <iostream>
+#include <vector>
 
 namespace sound {
 
@@ -15,19 +15,24 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
                                  unsigned long frames_per_buffer,
                                  const PaStreamCallbackTimeInfo*,
                                  PaStreamCallbackFlags) {
-  if (_lock) return paContinue;
+  // if (_lock) return paContinue;
+  //std::cerr << "Read\n";
+  bool locked = _lock;
   _lock = true;
   assert(output_buffer != nullptr);
   float** out = static_cast<float**>(output_buffer);
 
   for (auto i = 0u; i < frames_per_buffer; ++i) {
-    bool is_out = _cursor >= SamplesTableSize;
-    out[0][i] = (is_out) ? 0 : _left_output[_cursor];
-    out[1][i] = (is_out) ? 0 : _right_output[_cursor];
-    if (not is_out)
+    bool can_cpy = _cursor < SamplesTableSize and not locked;
+    out[0][i] = (can_cpy) ? _left_output[_cursor] : _last_sample_played.second;
+    out[1][i] = (can_cpy) ? _right_output[_cursor] : _last_sample_played.first;
+    if (can_cpy) {
+      _last_sample_played.first = _right_output[_cursor];
+      _last_sample_played.second = _left_output[_cursor];
       ++_cursor;
+    }
   }
-  _lock = false;
+  if (not locked) _lock = false;
   return paContinue;
 }
 
@@ -48,6 +53,7 @@ PortAudioInterface::~PortAudioInterface() { _stream->close(); }
 bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
                                               const MonoSamples& left) {
   if (_lock or _cursor < SamplesTableSize) return false;
+  //std::cerr << "Write!\n";
   _lock = true;
   // for (auto & e : right)
   //   std::cerr << e << ", ";
@@ -58,7 +64,8 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   return true;
 }
 
-float PortAudioInterface::mix(const std::vector<float>& samples, float volume) const {
+float PortAudioInterface::mix(const std::vector<float>& samples,
+                              float volume) const {
   float ret = 0.f;
   for (const auto& sample : samples) {
     ret += sample / samples.size();

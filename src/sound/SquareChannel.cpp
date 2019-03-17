@@ -45,7 +45,6 @@ void SquareChannel::write(Word addr, Byte v) {
     case 0x1:
       _waveform_selected = (v & 0xC0) >> 6;
       _length.set_length(v & 0x3f);
-      std::cerr << "SET: " << std::hex << +v << "\n";
       break;
     case 0x2:
       _volume = (v & 0xf0) >> 4;
