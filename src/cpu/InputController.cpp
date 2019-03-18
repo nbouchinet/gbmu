@@ -26,22 +26,14 @@ void InputController::write(Word addr, Byte val) {
 }
 
 Byte InputController::read(Word addr) const{
-
-	/*
-	if (addr == 0xFF00) {
-		return (_rP1);
-	}
-	return (0);
-	*/
 	if (addr == 0xFF00)
 		return (get_joypad_state());
 	return (0);
 }
-#include <iostream>
+
 Byte InputController::get_joypad_state() const
 {
 	Byte ret = _rP1.load();
-	//ret ^= 0xFF;
 	if (!test_bit(5, ret))
 	{
 		Byte button_section = _joypad_state.load() >> 4;
@@ -71,11 +63,6 @@ void InputController::key_pressed(int val)
 	else
 		is_button = false;
 	Byte key_requested = _rP1;
-	/*
-	std::cout << "rp1: " << std::hex << +_rP1 << std::endl;
-	std::cout << "button: " << is_button << std::endl;
-	std::cout << "was_unset: " << was_unset << std::endl;
-	*/
 	if (((is_button && !test_bit(5, key_requested))
 		|| (!is_button && !test_bit(4, key_requested)))
 		&& (was_unset))
