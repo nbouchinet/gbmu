@@ -2,6 +2,7 @@
 #include "src/sound/VolumeTable.hpp"
 
 #include <cassert>
+#include <iostream>
 
 static constexpr Word compute_timer(Word freq) noexcept {
   return (2048 - freq) * 2;

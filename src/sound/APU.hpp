@@ -51,10 +51,9 @@ class APU : public IReadWrite {
  public:
   APU(AudioInterface*, ComponentsContainer&);
 
- public:
-  APU(AudioInterface*);
   APU() = delete;
 
+  const auto& channels() const { return _channels; }
   void update_clock(Word);
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;

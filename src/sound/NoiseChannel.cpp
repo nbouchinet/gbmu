@@ -1,6 +1,7 @@
 #include "src/sound/NoiseChannel.hpp"
 
 #include <cassert>
+#include <iostream>
 
 namespace sound {
 
@@ -12,16 +13,16 @@ void NoiseChannel::do_update() {
     xored ^= (_lfsr & 1);
     _lfsr |= xored << 14;
     if (_width_mode) {
-      _lfsr &= ~0x40;
+      _lfsr &= ~0x40u;
       _lfsr |= xored << 6;
     }
-    p_output_volume = (~_lfsr & 1) * _volume;
+    p_output_volume = ((~_lfsr) & 1) * _volume;
   }
 }
 
 void NoiseChannel::do_trigger() {
   _timer = get_divider(_divisor_code) << _shift;
-  _lfsr = 0xffff;
+  _lfsr = 0x7fff;
 }
 
 void NoiseChannel::do_clear() {

@@ -90,6 +90,7 @@ class Gameboy {
   void set_bios_type();
 
 
+  const auto& components() const { return _components; }
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
   };
