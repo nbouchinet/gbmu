@@ -123,7 +123,8 @@ void MainWindow::on_actionDebug_triggered()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-//	mutexGb.lock();
+	if (!g_gameboy)
+		return;
 	switch (event->key())
 	{
 		case Qt::Key_W:
@@ -151,12 +152,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 			g_gameboy->key_pressed_wraper(6);
 			break;
 	}
-//	mutexGb.unlock();
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
-//	mutexGb.lock();
+	if (!g_gameboy)
+		return ;
 	switch (event->key())
 	{
 		case Qt::Key_W:
@@ -184,5 +185,4 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 			g_gameboy->key_released_wraper(6);
 			break;
 	}
-//	mutexGb.unlock();
 }
