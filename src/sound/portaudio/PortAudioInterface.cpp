@@ -15,14 +15,12 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
                                  unsigned long frames_per_buffer,
                                  const PaStreamCallbackTimeInfo*,
                                  PaStreamCallbackFlags) {
-  bool locked = _lock;
-  if (not locked)
-  _lock = true;
+  _callback_lock = true;
   assert(output_buffer != nullptr);
   float** out = static_cast<float**>(output_buffer);
 
   for (auto i = 0u; i < frames_per_buffer; ++i) {
-    bool can_cpy = _cursor < SamplesTableSize and not locked;
+    bool can_cpy = _cursor < SamplesTableSize and not _fill_lock;
     out[0][i] = (can_cpy) ? _left_output[_cursor] : _last_sample_played.second;
     out[1][i] = (can_cpy) ? _right_output[_cursor] : _last_sample_played.first;
     if (can_cpy) {
@@ -31,8 +29,7 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
       ++_cursor;
     }
   }
-  if (not locked)
-  _lock = false;
+  _callback_lock = false;
   return paContinue;
 }
 
@@ -52,14 +49,14 @@ PortAudioInterface::~PortAudioInterface() { _stream->close(); }
 
 bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
                                               const MonoSamples& left) {
-  if (_lock or _cursor < SamplesTableSize) return false;
+  if (_callback_lock or _cursor < SamplesTableSize) return false;
   // for (auto & e : right)
   //   std::cerr << e << ", ";
-  _lock = true;
+  _fill_lock = true;
   _right_output = right;
   _left_output = left;
   _cursor = 0;
-  _lock = false;
+  _fill_lock = false;
   return true;
 }
 

@@ -17,7 +17,8 @@ class PortAudioInterface : public AudioInterface {
   MonoSamples _right_output = {};
   MonoSamples _left_output = {};
   std::size_t _cursor = SamplesTableSize;
-  volatile bool _lock = false;
+  volatile bool _callback_lock = false;
+  volatile bool _fill_lock = false;
   StereoSample _last_sample_played = {0., 0.};
   std::unique_ptr<Stream> _stream = nullptr;
 
