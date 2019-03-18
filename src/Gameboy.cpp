@@ -91,11 +91,22 @@ void Gameboy::step() {
   }
 }
 
+void Gameboy::load_existing_save()
+{
+	std::string save_path = _rom_path + ".save";
+	std::ifstream file(save_path.c_str());
+	if (file.good())
+	{
+		load_save(save_path);
+	}
+}
+
 int Gameboy::run() {
   //_components.mem_bus->write(0xFF50, 1);
   set_cgb_flag();
   _components.core->instr_jp(0x0000);
   do_checksum();
+  load_existing_save();
   while (!_is_abort) {
 	if (!_pause)
 		step();

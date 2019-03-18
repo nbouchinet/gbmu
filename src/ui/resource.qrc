@@ -1,10 +1,14 @@
 <RCC>
-    <qresource prefix="/resources">
+    <qresource prefix="/resources"/>
+    <qresource prefix="/">
         <file>resources/bug.png</file>
-        <file>resources/download.png</file>
+        <file>resources/load.png</file>
         <file>resources/mute.png</file>
-        <file>resources/play.png</file>
-        <file>resources/stop.png</file>
+        <file>resources/open.png</file>
         <file>resources/pause.png</file>
+        <file>resources/play.png</file>
+        <file>resources/save.png</file>
+        <file>resources/sound.png</file>
+        <file>resources/stop.png</file>
     </qresource>
 </RCC>

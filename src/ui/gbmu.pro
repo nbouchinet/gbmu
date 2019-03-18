@@ -93,3 +93,5 @@ HEADERS += \
 	src/cpu/InputController.hpp \
 	src/cpu/InterruptController.hpp \
 	src/cpu/Timer.hpp
+
+DISTFILES +=
