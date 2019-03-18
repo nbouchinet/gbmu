@@ -15,7 +15,6 @@ const std::array<Byte, 4> SquareChannel::s_waveforms{
 
 void SquareChannel::do_update() {
   if (_timer == 0) {
-//    assert(_frequency);
     _timer = compute_timer(_frequency);
     if (++_waveform_step >= 8) _waveform_step = 0;
   }

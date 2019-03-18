@@ -1,5 +1,6 @@
 #include "src/sound/APU.hpp"
 
+#include "src/Gameboy.hpp"
 #include "src/sound/NoiseChannel.hpp"
 #include "src/sound/SquareChannel.hpp"
 #include "src/sound/WaveChannel.hpp"
@@ -12,8 +13,9 @@ namespace sound {
 
 APU::MemoryRangedChannel::~MemoryRangedChannel() {}
 
-APU::APU(AudioInterface* interface)
+APU::APU(AudioInterface* interface, ComponentsContainer& c)
     : _audio_interface(interface),
+      _comps(c),
       _channels{{
           {0xff10, 0xff14, std::make_unique<SquareChannel>(true)},
           {0xff15, 0xff19, std::make_unique<SquareChannel>(false)},
@@ -23,6 +25,7 @@ APU::APU(AudioInterface* interface)
 
 void APU::update_clock() {
   if (--_update_countdown <= 0) {
+    (void)_comps;
     _update_countdown = (CPU_FREQ / UPDATE_FREQ);
     for (auto& ranged_channel : _channels) {
       ranged_channel.channel->update_modules(_modulation_units_steps);
@@ -35,8 +38,8 @@ void APU::update_clock() {
 
   if (--_sampling_countdown <= 0) {
     _sampling_countdown = (CPU_FREQ / SAMPLING_FREQ);
-    float rvol = right_volume() + 1.f;
-    float lvol = left_volume() + 1.f;
+    float rvol = right_volume();
+    float lvol = left_volume();
 
     _right_output[_output_index] =
         fetch_and_mix_samples(_channel_to_terminal_output, rvol);
@@ -77,6 +80,7 @@ void APU::clear() {
 }
 
 Byte APU::read(Word addr) const {
+  //std::cerr << std::hex << _comps.core->pc() << " read: " << addr << "\n";
   for (auto& ranged_channel : _channels) {
     if (addr >= ranged_channel.begin and addr <= ranged_channel.end)
       return ranged_channel.channel->read(addr);
@@ -89,7 +93,7 @@ Byte APU::read(Word addr) const {
     case 0xff26: {
       Byte ret = _APU_on;
       ret = (ret << 7) | 0x70;
-      for (auto i = 0; i < 4; ++i)
+      for (auto i = 0u; i < _channels.size(); ++i)
         ret |= _channels[i].channel->is_enabled() << i;
       return ret;
     }
@@ -98,10 +102,13 @@ Byte APU::read(Word addr) const {
     return _wave_ram[addr & 0xf];
   else if (addr >= 0xff27 and addr <= 0xff2f)
     return 0xff;
+  return 0xff;
   assert(false);
 }
 
 void APU::write(Word addr, Byte v) {
+  //std::cerr << std::hex << _comps.core->pc() << " write: " << addr << " -> "
+  //          << +v << "\n";
   if (addr == 0xff26) {
     _APU_on = (v & 0x80) >> 7;
     if (not _APU_on) {
@@ -132,6 +139,7 @@ void APU::write(Word addr, Byte v) {
       _channel_to_terminal_output = v;
       return;
   }
+  return ;
   assert(false);
 }
 }  // namespace sound

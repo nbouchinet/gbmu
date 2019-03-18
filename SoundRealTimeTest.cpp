@@ -65,7 +65,7 @@ int main(int, char **) {
   using namespace sound;
   PortAudioInterface i;
 
-  test_audio_interface(&i);
+  //test_audio_interface(&i);
   APU apu(&i);
   i.start();
   apu.write(0xff26, 0x80);

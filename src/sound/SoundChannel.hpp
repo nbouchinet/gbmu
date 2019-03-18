@@ -39,7 +39,7 @@ class SoundChannel : public IReadWrite {
   float get_output() const {
     if (not p_enabled) return 0.f;
     assert(p_output_volume <= MaxVolume);
-    return p_output_volume / (static_cast<float>(MaxVolume) / 2.f) - 1.f;
+    return p_output_volume / (static_cast<float>(MaxVolume + 1) / 2.f) - 1.f;
   }
 
   Byte get_raw_volume() const { return p_output_volume; }

@@ -11,7 +11,7 @@ namespace sound {
 class NoiseChannel : public SoundChannel {
  private:
   Word _timer;
-  Word _lsfr;  // Linear feedback feed register
+  Word _lfsr;  // Linear feedback feed register
   Byte _shift;
   bool _width_mode;
   Byte _divisor_code;

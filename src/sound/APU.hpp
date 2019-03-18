@@ -36,6 +36,7 @@ class APU : public IReadWrite {
   AudioInterface::MonoSamples _left_output;
 
   AudioInterface* const _audio_interface;
+  ComponentsContainer& _comps;
 
   VolumeTable _wave_ram = {};
 
@@ -46,6 +47,9 @@ class APU : public IReadWrite {
   float fetch_and_mix_samples(Byte enabled_channels, float vol) const;
   float right_volume() const { return _vin_and_volumes & 0x07;}
   float left_volume() const { return (_vin_and_volumes & 0x70) >> 4;}
+
+ public:
+  APU(AudioInterface*, ComponentsContainer&);
 
  public:
   APU(AudioInterface*);

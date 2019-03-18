@@ -23,7 +23,13 @@ class SweepUnit : public IModulationUnit {
 
   Byte _current_period;
   bool _enabled;
+  bool _trigger_overflowed;
+
+  Word _shadow_freq;
   Word& _frequency;
+
+  Word frequency_calculation();
+  bool does_overflow(Word f) { return f > 0x7ff; }
 
  public:
   SweepUnit() = delete;
@@ -76,7 +82,7 @@ class EnvelopeUnit : public IModulationUnit {
  private:
   bool _add : 1;
   Byte _period : 3;
-  bool _enabled; 
+  bool _enabled;
   Byte _current_period;
   Byte& _volume;
 

@@ -24,7 +24,7 @@ ComponentsContainer::ComponentsContainer(
   lcd_registers = std::make_unique<LCDRegisters>();
   unit_working_ram = std::make_unique<UnitWorkingRAM>();
   ppu = std::make_unique<PPU>(*this);
-  apu = std::make_unique<sound::APU>(audio_interace);
+  apu = std::make_unique<sound::APU>(audio_interace, *this);
   driver_screen = std::make_unique<ScreenOutput>();
   bios = std::make_unique<Bios>();
   mem_bus = std::make_unique<MemoryBus>(*this);
@@ -110,8 +110,7 @@ int Gameboy::run() {
   load_existing_save();
   _audio_interface.start();
   while (!_is_abort) {
-    if (!_pause)
-      step();
+    if (!_pause) step();
   }
   return (0);
 }

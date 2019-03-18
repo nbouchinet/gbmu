@@ -7,23 +7,26 @@ namespace sound {
 void NoiseChannel::do_update() {
   if (--_timer == 0) {
     _timer = get_divider(_divisor_code) << _shift;
-  Byte xored = (_lsfr & 1);
-  _lsfr >>= 1;
-  xored ^= (_lsfr & 1);
-  _lsfr |= xored << 15;
-  if (_width_mode) _lsfr |= xored << 6;
-  p_output_volume = (~_lsfr & 1) * _volume;
+    Byte xored = (_lfsr & 1);
+    _lfsr >>= 1;
+    xored ^= (_lfsr & 1);
+    _lfsr |= xored << 14;
+    if (_width_mode) {
+      _lfsr &= ~0x40;
+      _lfsr |= xored << 6;
+    }
+    p_output_volume = (~_lfsr & 1) * _volume;
   }
 }
 
 void NoiseChannel::do_trigger() {
   _timer = get_divider(_divisor_code) << _shift;
-  _lsfr = 0xffff;
+  _lfsr = 0xffff;
 }
 
 void NoiseChannel::do_clear() {
   _timer = 0;
-  _lsfr = 0;
+  _lfsr = 0;
   _shift = 0;
   _width_mode = false;
   _divisor_code = 0;
