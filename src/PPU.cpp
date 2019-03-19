@@ -191,7 +191,7 @@ void					PPU::dma_transfer(uint16_t address)
 	dma_addr = address << 8;
 	for (int i = 0; i < 0xA0; i++)
 	{
-		write(0xFE00 + i, _components.mem_bus->read<Byte>(dma_addr + i)); // dma's are always written into OAM ram
+		_lcd_oam_ram[i] =  _components.mem_bus->read<Byte>(dma_addr + i); // dma's are always written into OAM ram
 	}
 }
 
@@ -261,6 +261,24 @@ void				PPU::handle_cgb_obj_palette_write(uint8_t ocpd_arg)
 }
 
 //------------------------------------------------------------------------------
+void				PPU::handle_lcdc_write(uint8_t value)
+{
+	if (test_bit(_lcdc, 7) == true && test_bit(value, 7) == false)
+	{
+		_ly = 0;
+		for (int y = 0; y < LCD_HEIGHT; y++)
+		{
+			for (int x = 0; x < LCD_WIDTH; x++)
+			{
+				set_pixel(y, x, 0xFFFFFFFF);
+			}
+		}
+		_components.driver_screen->transfer_dirty_to_clean();
+	}
+	_lcdc = value;
+}
+
+//------------------------------------------------------------------------------
 void				PPU::write(Word address, Byte value)
 {
 	if (address >= 0x8000 && address < 0xA000)
@@ -272,6 +290,7 @@ void				PPU::write(Word address, Byte value)
 		}
 		else if (test_bit(_vbk, 0) == true)
 		{
+			std::cerr << "_vbk = 1" << std::endl;
 			_lcd_memory_bank_1[address - 0x8000] = value;
 			return ;
 		}
@@ -285,7 +304,7 @@ void				PPU::write(Word address, Byte value)
 	switch (address)
 	{
 		case 0xFF40:
-			_lcdc = value;
+			handle_lcdc_write(value);
 			break;
 		case 0xFF41:
 			_stat = value;
@@ -294,6 +313,7 @@ void				PPU::write(Word address, Byte value)
 			_scy = value;
 			break;
 		case 0xFF43:
+//			std::cerr << "write on _scx, old = " << std::hex << +_scx << " | new = " << std::hex << +value << std::endl;
 			_scx = value;
 			break;
 		case 0xFF44:
@@ -444,6 +464,7 @@ Byte				PPU::read(Word address) const
 			ret = _scy;
 			break;
 		case 0xFF43:
+//			std::cerr << "read on _scx, returning value " << std::hex << +_scx << std::endl;
 			ret = _scx;
 			break;
 		case 0xFF44:
@@ -591,12 +612,13 @@ void				PPU::get_sprites_for_line() // takes up to MAX_SPRITE_PER_LINE sprites a
 	uint8_t			x_pos_tmp;
 
 	_nb_sprites = 0;
+	_vbk = 0;
 	for (int sprite = 0; sprite < 40; sprite++)
 	{
 		sprite_attributes_offset = sprite * 4; // 4 bytes of attributes data per sprite;
-		y_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset) - 16; // in screen !!
-		x_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset + 1) - 8; // in screen !!
-		if (_ly >= y_pos_tmp && (_ly < (y_pos_tmp + _sprite_size)) && x_pos_tmp != 0) // IMPORTANT : _sprite_size here might be a flat 16 instead !
+		y_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset); //
+		x_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset + 1); //
+		if (_ly + _sprite_size >= y_pos_tmp && _ly < y_pos_tmp) 
 		{
 			_sprites_line[_nb_sprites].y_pos = y_pos_tmp; // -16 !!!!
 			_sprites_line[_nb_sprites].x_pos = x_pos_tmp; // -8 !!!!
@@ -635,7 +657,7 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 				replace_pixel_segment(holder, contender);
 			}
 			else if (test_bit(contender.sprite_info.flags, 7) == true // contender sprite does not have priority to BG
-					&& _background_dmg_palette[holder.value] == 0) // background is transparent;
+					&& holder.value == 0) // background is transparent;
 			{
 				replace_pixel_segment(holder, contender);
 			}
@@ -693,12 +715,15 @@ void				PPU::render_sprites()
 {
 	get_sprites_for_line();
 
+	if (_nb_sprites > 10)
+		std::cerr << "SOMETHING IS BADLY FUCKED UP M8" << std::endl;
+
 	for (int sprite = _nb_sprites - 1; sprite >= 0; sprite--) // up to 10 sprites on the line
 	{
 		bool		x_flip = test_bit(_sprites_line[sprite].flags, 5) == true ? false : true;
-		bool		y_flip = test_bit(_sprites_line[sprite].flags, 6) == true ? true : false;
+		bool		y_flip = test_bit(_sprites_line[sprite].flags, 6) == true ? false : true;
 
-		int		sprite_line = _ly - _sprites_line[sprite].y_pos; // which line of the sprite does the scanline go through ?
+		int		sprite_line = (_sprites_line[sprite].y_pos - _ly) - 1; // which line of the sprite does the scanline go through ?
 		if (y_flip == true)
 			sprite_line = (sprite_line - (_sprite_size - 1)) * (-1);
 		uint16_t	tile_line_data_address = (_sprite_data_start + (_sprites_line[sprite].tile_number * 16)) + (sprite_line * 2);
@@ -720,12 +745,12 @@ void				PPU::render_sprites()
 			if (test_bit(data2, line_pixel) == true)
 				color_id += 2;
 
-			if (_sprites_line[sprite].x_pos + pixel < LCD_WIDTH)
+			if (_sprites_line[sprite].x_pos + pixel - 8u < LCD_WIDTH)
 			{
 				contender.value = color_id;
 				contender.is_sprite = true;
 				contender.sprite_info = _sprites_line[sprite];
-				blend_pixels(_pixel_pipeline[contender.sprite_info.x_pos + pixel], contender);
+				blend_pixels(_pixel_pipeline[contender.sprite_info.x_pos + pixel - 8u], contender);
 			}
 		}
 	}
@@ -734,22 +759,23 @@ void				PPU::render_sprites()
 //------------------------------------------------------------------------------
 uint16_t			PPU::get_tile_data_address(uint8_t tileIdentifier)
 {
-	uint8_t		offset = 128;
 	uint8_t		tile_memory_size = 16; // 2 bytes per line of pixels
 	uint16_t	tile_data_address;
 
 	if (_unsigned_tile_numbers == true)
-		tile_data_address = _background_data_start + (tileIdentifier * tile_memory_size);
+		tile_data_address = 0x8000 + (tileIdentifier * tile_memory_size);
 	else
 	{
-		tileIdentifier += offset; // overflow dat shitzlle
-		tile_data_address = _background_data_start + (tileIdentifier * tile_memory_size);
+		if (tileIdentifier <= 127)
+			tile_data_address = 0x9000 + (tileIdentifier * tile_memory_size);
+		else
+			tile_data_address = 0x8800 + ((tileIdentifier - 128) * tile_memory_size);
 	}
 	return (tile_data_address);
 }
 
 //------------------------------------------------------------------------------
-uint16_t			PPU::determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool boi_its_a_window)
+uint16_t			PPU::determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool in_window)
 {
 	uint16_t		tile_row; // 32 Tiles per line
 	uint16_t		tile_col; // add to Row  
@@ -758,7 +784,7 @@ uint16_t			PPU::determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool
 	tile_row = (((uint16_t)(y_pos / 8)) * 32);		// (0-992) 32 tiles per 8 vertical pixels
 	tile_col = x_pos / 8;								// (0-32) 1 tile per 8 horizontal pixel
 
-	if (boi_its_a_window == true)
+	if (in_window == true)
 		tile_number_address = _window_chr_attr_start + tile_row + tile_col;	// 1 byte per tile number (uint8_t), just the tile number
 	else
 		tile_number_address = _background_chr_attr_start + tile_row + tile_col;
@@ -771,22 +797,21 @@ void				PPU::render_tiles()
 {
 	uint8_t			x_pos;
 	uint8_t			y_pos;
-	bool			boi_its_a_window = false;
+	bool			in_window = false;
 	uint16_t		tile_number_address; // from tile_number_address we get the tile_number (in BG display Data)
 	uint8_t			tile_number; // from BG display data we get tile_number
 	uint16_t		tile_location; // from tile_number we deduce where the data for each pixel of the tile starts
 	uint8_t			tile_attr; // needed for CGB, same location as tile_number_address in the BG display Data except in the Bank 1 
 
-	for (int i = 0; i < 160; i++)
+	for (uint8_t i = 0; i < 160; i++)
 	{
 		if (_windowing_on == true && i >= _wx - 7 && _ly >= _wy) // are we in the window and is it enabled ?
-			boi_its_a_window = true;
+			in_window = true;
 
-		if (boi_its_a_window == true)
+		if (in_window == true)
 		{
 			x_pos = i - (_wx - 7);
 			y_pos = _ly - _wy;
-
 		}
 		else
 		{
@@ -794,7 +819,7 @@ void				PPU::render_tiles()
 			y_pos = _scy + _ly;
 		}
 
-		tile_number_address = determine_tile_number_address(y_pos, x_pos, boi_its_a_window);
+		tile_number_address = determine_tile_number_address(y_pos, x_pos, in_window);
 
 		_vbk = 0;
 		tile_number = read(tile_number_address);
@@ -872,10 +897,12 @@ void				PPU::send_pixel_pipeline()
 			}
 		}
 	}
+	if (_ly % 8 == 0)
+		set_pixel(_ly, 0, 0x0000FFFF);
 	set_pixel(0, 0, 0xFF0000FF);
-	set_pixel(0, 159, 0x00FF00FF);
-	set_pixel(143, 159, 0x0000FFFF);
-	set_pixel(143, 0, 0xFF00FFFF);
+	set_pixel(0, 159, 0xFF0000FF);
+	set_pixel(143, 159, 0xFF0000FF);
+	set_pixel(143, 0, 0xFF0000FF);
 }
 
 //------------------------------------------------------------------------------
@@ -971,7 +998,7 @@ void					PPU::update_lcd_status()
 		_ly = 0;
 		status_tmp &= 252;
 		set_bit(status_tmp, 0);
-		write(0xFF41, status_tmp);
+		_stat = status_tmp;
 		return ;
 	}
 
@@ -1031,7 +1058,7 @@ void					PPU::update_lcd_status()
 	{
 		unset_bit(status_tmp, 2);
 	}
-	write(0xFF41, status_tmp);
+	_stat = status_tmp;
 }
 
 //------------------------------------------------------------------------------
