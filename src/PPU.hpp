@@ -16,6 +16,7 @@
 
 	finish the pixel mixing algorythm for CGB
 	hdma transfers !!!
+	fix the goddamn sprites in metroid / pokemon
 */
 
 typedef struct		s_sprite_info
@@ -87,6 +88,7 @@ private:
 	void					setup_window();
 	void					setup_background_data();
 	void					setup_sprite_data();
+	void					handle_lcdc_write(uint8_t value);
 	Byte					handle_cgb_bg_palette_read() const;
 	Byte					handle_cgb_obj_palette_read() const;
 	void					handle_cgb_bg_palette_write(uint8_t bcpd_arg);
@@ -165,8 +167,8 @@ private:
 	t_sprite_info			_sprites_line[MAX_SPRITE_PER_LINE];	// by default 10 sprites per line
 	uint8_t					_nb_sprites;
 
-	std::array<Byte, 8192>		_lcd_memory_bank_0; // (0x8000-0x9FFF) Tiles RAM bank 0
 	std::array<Byte, 8192>		_lcd_memory_bank_1;
+	std::array<Byte, 8192>		_lcd_memory_bank_0; // (0x8000-0x9FFF) Tiles RAM bank 0
 	std::array<Byte, 160>		_lcd_oam_ram; // (0xFE00 - 0xFE9F) Sprite attr RAM
 
 };
