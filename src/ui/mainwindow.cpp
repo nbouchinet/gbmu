@@ -31,7 +31,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	//Shortcut settings
 	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
 	ui->actionSave->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-	ui->actionLoad->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_L));
 	ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
 	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
 	ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
@@ -50,6 +49,7 @@ void MainWindow::on_actionOpen_triggered()
 		return ;
 	if (g_gameboy && _gameboy_thread && _gameboy_worker && _timer_screen && _gameboy_screen)
 	{
+		std::cout << "deleting all the shit" << std::endl;
 		g_gameboy->set_is_abort(true);
 		_gameboy_thread->quit();
 		_gameboy_thread->wait();
@@ -76,6 +76,13 @@ void MainWindow::on_actionOpen_triggered()
 	connect(_gameboy_worker, SIGNAL (finished()), _gameboy_thread, SLOT (quit()));
 	_gameboy_thread->start();
 	setCentralWidget(_gameboy_screen);
+
+	//enable toolsbar action
+	ui->actionSave->setEnabled(true);
+	ui->actionPlay->setEnabled(true);
+	ui->actionStop->setEnabled(true);
+	ui->actionMute->setEnabled(true);
+	ui->actionDebug->setEnabled(true);
 }
 
 void MainWindow::on_actionSave_triggered()

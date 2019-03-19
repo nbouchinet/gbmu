@@ -72,10 +72,10 @@
   </widget>
   <action name="actionOpen">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -89,6 +89,9 @@
    </property>
   </action>
   <action name="actionPlay">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/resources/pause.png</normaloff>:/resources/pause.png</iconset>
@@ -101,6 +104,9 @@
    </property>
   </action>
   <action name="actionStop">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/resources/stop.png</normaloff>:/resources/stop.png</iconset>
@@ -113,6 +119,9 @@
    </property>
   </action>
   <action name="actionMute">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/resources/mute.png</normaloff>:/resources/mute.png</iconset>
@@ -125,6 +134,9 @@
    </property>
   </action>
   <action name="actionDebug">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/resources/bug.png</normaloff>:/resources/bug.png</iconset>
@@ -137,6 +149,9 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
      <normaloff>:/resources/save.png</normaloff>:/resources/save.png</iconset>
