@@ -8,6 +8,7 @@
 #include "src/sound/VolumeTable.hpp"
 
 #include <memory>
+#include <chrono>
 
 #define CPU_FREQ (4194304)
 #define UPDATE_FREQ (512)
@@ -48,6 +49,9 @@ class APU : public IReadWrite {
   float right_volume() const { return _vin_and_volumes & 0x07;}
   float left_volume() const { return (_vin_and_volumes & 0x70) >> 4;}
 
+  mutable bool _dump = false;
+  std::chrono::time_point<std::chrono::system_clock> _last_dump;
+
  public:
   APU(AudioInterface*, ComponentsContainer&);
 
@@ -57,6 +61,10 @@ class APU : public IReadWrite {
   void update_clock(Word);
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
+  void toggle_dump() const { 
+    _dump = !_dump; 
+  }
+  void dump() const;
 };
 }  // namespace sound
 

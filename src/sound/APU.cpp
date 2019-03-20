@@ -21,7 +21,9 @@ APU::APU(AudioInterface* interface, ComponentsContainer& c)
           {0xff15, 0xff19, std::make_unique<SquareChannel>(false)},
           {0xff1a, 0xff1e, std::make_unique<WaveChannel>(_wave_ram)},
           {0xff1f, 0xff23, std::make_unique<NoiseChannel>()},
-      }} {}
+      }} {
+      _last_dump = std::chrono::system_clock::now();
+      }
 
 void APU::update_clock() {
   if (--_update_countdown <= 0) {
@@ -79,8 +81,11 @@ void APU::clear() {
   _channel_to_terminal_output = 0;
 }
 
+void APU::dump() const { _channels[3].channel->dump(); }
+
 Byte APU::read(Word addr) const {
-  //std::cerr << std::hex << _comps.core->pc() << " read: " << addr << "\n";
+//  if (_dump)
+//    std::cerr << std::hex  << "APU read: " << addr << "\n";
   for (auto& ranged_channel : _channels) {
     if (addr >= ranged_channel.begin and addr <= ranged_channel.end)
       return ranged_channel.channel->read(addr);
@@ -107,8 +112,15 @@ Byte APU::read(Word addr) const {
 }
 
 void APU::write(Word addr, Byte v) {
-  //std::cerr << std::hex << _comps.core->pc() << " write: " << addr << " -> "
-  //          << +v << "\n";
+  if (_dump) {
+    auto now = std::chrono::system_clock::now();
+    int ms = std::chrono::duration_cast<std::chrono::milliseconds>
+                             (now-_last_dump).count();
+    std::cerr << std::hex << "APU write: " << addr << " -> " << +v <<  " | delay: " << ms << "\n";
+    if (addr == 0xff23 and v & 0x80)
+      dump();
+    _last_dump = std::chrono::system_clock::now();
+  }
   if (addr == 0xff26) {
     _APU_on = (v & 0x80) >> 7;
     if (not _APU_on) {
@@ -139,7 +151,7 @@ void APU::write(Word addr, Byte v) {
       _channel_to_terminal_output = v;
       return;
   }
-  return ;
+  return;
   assert(false);
 }
 }  // namespace sound

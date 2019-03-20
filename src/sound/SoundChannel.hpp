@@ -35,6 +35,7 @@ class SoundChannel : public IReadWrite {
   void update();
   void trigger();
   void clear();
+  virtual void dump() const {}
 
   float get_output() const {
     if (not p_enabled) return 0.f;

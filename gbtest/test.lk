@@ -1,0 +1,13 @@
+-mjwx
+-i test.ihx
+-b _CODE = 0x0200
+-b _DATA = 0xc0a0
+-k /Users/asenat/.brew/Cellar/gbdk-n/2.96/share/gbdk-n/lib
+-k /Users/asenat/.brew/bin/../share/sdcc/lib/gbz80
+-k /Users/asenat/.brew/Cellar/sdcc/3.8.0/share/sdcc/lib/gbz80
+-l gb.lib
+-l gbz80
+/Users/asenat/.brew/Cellar/gbdk-n/2.96/share/gbdk-n/lib/crt0.rel
+test.rel
+
+-e

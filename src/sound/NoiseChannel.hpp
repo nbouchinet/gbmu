@@ -34,10 +34,20 @@ class NoiseChannel : public SoundChannel {
   void write(Word, Byte) override;
   Byte read(Word) const override;
 
-  inline static Word get_divider(Byte code) {
-    if (code == 0) return 8u;
-    return 16 * code;
+  void dump() const override;
+
+  Word get_divider(Byte code) {
+    auto s = _shift + 3;
+    if (!code) {
+      code = 1;
+      --s;
+    }
+    return code << s;
   }
+  //inline static Word get_divider(Byte code) {
+  //  if (code == 0) return 8u;
+  //  return 16 * code;
+  //}
 };
 
 }  // namespace sound

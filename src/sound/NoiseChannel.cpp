@@ -7,23 +7,21 @@ namespace sound {
 
 void NoiseChannel::do_update() {
   if (--_timer == 0) {
-    _timer = get_divider(_divisor_code) << _shift;
-    Byte xored = (_lfsr & 1);
-    _lfsr >>= 1;
-    xored ^= (_lfsr & 1);
-    _lfsr |= xored << 14;
-    if (_width_mode) {
-      _lfsr &= ~0x40u;
-      _lfsr |= xored << 6;
-    }
-    p_output_volume = ((~_lfsr) & 1) * _volume;
+    if (_shift < 0xe) {
+      Byte xored = (_lfsr & 1);
+      _lfsr >>= 1;
+      xored ^= (_lfsr & 1);
+      _lfsr |= xored << 14;
+      if (_width_mode) {
+        _lfsr = (_lfsr & ~0x40u) | xored << 6;
+      }
+     p_output_volume = (~_lfsr & 1) * _volume;
   }
+  _timer = get_divider(_divisor_code);
 }
+}  // namespace sound
 
-void NoiseChannel::do_trigger() {
-  _timer = get_divider(_divisor_code) << _shift;
-  _lfsr = 0x7fff;
-}
+void NoiseChannel::do_trigger() { _lfsr = 0x7fff; }
 
 void NoiseChannel::do_clear() {
   _timer = 0;
@@ -32,6 +30,14 @@ void NoiseChannel::do_clear() {
   _width_mode = false;
   _divisor_code = 0;
   _volume = 0;
+}
+
+void NoiseChannel::dump() const {
+  std::cerr << "NoiseChan dump: \n" << std::hex;
+  for (Word i = 0xff1f; i < 0xff24; ++i) {
+    std::cerr << +read(i) << "\n";
+  }
+  std::cerr << "length: " << +_length.length() << "\n";
 }
 
 void NoiseChannel::write(Word addr, Byte v) {

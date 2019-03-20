@@ -90,5 +90,4 @@ Byte SquareChannel::read(Word addr) const {
   ret |= or_table[low_addr_nibble];
   return ret;
 }
-
 }  // namespace sound
