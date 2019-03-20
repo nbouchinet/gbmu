@@ -49,7 +49,6 @@ void MainWindow::on_actionOpen_triggered()
 		return ;
 	if (g_gameboy && _gameboy_thread && _gameboy_worker && _timer_screen && _gameboy_screen)
 	{
-		std::cout << "deleting all the shit" << std::endl;
 		g_gameboy->set_is_abort(true);
 		_gameboy_thread->quit();
 		_gameboy_thread->wait();
@@ -134,9 +133,9 @@ void MainWindow::on_actionDebug_triggered()
 	if (g_gameboy)
 	{
 		g_gameboy->get_debugger().toggle();
-		DebuggerWindow debuggerwindow;
-		debuggerwindow.setModal(true);
-		debuggerwindow.exec();
+		DebuggerWindow *debuggerwindow = new DebuggerWindow(this);
+		debuggerwindow->setModal(false);
+		debuggerwindow->show();
 	}
 }
 

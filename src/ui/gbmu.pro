@@ -36,17 +36,17 @@ SOURCES += \
         gbmuscreen.cpp \
         mainwindow.cpp \
     debuggerwindow.cpp \
-	worker.cpp
+	worker.cpp \
 
 HEADERS += \
         gbmuscreen.h\
         mainwindow.h \
     debuggerwindow.h \
-	worker.h
+	worker.h \
 
 FORMS += \
         mainwindow.ui \
-    debuggerwindow.ui
+    debuggerwindow.ui \
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
