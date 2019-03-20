@@ -25,6 +25,7 @@ void MemoryBus::reset(ComponentsContainer &components) {
   push_component(0x8000, 0x9FFF, components.ppu.get());
   push_component(0xA000, 0xBFFF, components.cartridge.get());
   push_component(0xC000, 0xDFFF, components.unit_working_ram.get());
+  push_component(0xFE00, 0xFE9F, components.ppu.get());
   push_component(0xFF04, 0xFF08, components.timer.get());
   push_component(0xFF0F, 0xFF0F, components.interrupt_controller.get());
   push_component(0xFF40, 0xFF4B, components.ppu.get());

@@ -3,6 +3,8 @@
 #include "MemoryBus.hpp"
 #include "cpu/InterruptController.hpp"
 
+#include <unistd.h>
+
 //------------------------------------------------------------------------------
 PPU::PPU(ComponentsContainer& components) : _components(components)
 {
@@ -313,7 +315,6 @@ void				PPU::write(Word address, Byte value)
 			_scy = value;
 			break;
 		case 0xFF43:
-//			std::cerr << "write on _scx, old = " << std::hex << +_scx << " | new = " << std::hex << +value << std::endl;
 			_scx = value;
 			break;
 		case 0xFF44:
@@ -344,23 +345,23 @@ void				PPU::write(Word address, Byte value)
 			_wx = value;
 			break;
 		case 0xFF51:
-			std::cerr << "write to _hdma1 " << _hdma1 << std::endl;
+			std::cerr << "write to _hdma1 " << +_hdma1 << std::endl;
 			_hdma1 = value;
 			break;
 		case 0xFF52:
-			std::cerr << "write to _hdma2 " << _hdma2 << std::endl;
+			std::cerr << "write to _hdma2 " << +_hdma2 << std::endl;
 			_hdma2 = value;
 			break;
 		case 0xFF53:
-			std::cerr << "write to _hdma3 " << _hdma3 << std::endl;
+			std::cerr << "write to _hdma3 " << +_hdma3 << std::endl;
 			_hdma3 = value;
 			break;
 		case 0xFF54:
-			std::cerr << "write to _hdma4 " << _hdma4 << std::endl;
+			std::cerr << "write to _hdma4 " << +_hdma4 << std::endl;
 			_hdma4 = value;
 			break;
 		case 0xFF55:
-			std::cerr << "write to _hdma5 " << _hdma5 << std::endl;
+			std::cerr << "write to _hdma5 " << +_hdma5 << std::endl;
 			handle_hdma_transfer(value);
 			break;
 		case 0xFF68:
@@ -464,7 +465,6 @@ Byte				PPU::read(Word address) const
 			ret = _scy;
 			break;
 		case 0xFF43:
-//			std::cerr << "read on _scx, returning value " << std::hex << +_scx << std::endl;
 			ret = _scx;
 			break;
 		case 0xFF44:
@@ -613,12 +613,13 @@ void				PPU::get_sprites_for_line() // takes up to MAX_SPRITE_PER_LINE sprites a
 
 	_nb_sprites = 0;
 	_vbk = 0;
+
 	for (int sprite = 0; sprite < 40; sprite++)
 	{
 		sprite_attributes_offset = sprite * 4; // 4 bytes of attributes data per sprite;
 		y_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset); //
 		x_pos_tmp = read(sprite_attributes_table_start + sprite_attributes_offset + 1); //
-		if (_ly + _sprite_size >= y_pos_tmp && _ly < y_pos_tmp) 
+		if (_ly + 16 >= y_pos_tmp && _ly + (16 - _sprite_size) < y_pos_tmp) 
 		{
 			_sprites_line[_nb_sprites].y_pos = y_pos_tmp; // -16 !!!!
 			_sprites_line[_nb_sprites].x_pos = x_pos_tmp; // -8 !!!!
@@ -715,7 +716,7 @@ void				PPU::render_sprites()
 {
 	get_sprites_for_line();
 
-	if (_nb_sprites > 10)
+	if (_nb_sprites > MAX_SPRITE_PER_LINE)
 		std::cerr << "SOMETHING IS BADLY FUCKED UP M8" << std::endl;
 
 	for (int sprite = _nb_sprites - 1; sprite >= 0; sprite--) // up to 10 sprites on the line
@@ -723,7 +724,7 @@ void				PPU::render_sprites()
 		bool		x_flip = test_bit(_sprites_line[sprite].flags, 5) == true ? false : true;
 		bool		y_flip = test_bit(_sprites_line[sprite].flags, 6) == true ? false : true;
 
-		int		sprite_line = (_sprites_line[sprite].y_pos - _ly) - 1; // which line of the sprite does the scanline go through ?
+		int		sprite_line = ((_sprites_line[sprite].y_pos) - (_ly + (16 - _sprite_size)) - 1); // which line of the sprite does the scanline go through ?
 		if (y_flip == true)
 			sprite_line = (sprite_line - (_sprite_size - 1)) * (-1);
 		uint16_t	tile_line_data_address = (_sprite_data_start + (_sprites_line[sprite].tile_number * 16)) + (sprite_line * 2);
