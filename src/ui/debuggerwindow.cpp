@@ -312,7 +312,7 @@ void DebuggerWindow::on_runOneFrameButton_clicked()
 
 void DebuggerWindow::on_runDurationButton_clicked()
 {
-	g_gameboy->notify_debugger(Debugger::RUN_CPU_SEC, ui->runDurationSpinBox->value());
+	g_gameboy->notify_debugger(Debugger::RUN_DURATION , ui->runDurationSpinBox->value());
 	while (!g_gameboy->get_debugger().get_lock()){}
 	refresh_info();
 }

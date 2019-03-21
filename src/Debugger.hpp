@@ -48,6 +48,7 @@ private:
   int _frame_size = 10;
   std::chrono::time_point<std::chrono::high_resolution_clock> _past;
   static int _first_time;
+  bool _in_vb = false;
 
   std::vector<_debug_info> _instr_pool;
   std::vector<uint16_t> _breakpoint_pool;
