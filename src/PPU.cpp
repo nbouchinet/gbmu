@@ -92,7 +92,7 @@ void				PPU::reset()
 	_bcpd = 0xFF;
 	_bcpd = 0xFF;
 
-	_scanline_counter = 456;
+	_lcd_cycles = 0;
 	_background_data_start = 0;
 	_background_chr_attr_start = 0;
 	_sprite_data_start = 0;
@@ -277,7 +277,26 @@ void				PPU::handle_lcdc_write(uint8_t value)
 		}
 		_components.driver_screen->transfer_dirty_to_clean();
 	}
+	else if (test_bit(_lcdc, 7) == false && test_bit(value, 7) == true)
+	{
+		lyc_check();
+	}
 	_lcdc = value;
+}
+
+//------------------------------------------------------------------------------
+void				PPU::lyc_check()
+{
+	if (_ly == _lyc)
+	{
+		set_bit(_stat, 2);
+		if (test_bit(_stat, 6))
+			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
+	}
+	else
+	{
+		unset_bit(_stat, 2);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -319,9 +338,11 @@ void				PPU::write(Word address, Byte value)
 			break;
 		case 0xFF44:
 			_ly = 0;
+			lyc_check();
 			break;
 		case 0xFF45:
 			_lyc = value;
+			lyc_check();
 			break;
 		case 0xFF46:
 			dma_transfer(value);
@@ -714,8 +735,6 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 //------------------------------------------------------------------------------
 void				PPU::render_sprites()
 {
-	get_sprites_for_line();
-
 	if (_nb_sprites > MAX_SPRITE_PER_LINE)
 		std::cerr << "SOMETHING IS BADLY FUCKED UP M8" << std::endl;
 
@@ -988,56 +1007,68 @@ void					PPU::translate_dmg_palettes()
 }
 
 //------------------------------------------------------------------------------
-void					PPU::update_lcd_status()
+void					PPU::update_data_transfer_to_lcd_status()
 {
-	uint8_t				status_tmp;
-
-	status_tmp = read(STAT);
-	if (is_lcd_enabled() == false)
+	if (_lcd_cycles >= CYCLES_DATA_TRANSFER_TO_LCD)
 	{
-		_scanline_counter = 456;
-		_ly = 0;
-		status_tmp &= 252;
-		set_bit(status_tmp, 0);
-		_stat = status_tmp;
-		return ;
+		_lcd_cycles -= CYCLES_DATA_TRANSFER_TO_LCD;
+		set_stat_mode(MODE_HBLANK);
+		render_scanline();
 	}
+}
 
-	uint8_t				current_mode = status_tmp & 0x3;
-	uint8_t				mode = 0;
-	bool				RequestInterrupt_flag = false;
-
-	if (_ly >= 144) // (V)ertical Blank
+//------------------------------------------------------------------------------
+void					PPU::update_oam_search_status()
+{
+	if (_lcd_cycles >= CYCLES_OAM_SEARCH)
 	{
-		mode = 1;
-		set_bit(status_tmp, 0);
-		unset_bit(status_tmp, 1);
-		RequestInterrupt_flag = test_bit(status_tmp, 4);
+		_lcd_cycles -= CYCLES_OAM_SEARCH;
+		get_sprites_for_line();
+		set_stat_mode(MODE_DATA_TRANSFER_TO_LCD);
 	}
-	else
-	{
-		uint32_t mode_2_bounds = 456 - 80;
-		uint32_t mode_3_bounds = mode_2_bounds - 172;
+}
 
-		if (_scanline_counter >= mode_2_bounds) // OAM search
+//------------------------------------------------------------------------------
+void					PPU::update_v_blank_status()
+{
+	if (_lcd_cycles >= CYCLES_VBLANK)
+	{
+		_lcd_cycles -= CYCLES_VBLANK;
+		if (_ly >= 153)
 		{
-			mode = 2;
-			set_bit(status_tmp, 1);
-			unset_bit(status_tmp, 0);
-			RequestInterrupt_flag = test_bit(status_tmp, 5);
+			_ly = 0;
+			set_stat_mode(MODE_OAM_SEARCH);
+			if (test_bit(_stat, 5) == true)
+				_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
 		}
-		else if (_scanline_counter >= mode_3_bounds) // Transfer data to lcd driver
+		else
+			_ly++;
+		lyc_check();
+	}
+}
+
+//------------------------------------------------------------------------------
+void					PPU::update_h_blank_status()
+{
+	if (_lcd_cycles >= CYCLES_HBLANK)
+	{
+		_lcd_cycles -= CYCLES_HBLANK;
+		_ly++;
+		lyc_check();
+		if (_ly >= 144)
 		{
-			mode = 3;
-			set_bit(status_tmp, 1);
-			set_bit(status_tmp, 0);
+			_components.driver_screen->transfer_dirty_to_clean();
+			set_stat_mode(MODE_VBLANK);
+			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->VBI);
+			if (test_bit(_stat, 5) == true)
+				_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
 		}
-		else // (H)orizontal Blank
+		else
 		{
-			mode = 0;
-			unset_bit(status_tmp, 1);
-			unset_bit(status_tmp, 0);
-			RequestInterrupt_flag = test_bit(status_tmp, 3);
+			set_stat_mode(MODE_OAM_SEARCH);
+			if (test_bit(_stat, 5) == true)
+				_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
+
 			if (is_hdma_active() == true && _h_blank_hdma_step_done == false)
 			{
 				hdma_h_blank_step();
@@ -1045,54 +1076,34 @@ void					PPU::update_lcd_status()
 			}
 		}
 	}
+}
 
-	if (RequestInterrupt_flag == true && mode != current_mode)
-		_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
-
-	if (_ly == _lyc)
-	{
-		set_bit(status_tmp, 2);
-		if (test_bit(status_tmp, 6))
-			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
-	}
-	else
-	{
-		unset_bit(status_tmp, 2);
-	}
-	_stat = status_tmp;
+//------------------------------------------------------------------------------
+void					PPU::update_lcd_status()
+{
+//	std::cerr << "update_lcd_status called, _stat = " << std::bitset<8>(_stat)  << std::endl;
+	if (get_stat_mode() == MODE_HBLANK)
+		update_h_blank_status();
+	else if (get_stat_mode() == MODE_VBLANK)
+		update_v_blank_status();
+	else if (get_stat_mode() == MODE_OAM_SEARCH)
+		update_oam_search_status();
+	else if (get_stat_mode() == MODE_DATA_TRANSFER_TO_LCD)
+		update_data_transfer_to_lcd_status();
 }
 
 //------------------------------------------------------------------------------
 void					PPU::update_graphics(Word cycles)
 {
-	update_lcd_status();
-
+	_lcd_cycles += cycles;
 	if (is_lcd_enabled())
 	{
-		if (static_cast<int>(_scanline_counter) - cycles <= 0)
-			_scanline_counter = 0;
-		else
-			_scanline_counter -= cycles;
+		update_lcd_status();
 	}
 	else
-		return ;
-
-	if (_scanline_counter <= 0)
 	{
-
-		_h_blank_hdma_step_done = false;
-		_scanline_counter = 456;
-		if (_ly == 144)
-		{
-			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->VBI);
-			_components.driver_screen->transfer_dirty_to_clean();
-		}
-		if (_ly < 144)
-			render_scanline();
-		if (_ly <= 153)
-			_ly++;
-		else
-			_ly = 0;
+		if (_lcd_cycles >= 70224)
+			_lcd_cycles -= 70224;
 	}
 }
 
