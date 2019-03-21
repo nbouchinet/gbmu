@@ -9,6 +9,8 @@
 #include <unistd.h>
 #include <vector>
 
+int Debugger::_first_time = 0;
+
 Debugger::Debugger(ComponentsContainer &components)
     : _components(components), _lock(true) {
   _enabled = false;
@@ -341,11 +343,9 @@ void Debugger::lock_game(uint16_t pc) {
 }
 
 void Debugger::fetch(uint16_t pc) {
-  static int first_time = 0;
-
-  if (first_time == 0) {
+  if (Debugger::_first_time == 0) {
     update_data(pc);
-    first_time = 1;
+	Debugger::_first_time = 1;
   }
   lock_game(pc);
   while (_lock) {

@@ -11,6 +11,7 @@
 #include <QKeyEvent>
 #include <QThread>
 #include <QGraphicsPixmapItem>
+#include <QInputDialog>
 
 Gameboy *g_gameboy = nullptr;
 QMutex mutexGb;
@@ -24,13 +25,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
 	//Load icon
-	_pause_icon = QIcon(":resources/resources/pause.png");
-	_play_icon = QIcon(":resources/resources/play.png");
+	_pause_icon = QIcon(":/resources/pause.png");
+	_play_icon = QIcon(":/resources/play.png");
 
 	//Shortcut settings
 	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+	ui->actionSave->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
 	ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
-	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
 	ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
 	ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
 }
@@ -73,6 +75,22 @@ void MainWindow::on_actionOpen_triggered()
 	connect(_gameboy_worker, SIGNAL (finished()), _gameboy_thread, SLOT (quit()));
 	_gameboy_thread->start();
 	setCentralWidget(_gameboy_screen);
+
+	//enable toolsbar action
+	ui->actionSave->setEnabled(true);
+	ui->actionPlay->setEnabled(true);
+	ui->actionStop->setEnabled(true);
+	ui->actionMute->setEnabled(true);
+	ui->actionDebug->setEnabled(true);
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+	if (!g_gameboy)
+		return;
+    QString save_path = _rom_path + ".save";
+	g_gameboy->save(save_path.toUtf8().constData());
+    QMessageBox::information(this, "Save", "Game Saved");
 }
 
 void MainWindow::pause_gameboy(bool stop)
@@ -115,9 +133,9 @@ void MainWindow::on_actionDebug_triggered()
 	if (g_gameboy)
 	{
 		g_gameboy->get_debugger().toggle();
-		DebuggerWindow debuggerwindow;
-		debuggerwindow.setModal(true);
-		debuggerwindow.exec();
+		DebuggerWindow *debuggerwindow = new DebuggerWindow(this);
+		debuggerwindow->setModal(false);
+		debuggerwindow->show();
 	}
 }
 

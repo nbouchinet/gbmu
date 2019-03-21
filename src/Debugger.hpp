@@ -9,11 +9,12 @@
 #include <chrono>
 #include <map>
 #include <vector>
-
+#include <iostream>
 class Debugger {
 
 public:
   Debugger(ComponentsContainer &components);
+  ~Debugger() { Debugger::_first_time = 0; }
   struct _instr_info {
     const char *instr = nullptr;
     uint8_t size = 0x00;
@@ -46,6 +47,7 @@ private:
   bool _run_one_step = false;
   int _frame_size = 10;
   std::chrono::time_point<std::chrono::high_resolution_clock> _past;
+  static int _first_time;
 
   std::vector<_debug_info> _instr_pool;
   std::vector<uint16_t> _breakpoint_pool;

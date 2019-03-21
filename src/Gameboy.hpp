@@ -59,6 +59,7 @@ public:
   int run();
   void step();
   void init();
+  void load_existing_save();
   void reset();
   void save(std::string save_name);
   void load_save(std::string save_name);

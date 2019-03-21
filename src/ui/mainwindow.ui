@@ -30,6 +30,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
    </widget>
    <widget class="QMenu" name="menuAction">
     <property name="title">
@@ -63,15 +64,22 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
    <addaction name="actionPlay"/>
    <addaction name="actionStop"/>
    <addaction name="actionMute"/>
    <addaction name="actionDebug"/>
   </widget>
   <action name="actionOpen">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/resources/resources/download.png</normaloff>:/resources/resources/download.png</iconset>
+     <normaloff>:/resources/open.png</normaloff>:/resources/open.png</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -81,9 +89,12 @@
    </property>
   </action>
   <action name="actionPlay">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/resources/resources/pause.png</normaloff>:/resources/resources/pause.png</iconset>
+     <normaloff>:/resources/pause.png</normaloff>:/resources/pause.png</iconset>
    </property>
    <property name="text">
     <string>Play</string>
@@ -93,9 +104,12 @@
    </property>
   </action>
   <action name="actionStop">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/resources/resources/stop.png</normaloff>:/resources/resources/stop.png</iconset>
+     <normaloff>:/resources/stop.png</normaloff>:/resources/stop.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -105,9 +119,12 @@
    </property>
   </action>
   <action name="actionMute">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/resources/resources/mute.png</normaloff>:/resources/resources/mute.png</iconset>
+     <normaloff>:/resources/mute.png</normaloff>:/resources/mute.png</iconset>
    </property>
    <property name="text">
     <string>Mute</string>
@@ -117,15 +134,30 @@
    </property>
   </action>
   <action name="actionDebug">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/resources/resources/bug.png</normaloff>:/resources/resources/bug.png</iconset>
+     <normaloff>:/resources/bug.png</normaloff>:/resources/bug.png</iconset>
    </property>
    <property name="text">
     <string>Debug</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/resources/save.png</normaloff>:/resources/save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
    </property>
   </action>
  </widget>
