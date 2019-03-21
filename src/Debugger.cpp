@@ -108,8 +108,12 @@ void Debugger::add_breakpoint(uint16_t addr) {
 }
 
 void Debugger::remove_breakpoint(uint16_t addr) {
-  _breakpoint_pool.erase(
-      std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr));
+  auto to_erase =
+      std::find(_breakpoint_pool.begin(), _breakpoint_pool.end(), addr);
+
+  if (to_erase != _breakpoint_pool.end()) {
+    _breakpoint_pool.erase(to_erase);
+  }
 }
 
 uint16_t Debugger::get_register_value(uint16_t addr) {
@@ -266,7 +270,10 @@ bool Debugger::on_breakpoint(uint16_t pc) {
 }
 
 bool Debugger::is_frame_passed() {
-  if (_run_one_frame && _components.ppu->is_screen_filled()) {
+  if (_components.ppu->is_screen_filled())
+    _in_vb = true;
+  if (_run_one_frame && _components.ppu->get_ly() <= 143 && _in_vb == true) {
+    _in_vb = false;
     reset_flags();
     return true;
   }
@@ -345,7 +352,7 @@ void Debugger::lock_game(uint16_t pc) {
 void Debugger::fetch(uint16_t pc) {
   if (Debugger::_first_time == 0) {
     update_data(pc);
-	Debugger::_first_time = 1;
+    Debugger::_first_time = 1;
   }
   lock_game(pc);
   while (_lock) {
