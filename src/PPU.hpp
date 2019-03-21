@@ -51,6 +51,7 @@ public:
 	void					set_bit(uint8_t & src, uint8_t bit_number);
 	void					unset_bit(uint8_t & src, uint8_t bit_number);
 	void					update_graphics(Word cycles);
+	Byte				get_ly() const {return _ly;}
 
 	static constexpr Word	LCDC = 0xFF40;
 	static constexpr Word	STAT = 0xFF41;
