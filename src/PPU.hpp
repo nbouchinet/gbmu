@@ -16,7 +16,6 @@
 
 	finish the pixel mixing algorythm for CGB
 	hdma transfers !!!
-	fix the goddamn sprites in metroid / pokemon
 */
 
 typedef struct		s_sprite_info
@@ -80,6 +79,22 @@ public:
 	static constexpr Byte	MODE_GB_DMG = 0x01;
 	static constexpr Byte	MODE_GB_CGB = 0x02;
 
+	enum MODE_CYCLES
+	{
+		CYCLES_HBLANK = 204,
+		CYCLES_VBLANK = 456,
+		CYCLES_OAM_SEARCH = 80,
+		CYCLES_DATA_TRANSFER_TO_LCD = 172
+	};
+
+	enum STAT_MODE
+	{
+		MODE_HBLANK = 0,
+		MODE_VBLANK = 1,
+		MODE_OAM_SEARCH = 2,
+		MODE_DATA_TRANSFER_TO_LCD = 3
+	};
+
 private:
 	uint16_t				get_tile_data_address(uint8_t tile_identifier);
 	uint16_t				determine_tile_number_address(uint8_t y_pos, uint8_t x_pos, bool boi_its_a_window);
@@ -94,6 +109,7 @@ private:
 	void					handle_cgb_bg_palette_write(uint8_t bcpd_arg);
 	void					handle_cgb_obj_palette_write(uint8_t ocpd_arg);
 	void					handle_hdma_transfer(uint8_t hdma5_arg);
+	void					lyc_check();
 	bool					is_hdma_active();
 	void					hdma_h_blank_step();
 	void					initiate_hdma_transfer(uint8_t hdma5_arg);
@@ -110,6 +126,13 @@ private:
 	uint32_t				translate_cgb_color_value(uint16_t value);
 	uint32_t				translate_dmg_color_value(uint8_t value);
 	uint16_t				color_palette_array_case_wrapper(uint8_t specifier) const;
+	void					update_data_transfer_to_lcd_status();
+	void					update_oam_search_status();
+	void					update_v_blank_status();
+	void					update_h_blank_status();
+	bool					test_interrupt_enablers();
+	void					set_stat_mode(STAT_MODE mode) { unset_bit(_stat, 0); unset_bit(_stat, 1); _stat += mode; }
+	uint8_t					get_stat_mode() { return (extract_value(_stat, 0, 1)); }
 	void					update_lcd_status();
 	void					replace_pixel_segment(t_pixel_segment &holder, t_pixel_segment &contender);
 
@@ -138,7 +161,7 @@ private:
 	uint8_t					_ocps;					// (0xFF6A)
 	uint8_t					_ocpd;					// (0xFF6B)
 
-	uint32_t				_scanline_counter;
+	uint64_t				_lcd_cycles;
 	uint16_t				_background_data_start;
 	uint16_t				_background_chr_attr_start;
 	uint16_t				_sprite_data_start;
