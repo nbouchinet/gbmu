@@ -198,8 +198,6 @@ void DebuggerWindow::refresh_instr(bool init)
 			ui->disassemblerWidget->item(i, 1)->setText(value);
 	}
 	ui->disassemblerWidget->setVerticalHeaderLabels(titles);
-	if (init)
-		init = false;
 }
 
 void DebuggerWindow::reset_color(QTableWidget *widget, int column)

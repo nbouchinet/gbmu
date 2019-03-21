@@ -40,6 +40,8 @@ private slots:
 
     void on_actionDebug_triggered();
     
+	void on_actionSave_triggered();
+
 private:
     Ui::MainWindow *ui;
 	QString			_rom_path;

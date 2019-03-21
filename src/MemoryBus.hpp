@@ -15,13 +15,12 @@ private:
     IReadWrite *component;
   };
   std::vector<RangedComponent> _ranged_components;
-  bool _bios_is_enabled = true;
+  bool _bios_is_enabled;
 
 public:
   MemoryBus(ComponentsContainer &components);
 
   void disable_bios();
-  void enable_bios(Bios *bios);
   void reset(ComponentsContainer &components);
 
   template <typename T> T read(Word addr) const {
