@@ -103,7 +103,7 @@ void Gameboy::load_existing_save() {
 int Gameboy::run() {
   //_components.mem_bus->write(0xFF50, 1);
   set_cgb_flag();
-  _components.core->instr_jp(0x0000);
+  //_components.core->instr_jp(0x0000);
   do_checksum();
   load_existing_save();
   while (!_is_abort) {
@@ -187,6 +187,22 @@ void Gameboy::do_checksum() {
 
   if (cartridge_sum != sum)
     throw BadChecksum();
+}
+
+bool Gameboy::is_cgb_bios() {
+	if (_cgb_flag == 0xC0) {
+		return true;
+	}
+	else if (_cgb_flag == 0x80) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void Gameboy::set_bios_type() {
+	_components.bios->_bios_type = is_cgb_bios();
 }
 
 void Gameboy::set_cgb_flag() {

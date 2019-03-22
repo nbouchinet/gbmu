@@ -623,12 +623,15 @@ void				PPU::setup_gb_mode()
 {
 	uint8_t			mode_flag = _components.mem_bus->read<Byte>(0x0143);
 
-	if (1)/* some shit that says we run on DMG */
-		_gb_mode = MODE_GB_DMG;
-	else if (mode_flag == 0xC0)
+	if (mode_flag == 0xC0) {
 		_gb_mode = MODE_GB_CGB;
-	else if (mode_flag == 0x80)
+	}
+	else if (mode_flag == 0x80) {
 		_gb_mode = MODE_GB_DMGC;
+	}
+	else {
+		_gb_mode = MODE_GB_DMG;
+	}
 }
 
 //------------------------------------------------------------------------------
