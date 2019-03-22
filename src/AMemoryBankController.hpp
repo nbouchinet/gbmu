@@ -3,6 +3,8 @@
 
 #include "Fwd.hpp"
 #include <array>
+#include <boost/serialization/array.hpp>
+#include <boost/serialization/vector.hpp>
 #include <cstdint>
 #include <vector>
 
@@ -20,6 +22,8 @@ public:
   AMemoryBankController(ROMContainer &rom, RAMContainer &ram)
 	  : _rom(rom), _ram(ram) {}
   virtual ~AMemoryBankController() {};
+
+  template <class Archive> void serialize(Archive &, const unsigned int) {}
 
   virtual void write(uint16_t addr, uint8_t value) = 0;
   virtual uint8_t read(uint16_t addr) const = 0;

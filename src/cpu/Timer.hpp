@@ -3,6 +3,8 @@
 
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 class Timer : public IReadWrite {
 public:
@@ -15,6 +17,14 @@ private:
     Byte _value;
     Byte _freq;
     int _cycles;
+
+    friend class boost::serialization::access;
+    template <class Archive> void serialize(Archive &ar, const unsigned int) {
+      ar &_is_running;
+      ar &_value;
+      ar &_freq;
+      ar &_cycles;
+    }
 
   public:
     Counter(Byte freq);
@@ -40,6 +50,21 @@ private:
 
   ComponentsContainer &_components;
 
+  Counter _timer_counter;
+  Counter _divider_counter;
+
+  friend class boost::serialization::access;
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    Byte rTAC = _rTAC;
+
+    ar &_rTMA;
+    ar &rTAC;
+    ar &_timer_counter;
+    ar &_divider_counter;
+
+	_rTAC = rTAC;
+  }
+
 public:
   Timer(ComponentsContainer &components)
       : _components(components), _timer_counter(0x00), _divider_counter(0x03) {
@@ -56,9 +81,6 @@ public:
   void enable_timer() { _rTAC |= 0x4; }
   void set_frequence();
   void update(Word cycles);
-
-  Counter _timer_counter;
-  Counter _divider_counter;
 };
 
 #endif /* TIMER_H */

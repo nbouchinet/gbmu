@@ -26,6 +26,15 @@ private:
   clock_t clock_last;
   float elapsed_time;
 
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &active_reg;
+    ar &seconds;
+    ar &minutes;
+    ar &hours;
+    ar &day_low;
+    ar &day_high;
+  }
+
 public:
   RealTimeClock(void)
       : active_reg(RTC_SEC), seconds(0), minutes(0), hours(0), day_low(0),

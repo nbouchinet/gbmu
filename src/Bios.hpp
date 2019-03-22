@@ -7,6 +7,7 @@
 
 #include <exception>
 #include <vector>
+#include <boost/serialization/access.hpp>
 
 class Bios : public IReadWrite {
 
@@ -19,6 +20,9 @@ public:
 private:
   static const std::vector<Byte> s_dmg_bios;
   static const std::vector<Byte> s_cgb_bios;
+
+  friend boost::serialization::access;
+  template <class Archive> void serialize(Archive &, const unsigned int) {}
 
   const std::vector<Byte>& get_bios() const;
 

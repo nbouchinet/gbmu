@@ -12,6 +12,11 @@
 #include <iostream>
 #include <string>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/array.hpp>
+
 /* TODO LIST
 
         finish the pixel mixing algorythm for CGB
@@ -24,6 +29,15 @@ typedef struct s_sprite_info {
   uint8_t tile_number;
   uint8_t flags;
   uint8_t obj_number;
+
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &y_pos;
+    ar &x_pos;
+    ar &tile_number;
+    ar &flags;
+    ar &obj_number;
+  }
+
 } t_sprite_info;
 
 typedef struct s_pixel_segment {
@@ -31,6 +45,13 @@ typedef struct s_pixel_segment {
   bool is_sprite;
   t_sprite_info sprite_info;
   // need to add stuff related to palette // actually maybe not
+
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &value;
+    ar &is_sprite;
+    ar &sprite_info;
+  }
+
 } t_pixel_segment;
 
 class PPU : public IReadWrite {
@@ -92,7 +113,7 @@ public:
     MODE_DATA_TRANSFER_TO_LCD = 3
   };
 
-  void set_speed(uint8_t value) {_speed = value;}
+  void set_speed(uint8_t value) { _speed = value; }
 
 private:
   uint8_t _speed = 1;
@@ -209,6 +230,65 @@ private:
 
   uint64_t _nb_frames_rendered;
   uint8_t _wait_frames_turn_on;
+
+  friend class boost::serialization::access;
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &_lcdc;
+    ar &_stat;
+    ar &_scy;
+    ar &_scx;
+    ar &_ly;
+    ar &_lyc;
+    ar &_dma;
+    ar &_bgp;
+    ar &_obp0;
+    ar &_obp1;
+    ar &_wy;
+    ar &_wx;
+    ar &_vbk;
+    ar &_hdma1;
+    ar &_hdma2;
+    ar &_hdma3;
+    ar &_hdma4;
+    ar &_hdma5;
+    ar &_bcps;
+    ar &_bcpd;
+    ar &_ocps;
+    ar &_ocpd;
+
+    ar &_lcd_cycles;
+    ar &_background_data_start;
+    ar &_background_chr_attr_start;
+    ar &_sprite_data_start;
+    ar &_window_chr_attr_start;
+    ar &_sprite_size;
+    ar &_unsigned_tile_numbers;
+    ar &_windowing_on;
+    ar &_gb_mode;
+
+    ar &_h_blank_hdma_src_addr;
+    ar &_h_blank_hdma_dst_addr;
+
+    ar &_background_color_palettes_translated;
+    ar &_sprite_color_palettes_translated;
+    ar &_background_color_palettes;
+    ar &_sprite_color_palettes;
+
+    ar &_background_dmg_palette_translated;
+    ar &_sprites_dmg_palettes_translated;
+
+    ar &_background_dmg_palette;
+    ar &_sprites_dmg_palettes;
+
+    ar &_pixel_pipeline;
+    ar &_sprites_line;
+
+    ar &_nb_sprites;
+
+    ar &_lcd_memory_bank_1;
+    ar &_lcd_memory_bank_0;
+    ar &_lcd_oam_ram;
+  }
 };
 
 #endif

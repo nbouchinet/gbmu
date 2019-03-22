@@ -4,6 +4,7 @@
 #include "MemoryBankController1.hpp"
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
+#include <boost/serialization/access.hpp>
 #include <memory>
 #include <sstream>
 
@@ -16,6 +17,14 @@ private:
   AMemoryBankController::ROMContainer rom;
 
   friend class Accessor;
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar &rom;
+    ar &ram;
+    ar &*mbc;
+  }
 
 public:
   Cartridge(const std::string &);
