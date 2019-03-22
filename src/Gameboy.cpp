@@ -32,7 +32,8 @@ ComponentsContainer::ComponentsContainer(const std::string &rom_path) {
 ComponentsContainer::~ComponentsContainer() {}
 
 Gameboy::Gameboy(const std::string &rom_path)
-    : _components(rom_path), _debugger(_components), _wait(false), _rom_path(rom_path), _is_abort(false), _pause(false) {}
+    : _components(rom_path), _debugger(_components), _wait(false),
+      _rom_path(rom_path), _is_abort(false), _pause(false) {}
 
 void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
   switch (state) {
@@ -52,17 +53,17 @@ void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
 }
 
 void Gameboy::reset() {
-	_components.mem_bus->reset(_components);
-	_components.core->reset();
-	_components.cartridge->reset(_rom_path);
-	_components.interrupt_controller->reset();
-	_components.input_controller->reset();
-	_components.timer->reset();
-	_components.lcd_registers->reset();
-	_components.ppu->reset();
-	_components.driver_screen->reset_screen();
-	init();
-	_debugger.reset();
+  _components.mem_bus->reset(_components);
+  _components.core->reset();
+  _components.cartridge->reset(_rom_path);
+  _components.interrupt_controller->reset();
+  _components.input_controller->reset();
+  _components.timer->reset();
+  _components.lcd_registers->reset();
+  _components.ppu->reset();
+  _components.driver_screen->reset_screen();
+  init();
+  _debugger.reset();
 }
 
 void Gameboy::key_pressed_wraper(int val) {
@@ -91,14 +92,12 @@ void Gameboy::step() {
   }
 }
 
-void Gameboy::load_existing_save()
-{
-	std::string save_path = _rom_path + ".save";
-	std::ifstream file(save_path.c_str());
-	if (file.good())
-	{
-		load_save(save_path);
-	}
+void Gameboy::load_existing_save() {
+  std::string save_path = _rom_path + ".save";
+  std::ifstream file(save_path.c_str());
+  if (file.good()) {
+    load_save(save_path);
+  }
 }
 
 int Gameboy::run() {
@@ -108,8 +107,8 @@ int Gameboy::run() {
   do_checksum();
   load_existing_save();
   while (!_is_abort) {
-	if (!_pause)
-		step();
+    if (!_pause)
+      step();
   }
   return (0);
 }
@@ -191,5 +190,5 @@ void Gameboy::do_checksum() {
 }
 
 void Gameboy::set_cgb_flag() {
-	_cgb_flag = _components.mem_bus->read<Byte>(0x143);
+  _cgb_flag = _components.mem_bus->read<Byte>(0x143);
 }

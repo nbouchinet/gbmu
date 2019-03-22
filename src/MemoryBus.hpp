@@ -31,6 +31,8 @@ public:
 
     if (addr < 0x100 && _bios_is_enabled) {
       return _bios->read(addr);
+    } else if (addr >= 0x0200 && addr < 0x0900 && _bios_is_enabled) {
+      return _bios->read(addr - 0x0100);
     }
 
     for (const auto &range : _ranged_components) {
