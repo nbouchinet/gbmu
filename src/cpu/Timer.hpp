@@ -35,19 +35,14 @@ private:
   static constexpr Word TMA = 0xFF06;  // Timer modulo
   static constexpr Word TAC = 0xFF07;  // Timer controller
 
-  Byte _rDIV;
-  Byte _rTIMA;
   Byte _rTMA;
   Byte _rTAC : 3;
-  int _counter;
-  Word _rDIVCounter;
 
   ComponentsContainer &_components;
 
 public:
   Timer(ComponentsContainer &components)
-      : _components(components), _timer_counter(0x00),
-        _divider_counter(0x03) {
+      : _components(components), _timer_counter(0x00), _divider_counter(0x03) {
     reset();
   };
 
@@ -57,8 +52,6 @@ public:
   void write(Word addr, Byte val) override;
 
   auto get_frequence() const { return read(TAC) & 0x3; }
-  auto get_counter() const { return _counter; }
-  void update_divider(Word cycles);
   bool timer_enabled() const { return (_rTAC & 0x4); }
   void enable_timer() { _rTAC |= 0x4; }
   void set_frequence();
