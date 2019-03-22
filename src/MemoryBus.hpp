@@ -2,6 +2,7 @@
 #ifndef MEMORYBUS_H
 #define MEMORYBUS_H
 
+#include "src/Bios.hpp"
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
 
@@ -15,6 +16,7 @@ private:
     IReadWrite *component;
   };
   std::vector<RangedComponent> _ranged_components;
+  Bios *_bios;
   bool _bios_is_enabled;
 
 public:
@@ -26,6 +28,10 @@ public:
   template <typename T> T read(Word addr) const {
     T ret = 0;
     auto i = sizeof(T);
+
+    if (addr < 0x100 && _bios_is_enabled) {
+      return _bios->read(addr);
+    }
 
     for (const auto &range : _ranged_components) {
       if (addr >= range.begin and addr <= range.end) {

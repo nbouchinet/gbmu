@@ -3,9 +3,7 @@
 
 #include "Fwd.hpp"
 
-#include "Gameboy.hpp"
-#include "MemoryBus.hpp"
-
+#include "src/IReadWrite.hpp"
 #include <exception>
 #include <vector>
 
