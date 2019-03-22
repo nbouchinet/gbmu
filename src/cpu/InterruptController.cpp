@@ -57,6 +57,7 @@ void InterruptController::parse_interrupt() {
 
 void InterruptController::execute_interrupt(Byte interrupt) {
   _IME = false;
+  _components.core->notify_interrupt();
   switch (interrupt) {
   case 0:
     _components.core->start_interrupt(VBI);
@@ -95,5 +96,4 @@ void InterruptController::request_interrupt(Word interrupt) {
     _rIF |= 0x0F;
     break;
   }
-  _components.core->notify_interrupt();
 }
