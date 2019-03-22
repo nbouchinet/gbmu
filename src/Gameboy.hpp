@@ -77,6 +77,9 @@ public:
 
   void go() { _wait.store(false); }
   bool is_cycling() { return !_wait; }
+  bool is_cgb_bios();
+  void set_bios_type();
+
 
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
