@@ -619,6 +619,19 @@ void				PPU::setup_background_data()
 }
 
 //------------------------------------------------------------------------------
+void				PPU::setup_gb_mode()
+{
+	uint8_t			mode_flag = _components.mem_bus->read<Byte>(0x0143);
+
+	if (1)/* some shit that says we run on DMG */
+		_gb_mode = MODE_GB_DMG;
+	else if (mode_flag == 0xC0)
+		_gb_mode = MODE_GB_CGB;
+	else if (mode_flag == 0x80)
+		_gb_mode = MODE_GB_DMGC;
+}
+
+//------------------------------------------------------------------------------
 void				PPU::set_pixel(uint8_t y, uint8_t x, uint32_t value)
 {
 	_components.driver_screen->set_rgba(y, x, value);
@@ -728,7 +741,6 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 			if (holder.value == 0 && contender.value != 0) // transparent pixel vs not transparent
 				replace_pixel_segment(holder, contender);
 		}
-		//replace_pixel_segment(holder, contender); // obvious tmp is obvious
 	}
 }
 
@@ -825,12 +837,12 @@ void				PPU::render_tiles()
 
 	for (uint8_t i = 0; i < 160; i++)
 	{
-		if (_windowing_on == true && i >= _wx - 7 && _ly >= _wy) // are we in the window and is it enabled ?
+		if (_windowing_on == true && i + 7 >= _wx && _ly >= _wy) // are we in the window and is it enabled ?
 			in_window = true;
 
 		if (in_window == true)
 		{
-			x_pos = i - (_wx - 7);
+			x_pos = (i + 7) - _wx;
 			y_pos = _ly - _wy;
 		}
 		else
@@ -928,6 +940,7 @@ void				PPU::send_pixel_pipeline()
 //------------------------------------------------------------------------------
 void				PPU::render_scanline()
 {
+	setup_gb_mode();
 	setup_window();
 	setup_background_data();
 	setup_sprite_data();
