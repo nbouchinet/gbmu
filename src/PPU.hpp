@@ -77,7 +77,8 @@ public:
 
 	static constexpr Byte	MODE_GB_NOMODE = 0x00;
 	static constexpr Byte	MODE_GB_DMG = 0x01;
-	static constexpr Byte	MODE_GB_CGB = 0x02;
+	static constexpr Byte	MODE_GB_DMGC = 0x02;
+	static constexpr Byte	MODE_GB_CGB = 0x03;
 
 	enum MODE_CYCLES
 	{
@@ -135,6 +136,7 @@ private:
 	uint8_t					get_stat_mode() { return (extract_value(_stat, 0, 1)); }
 	void					update_lcd_status();
 	void					replace_pixel_segment(t_pixel_segment &holder, t_pixel_segment &contender);
+	void					setup_gb_mode();
 
 	ComponentsContainer&	_components;
 
