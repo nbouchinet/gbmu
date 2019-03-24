@@ -3,6 +3,7 @@
 
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
+#include "src/sound/AudioInterface.hpp"
 
 #include <cassert>
 #include <vector>
@@ -15,6 +16,8 @@ class SoundChannel : public IReadWrite {
  private:
   using ModUnitPtr = IModulationUnit*;
   std::vector<ModUnitPtr> _modulation_units;
+  mutable unsigned _summed_volumes = 0;
+  mutable unsigned _summed_volumes_nb = 1;
 
   virtual void do_trigger() = 0;
   virtual void do_update() = 0;
@@ -39,8 +42,12 @@ class SoundChannel : public IReadWrite {
 
   float get_output() const {
     if (not p_enabled) return 0.f;
-    assert(p_output_volume <= MaxVolume);
-    return p_output_volume / (static_cast<float>(MaxVolume + 1) / 2.f) - 1.f;
+    Byte average = _summed_volumes / _summed_volumes_nb;
+    float ret = average / (static_cast<float>(MaxVolume + 1) / 2.f) - 1.f;
+    _summed_volumes = 0;
+    _summed_volumes_nb = 1;
+    assert(ret <= 1.f and ret >= -1.f);
+    return ret;
   }
 
   Byte get_raw_volume() const { return p_output_volume; }

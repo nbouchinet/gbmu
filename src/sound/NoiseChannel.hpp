@@ -36,18 +36,19 @@ class NoiseChannel : public SoundChannel {
 
   void dump() const override;
 
-  Word get_divider(Byte code) {
-    auto s = _shift + 3;
-    if (!code) {
-      code = 1;
-      --s;
-    }
-    return code << s;
+  // Word get_divider(Byte code) {
+  //   auto s = _shift + 3;
+  //   if (!code) {
+  //     code = 1;
+  //     --s;
+  //   }
+  //   return (code << s);
+  // }
+  inline static Word get_divider(Byte code) {
+    Word ret = 8u;
+    if (code != 0) ret = 16 * code;
+    return ret;
   }
-  //inline static Word get_divider(Byte code) {
-  //  if (code == 0) return 8u;
-  //  return 16 * code;
-  //}
 };
 
 }  // namespace sound

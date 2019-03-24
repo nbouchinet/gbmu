@@ -15,13 +15,16 @@ void NoiseChannel::do_update() {
       if (_width_mode) {
         _lfsr = (_lfsr & ~0x40u) | xored << 6;
       }
-     p_output_volume = (~_lfsr & 1) * _volume;
+      p_output_volume = (~_lfsr & 1) * _volume;
+    }
+    _timer = get_divider(_divisor_code) << _shift;
   }
-  _timer = get_divider(_divisor_code);
 }
-}  // namespace sound
 
-void NoiseChannel::do_trigger() { _lfsr = 0x7fff; }
+void NoiseChannel::do_trigger() {
+  _lfsr = 0x7fff;
+  _timer = get_divider(_divisor_code) << _shift;
+}
 
 void NoiseChannel::do_clear() {
   _timer = 0;

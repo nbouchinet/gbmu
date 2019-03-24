@@ -7,6 +7,7 @@
 #include "utils/Operations_utils.hpp"
 
 #include <cassert>
+#include <unistd.h>
 #include <iostream>
 
 namespace sound {
@@ -52,6 +53,7 @@ void APU::update_clock() {
     if (_output_index >= AudioInterface::SamplesTableSize) {
       while (not _audio_interface->queue_stereo_samples(_right_output,
                                                         _left_output)) {
+        usleep(1);
       }
       _output_index = 0;
     }

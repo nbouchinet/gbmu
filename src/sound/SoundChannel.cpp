@@ -17,7 +17,11 @@ void SoundChannel::update_modules(unsigned int modulation_unit_step) {
 }
 
 void SoundChannel::update() {
-  if (p_enabled) do_update();
+  if (p_enabled) {
+    do_update();
+    _summed_volumes += p_output_volume;
+    ++_summed_volumes_nb;
+  }
 }
 
 void SoundChannel::trigger() {
@@ -29,6 +33,8 @@ void SoundChannel::trigger() {
 }
 
 void SoundChannel::clear() {
+  _summed_volumes = 0;
+  _summed_volumes_nb = 1;
   p_enabled = false;
   p_output_volume = 0;
   for (auto& unit : _modulation_units) unit->clear();
