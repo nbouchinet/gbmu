@@ -138,6 +138,7 @@ bool					PPU::is_hdma_active()
 //------------------------------------------------------------------------------
 void					PPU::hdma_h_blank_step()
 {
+	std::cerr << "hdma_h_blank_step called" << std::endl;
 	for (int i = 0; i < 16; i++)
 	{
 		_components.mem_bus->write(_h_blank_hdma_dst_addr + i,
@@ -154,8 +155,14 @@ void					PPU::initiate_hdma_transfer(uint8_t hdma5_arg)
 	std::cerr << "Initiated an hdma transfer !" << std::endl;
 	if (test_bit(hdma5_arg, 7) == true) // horizontal blanking dma : only 16 bytes transfered per H-blank
 	{
+		if (get_stat_mode() == MODE_HBLANK)
+			std::cerr << "WARNING : H-Blank DMA should not be started (write to FF55) during a H-Blank period (STAT mode 0)." << std::endl;
+		unset_bit(hdma5_arg, 7);
+		_hdma5 = hdma5_arg;
 		_h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
 		_h_blank_hdma_dst_addr = 0x8000 + (((_hdma3 << 8) + _hdma4) & 0x1FF0);
+		std::cerr << "hblank hdma, src = " << std::hex << +_h_blank_hdma_src_addr
+			<< " -> dest : " << std::hex << +_h_blank_hdma_dst_addr << " | size = " << std::hex << 16 * (_hdma5 + 1) << std::endl;
 	}
 	else // general purpose dma : everything is tranfered at once rignt away
 	{
@@ -169,10 +176,13 @@ void					PPU::initiate_hdma_transfer(uint8_t hdma5_arg)
 		addr_dest = 0x8000 + addr_add;
 		lines_to_transfer = _hdma5 & 0x7F;
 
+		std::cerr << "general purpose hdma, src = " << std::hex << +addr_source << " -> dest : " << std::hex << +addr_dest << " | size = " << std::hex << 16 * (_hdma5 + 1) << std::endl;
+
 		for (int i = 0; i < (lines_to_transfer + 1) * 16; i++)
 		{
 			_components.mem_bus->write(addr_dest + i, _components.mem_bus->read<Byte>(addr_source + i));
 		}
+		_hdma5 = 0xFF;
 	}
 }
 
@@ -180,9 +190,15 @@ void					PPU::initiate_hdma_transfer(uint8_t hdma5_arg)
 void					PPU::handle_hdma_transfer(uint8_t hdma5_arg)
 {
 	if (is_hdma_active() == false)
+	{
+		std::cerr << "handle_hdma_transfer called : No hdma transfer currently in progress" << std::endl;
 		initiate_hdma_transfer(hdma5_arg);
+	}
 	else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false)
+	{
+		std::cerr << "handle_hdma_transfer called : WARNING : hdma transfer currently in progress" << std::endl;
 		unset_bit(_hdma5, 7);
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -546,19 +562,18 @@ Byte				PPU::read(Word address) const
 //------------------------------------------------------------------------------
 uint8_t				PPU::read_mem_bank(uint8_t bank, uint16_t address)
 {
-	uint8_t			ret = 0;
-
-	if (bank == 0)
+	if (address >= 0x8000 && address <= 0x9FFF)
 	{
-		_vbk = 0;
-		ret = read(address); // in screen !!
+		if (bank == 0)
+			return (_lcd_memory_bank_0[address - 0x8000]);
+		else if (bank == 1)
+			return (_lcd_memory_bank_1[address - 0x8000]);
 	}
-	else if (bank == 1)
+	else
 	{
-		_vbk = 1;
-		ret = read(address); // in screen !!
+		std::cerr << "WARNING : read_mem_bank called with an address not included in v_bank ranges (0x8000-0x9FFF) - returning 0" << std::endl;
 	}
-	return (ret);
+		return (0);
 }
 
 //------------------------------------------------------------------------------
@@ -649,7 +664,6 @@ void				PPU::get_sprites_for_line() // takes up to MAX_SPRITE_PER_LINE sprites a
 	uint8_t			x_pos_tmp;
 
 	_nb_sprites = 0;
-	_vbk = 0;
 
 	for (int sprite = 0; sprite < 40; sprite++)
 	{
@@ -755,6 +769,8 @@ void				PPU::render_sprites()
 
 	for (int sprite = _nb_sprites - 1; sprite >= 0; sprite--) // up to 10 sprites on the line
 	{
+		uint8_t		data1;
+		uint8_t		data2;
 		bool		x_flip = test_bit(_sprites_line[sprite].flags, 5) == true ? false : true;
 		bool		y_flip = test_bit(_sprites_line[sprite].flags, 6) == true ? false : true;
 
@@ -763,9 +779,16 @@ void				PPU::render_sprites()
 			sprite_line = (sprite_line - (_sprite_size - 1)) * (-1);
 		uint16_t	tile_line_data_address = (_sprite_data_start + (_sprites_line[sprite].tile_number * 16)) + (sprite_line * 2);
 
-		_vbk = test_bit(_sprites_line[sprite].flags, 3) == true ? 1 : 0;
-		uint8_t data1 = read(tile_line_data_address);
-		uint8_t data2 = read(tile_line_data_address + 1);
+		if (test_bit(_sprites_line[sprite].flags, 3) == true)
+		{
+			data1 = read_mem_bank(1, tile_line_data_address);
+			data2 = read_mem_bank(1, tile_line_data_address + 1);
+		}
+		else
+		{
+			data1 = read_mem_bank(0, tile_line_data_address);
+			data2 = read_mem_bank(0, tile_line_data_address + 1);
+		}
 
 		for (int pixel = 0; pixel < 8; pixel++)
 		{
@@ -856,15 +879,10 @@ void				PPU::render_tiles()
 
 		tile_number_address = determine_tile_number_address(y_pos, x_pos, in_window);
 
-		_vbk = 0;
-		tile_number = read(tile_number_address);
-
+		tile_number = read_mem_bank(0, tile_number_address);
 		tile_attr = 0;
 		if (_gb_mode == MODE_GB_CGB)
-		{
-			_vbk = 1;
-			tile_attr = read(tile_number_address);
-		}
+			tile_attr = read_mem_bank(1, tile_number_address);
 		tile_location = get_tile_data_address(tile_number);
 
 		uint8_t			pixel_line_in_tile = y_pos % 8;
@@ -876,12 +894,19 @@ void				PPU::render_tiles()
 			pixel_in_tile_line = 7 - pixel_in_tile_line;
 
 		uint16_t		tile_line = (pixel_line_in_tile * 2);						// 16 bits (2 bytes) per 8 pixels, get the right horizontal line of pixels
+		uint8_t			first_byte = 0;
+		uint8_t			second_byte = 0;
+
 		if (test_bit(tile_attr, 3) == true)
-			_vbk = 1;
+		{
+			first_byte = read_mem_bank(1, tile_location + tile_line);
+			second_byte = read_mem_bank(1, tile_location + tile_line + 1);
+		}
 		else
-			_vbk = 0;
-		uint8_t			first_byte = read(tile_location + tile_line);
-		uint8_t			second_byte = read(tile_location + tile_line + 1);
+		{
+			first_byte = read_mem_bank(0, tile_location + tile_line);
+			second_byte = read_mem_bank(0, tile_location + tile_line + 1);
+		}
 
 		//extract the color value from each byte's corresponding bit 
 		uint8_t			color_id = 0;
@@ -1081,15 +1106,15 @@ void					PPU::update_h_blank_status()
 		}
 		else
 		{
-			set_stat_mode(MODE_OAM_SEARCH);
-			if (test_bit(_stat, 5) == true)
-				_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
-
 			if (is_hdma_active() == true && _h_blank_hdma_step_done == false)
 			{
 				hdma_h_blank_step();
 				_h_blank_hdma_step_done = true;
 			}
+
+			set_stat_mode(MODE_OAM_SEARCH);
+			if (test_bit(_stat, 5) == true)
+				_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
 		}
 	}
 }
