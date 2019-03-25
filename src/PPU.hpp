@@ -122,6 +122,7 @@ private:
 	void					render_tiles(); // put pixels in the pipeline from Tiles
 	void					render_sprites(); // does the same with sprites, handle some merging too
 	void					get_sprites_for_line();
+	void					enforce_debug_palettes();
 	void					send_pixel_pipeline();
 	void					blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender);
 	void					translate_dmg_palettes();
@@ -176,7 +177,6 @@ private:
 
 	uint16_t				_h_blank_hdma_src_addr;
 	uint16_t				_h_blank_hdma_dst_addr;
-	bool					_h_blank_hdma_step_done;
 
 	uint32_t				_background_color_palettes_translated[8][4];
 	uint32_t				_sprite_color_palettes_translated[8][4];
@@ -197,6 +197,8 @@ private:
 	std::array<Byte, 8192>		_lcd_memory_bank_0; // (0x8000-0x9FFF) Tiles RAM bank 0
 	std::array<Byte, 160>		_lcd_oam_ram; // (0xFE00 - 0xFE9F) Sprite attr RAM
 
+	uint64_t				_nb_frames_rendered;
+	uint8_t					_wait_frames_turn_on;
 };
 
 #endif
