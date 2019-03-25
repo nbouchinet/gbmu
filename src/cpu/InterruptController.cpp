@@ -47,6 +47,7 @@ void InterruptController::parse_interrupt() {
   if (enabled) {
     for (Byte i = 0; i < 5; i++) {
       if ((enabled >> i) & 0x01) {
+		_components.core->notify_interrupt();
         if (_IME) {
           execute_interrupt(i);
         }
@@ -57,7 +58,6 @@ void InterruptController::parse_interrupt() {
 
 void InterruptController::execute_interrupt(Byte interrupt) {
   _IME = false;
-  _components.core->notify_interrupt();
   switch (interrupt) {
   case 0:
     _components.core->start_interrupt(VBI);
