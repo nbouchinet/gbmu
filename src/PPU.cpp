@@ -105,7 +105,9 @@ void				PPU::reset()
 
 	_h_blank_hdma_src_addr = 0;
 	_h_blank_hdma_dst_addr = 0;
-	_h_blank_hdma_step_done = false;
+
+	_nb_frames_rendered = 0;
+	_wait_frames_turn_on = 0;
 }
 
 //==============================================================================
@@ -138,7 +140,7 @@ bool					PPU::is_hdma_active()
 //------------------------------------------------------------------------------
 void					PPU::hdma_h_blank_step()
 {
-	std::cerr << "hdma_h_blank_step called" << std::endl;
+	//	std::cerr << "hdma_h_blank_step called" << std::endl;
 	for (int i = 0; i < 16; i++)
 	{
 		_components.mem_bus->write(_h_blank_hdma_dst_addr + i,
@@ -152,17 +154,19 @@ void					PPU::hdma_h_blank_step()
 //------------------------------------------------------------------------------
 void					PPU::initiate_hdma_transfer(uint8_t hdma5_arg)
 {
-	std::cerr << "Initiated an hdma transfer !" << std::endl;
+	//	std::cerr << "Initiated an hdma transfer ! _ly = " << +_ly << std::endl;
 	if (test_bit(hdma5_arg, 7) == true) // horizontal blanking dma : only 16 bytes transfered per H-blank
 	{
-		if (get_stat_mode() == MODE_HBLANK)
-			std::cerr << "WARNING : H-Blank DMA should not be started (write to FF55) during a H-Blank period (STAT mode 0)." << std::endl;
+		//		if (get_stat_mode() == MODE_HBLANK)
+		//			std::cerr << "WARNING : H-Blank DMA should not be started (write to FF55) during a H-Blank period (STAT mode 0)." << std::endl;
 		unset_bit(hdma5_arg, 7);
 		_hdma5 = hdma5_arg;
 		_h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
 		_h_blank_hdma_dst_addr = 0x8000 + (((_hdma3 << 8) + _hdma4) & 0x1FF0);
-		std::cerr << "hblank hdma, src = " << std::hex << +_h_blank_hdma_src_addr
-			<< " -> dest : " << std::hex << +_h_blank_hdma_dst_addr << " | size = " << std::hex << 16 * (_hdma5 + 1) << std::endl;
+		//		std::cerr << "hblank hdma, src = " << std::hex << +_h_blank_hdma_src_addr
+		//			<< " -> dest : " << std::hex << +_h_blank_hdma_dst_addr
+		//			<< " | iters = " << extract_value(_hdma5, 0, 6)
+		//			<< " | _vbk = " << +_vbk << " | _ly = " << +_ly << std::endl;
 	}
 	else // general purpose dma : everything is tranfered at once rignt away
 	{
@@ -176,7 +180,10 @@ void					PPU::initiate_hdma_transfer(uint8_t hdma5_arg)
 		addr_dest = 0x8000 + addr_add;
 		lines_to_transfer = _hdma5 & 0x7F;
 
-		std::cerr << "general purpose hdma, src = " << std::hex << +addr_source << " -> dest : " << std::hex << +addr_dest << " | size = " << std::hex << 16 * (_hdma5 + 1) << std::endl;
+		//		std::cerr << "general purpose hdma, src = " << std::hex << +addr_source
+		//			<< " -> dest : " << std::hex << +addr_dest
+		//			<< " | iters = " << extract_value(_hdma5, 0, 6)
+		//			<< " _vbk = " << +_vbk << std::endl;
 
 		for (int i = 0; i < (lines_to_transfer + 1) * 16; i++)
 		{
@@ -191,13 +198,15 @@ void					PPU::handle_hdma_transfer(uint8_t hdma5_arg)
 {
 	if (is_hdma_active() == false)
 	{
-		std::cerr << "handle_hdma_transfer called : No hdma transfer currently in progress" << std::endl;
+		//		std::cerr << "handle_hdma_transfer called : No hdma transfer currently in progress, _ly = "
+		//			<< +_ly << " | nb_frames " << _nb_frames_rendered <<  std::endl;
 		initiate_hdma_transfer(hdma5_arg);
 	}
 	else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false)
 	{
-		std::cerr << "handle_hdma_transfer called : WARNING : hdma transfer currently in progress" << std::endl;
-		unset_bit(_hdma5, 7);
+		//		std::cerr << "handle_hdma_transfer called : WARNING : hdma transfer currently in progress _ly = "
+		//			<< +_ly << " nb_frames = " << _nb_frames_rendered <<  std::endl;
+		set_bit(_hdma5, 7);
 	}
 }
 
@@ -234,10 +243,12 @@ void				PPU::handle_cgb_bg_palette_write(uint8_t bcpd_arg)
 	uint16_t		palette_tmp_value = 0;
 	uint8_t			array_case = 0;
 
+//	std::cerr << "write on _bcps " << std::bitset<8>(_bcps) << std::endl;
+//	std::cerr << "write on _bcpd " << std::hex << +bcpd_arg << std::endl;
 	_bcpd = bcpd_arg;
 	array_case = color_palette_array_case_wrapper(_bcps);
 	if (test_bit(_bcps, 7) == true)
-		array_case += 1;
+		 _bcps += 1;
 	if (test_bit(_bcps, 0) == true) // high byte
 	{
 		palette_tmp_value = bcpd_arg;
@@ -259,10 +270,12 @@ void				PPU::handle_cgb_obj_palette_write(uint8_t ocpd_arg)
 	uint16_t		palette_tmp_value = 0;
 	uint8_t			array_case = 0;
 
+//	std::cerr << "write on _ocps " << std::bitset<8>(_ocps) << std::endl;
+//	std::cerr << "write on _ocpd " << std::hex << +ocpd_arg << std::endl;
 	_ocpd = ocpd_arg;
 	array_case = color_palette_array_case_wrapper(_ocps);
 	if (test_bit(_ocps, 7) == true)
-		array_case += 1;
+		_ocps += 1;
 	if (test_bit(_ocps, 0) == true) // high byte
 	{
 		palette_tmp_value = ocpd_arg;
@@ -284,6 +297,7 @@ void				PPU::handle_lcdc_write(uint8_t value)
 	if (test_bit(_lcdc, 7) == true && test_bit(value, 7) == false)
 	{
 		_ly = 0;
+		_wait_frames_turn_on = 2;
 		for (int y = 0; y < LCD_HEIGHT; y++)
 		{
 			for (int x = 0; x < LCD_WIDTH; x++)
@@ -382,35 +396,39 @@ void				PPU::write(Word address, Byte value)
 			_wx = value;
 			break;
 		case 0xFF51:
-			std::cerr << "write to _hdma1 " << +_hdma1 << std::endl;
+			//			std::cerr << "write to _hdma1 " << +_hdma1 << std::endl;
 			_hdma1 = value;
 			break;
 		case 0xFF52:
-			std::cerr << "write to _hdma2 " << +_hdma2 << std::endl;
+			//			std::cerr << "write to _hdma2 " << +_hdma2 << std::endl;
 			_hdma2 = value;
 			break;
 		case 0xFF53:
-			std::cerr << "write to _hdma3 " << +_hdma3 << std::endl;
+			//			std::cerr << "write to _hdma3 " << +_hdma3 << std::endl;
 			_hdma3 = value;
 			break;
 		case 0xFF54:
-			std::cerr << "write to _hdma4 " << +_hdma4 << std::endl;
+			//			std::cerr << "write to _hdma4 " << +_hdma4 << std::endl;
 			_hdma4 = value;
 			break;
 		case 0xFF55:
-			std::cerr << "write to _hdma5 " << +_hdma5 << std::endl;
+			//			std::cerr << "write to _hdma5 " << +_hdma5 << std::endl;
 			handle_hdma_transfer(value);
 			break;
 		case 0xFF68:
+						std::cerr << "write on _bcps " << std::bitset<8>(value) << std::endl;
 			_bcps = value;
 			break;
 		case 0xFF69:
+			//			std::cerr << "write on _bcpd " << std::hex << +value << std::endl;
 			handle_cgb_bg_palette_write(value);
 			break;
 		case 0xFF6A:
+						std::cerr << "write on _ocps " << std::bitset<8>(value) << std::endl;
 			_ocps = value;
 			break;
 		case 0xFF6B:
+			//			std::cerr << "write on _ocpd " << std::hex << +value << std::endl;
 			handle_cgb_obj_palette_write(value);
 			break;
 	}
@@ -571,9 +589,9 @@ uint8_t				PPU::read_mem_bank(uint8_t bank, uint16_t address)
 	}
 	else
 	{
-		std::cerr << "WARNING : read_mem_bank called with an address not included in v_bank ranges (0x8000-0x9FFF) - returning 0" << std::endl;
+		//		std::cerr << "WARNING : read_mem_bank called with an address not included in v_bank ranges (0x8000-0x9FFF) - returning 0" << std::endl;
 	}
-		return (0);
+	return (0);
 }
 
 //------------------------------------------------------------------------------
@@ -737,7 +755,7 @@ void				PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender)
 			// careful, tiles also have priority flag in CGB !!! why nintendo whyyyyyyyyyyyy
 			if (test_bit(holder.sprite_info.flags, 7) == true) // priority given to tiles because why the f*** not
 			{
-				
+
 			}
 			else // bit 7 is zero, priority according to the contending sprite's priority flag (same as DMG)
 			{
@@ -924,6 +942,92 @@ void				PPU::render_tiles()
 }
 
 //------------------------------------------------------------------------------
+void				PPU::enforce_debug_palettes()
+{
+	_background_color_palettes_translated[0][0] = 0xFFE6E6FF; // Rouge
+	_background_color_palettes_translated[0][1] = 0xFF4D4DFF;
+	_background_color_palettes_translated[0][2] = 0xe60000FF;
+	_background_color_palettes_translated[0][3] = 0x800000FF;
+
+	_background_color_palettes_translated[1][0] = 0xFFCCE6FF; // Rose
+	_background_color_palettes_translated[1][1] = 0xFF66B5FF;
+	_background_color_palettes_translated[1][2] = 0xFF0084FF;
+	_background_color_palettes_translated[1][3] = 0xB3005CFF;
+
+	_background_color_palettes_translated[2][0] = 0xf9e6ffFF; // Violet
+	_background_color_palettes_translated[2][1] = 0xd966ffFF;
+	_background_color_palettes_translated[2][2] = 0xFF0084FF;
+	_background_color_palettes_translated[2][3] = 0x9900ccFF;
+
+	_background_color_palettes_translated[3][0] = 0xe6e6ffFF; // Bleu
+	_background_color_palettes_translated[3][1] = 0x6666ffFF;
+	_background_color_palettes_translated[3][2] = 0x0000ccFF;
+	_background_color_palettes_translated[3][3] = 0x000099FF;
+
+	_background_color_palettes_translated[4][0] = 0xe6ffffFF; // Cyan
+	_background_color_palettes_translated[4][1] = 0x66ffffFF;
+	_background_color_palettes_translated[4][2] = 0x00ccccFF;
+	_background_color_palettes_translated[4][3] = 0x009999FF;
+
+	_background_color_palettes_translated[5][0] = 0xf2ffe6FF; // Vert
+	_background_color_palettes_translated[5][1] = 0xb3ff66FF;
+	_background_color_palettes_translated[5][2] = 0x66cc00FF;
+	_background_color_palettes_translated[5][3] = 0x4d9900FF;
+
+	_background_color_palettes_translated[6][0] = 0xffffe6FF; // Jaune
+	_background_color_palettes_translated[6][1] = 0xffff66FF;
+	_background_color_palettes_translated[6][2] = 0xcccc00FF;
+	_background_color_palettes_translated[6][3] = 0x999900FF;
+
+	_background_color_palettes_translated[7][0] = 0xfff0e6FF; // Orange
+	_background_color_palettes_translated[7][1] = 0xffa366FF;
+	_background_color_palettes_translated[7][2] = 0xcc5200FF;
+	_background_color_palettes_translated[7][3] = 0x993d00FF;
+
+
+
+	_sprite_color_palettes_translated[7][0] = 0xFFE6E6FF; // Orange
+	_sprite_color_palettes_translated[7][1] = 0xFF4D4DFF;
+	_sprite_color_palettes_translated[7][2] = 0xe60000FF;
+	_sprite_color_palettes_translated[7][3] = 0x800000FF;
+
+	_sprite_color_palettes_translated[6][0] = 0xFFCCE6FF; // Jaune
+	_sprite_color_palettes_translated[6][1] = 0xFF66B5FF;
+	_sprite_color_palettes_translated[6][2] = 0xFF0084FF;
+	_sprite_color_palettes_translated[6][3] = 0xB3005CFF;
+
+	_sprite_color_palettes_translated[5][0] = 0xf9e6ffFF; // Vert
+	_sprite_color_palettes_translated[5][1] = 0xd966ffFF;
+	_sprite_color_palettes_translated[5][2] = 0xFF0084FF;
+	_sprite_color_palettes_translated[5][3] = 0x9900ccFF;
+
+	_sprite_color_palettes_translated[4][0] = 0xe6e6ffFF; // Cyan
+	_sprite_color_palettes_translated[4][1] = 0x6666ffFF;
+	_sprite_color_palettes_translated[4][2] = 0x0000ccFF;
+	_sprite_color_palettes_translated[4][3] = 0x000099FF;
+
+	_sprite_color_palettes_translated[3][0] = 0xe6ffffFF; // Bleu
+	_sprite_color_palettes_translated[3][1] = 0x66ffffFF;
+	_sprite_color_palettes_translated[3][2] = 0x00ccccFF;
+	_sprite_color_palettes_translated[3][3] = 0x009999FF;
+
+	_sprite_color_palettes_translated[2][0] = 0xf2ffe6FF; // Violet
+	_sprite_color_palettes_translated[2][1] = 0xb3ff66FF;
+	_sprite_color_palettes_translated[2][2] = 0x66cc00FF;
+	_sprite_color_palettes_translated[2][3] = 0x4d9900FF;
+
+	_sprite_color_palettes_translated[1][0] = 0xffffe6FF; // Rose
+	_sprite_color_palettes_translated[1][1] = 0xffff66FF;
+	_sprite_color_palettes_translated[1][2] = 0xcccc00FF;
+	_sprite_color_palettes_translated[1][3] = 0x999900FF;
+
+	_sprite_color_palettes_translated[0][0] = 0xfff0e6FF; // Rouge
+	_sprite_color_palettes_translated[0][1] = 0xffa366FF;
+	_sprite_color_palettes_translated[0][2] = 0xcc5200FF;
+	_sprite_color_palettes_translated[0][3] = 0x993d00FF;
+}
+
+//------------------------------------------------------------------------------
 void				PPU::send_pixel_pipeline()
 {
 	for (int i = 0; i < LCD_WIDTH; i++)
@@ -944,6 +1048,8 @@ void				PPU::send_pixel_pipeline()
 		}
 		else if (_gb_mode == MODE_GB_CGB)
 		{
+			//			enforce_debug_palettes();
+
 			uint8_t		palette_number = 0;
 			if (_pixel_pipeline[i].is_sprite == false)
 			{
@@ -957,8 +1063,6 @@ void				PPU::send_pixel_pipeline()
 			}
 		}
 	}
-	if (_ly % 8 == 0)
-		set_pixel(_ly, 0, 0x0000FFFF);
 	set_pixel(0, 0, 0xFF0000FF);
 	set_pixel(0, 159, 0xFF0000FF);
 	set_pixel(143, 159, 0xFF0000FF);
@@ -1054,7 +1158,8 @@ void					PPU::update_data_transfer_to_lcd_status()
 	{
 		_lcd_cycles -= CYCLES_DATA_TRANSFER_TO_LCD;
 		set_stat_mode(MODE_HBLANK);
-		render_scanline();
+		if (_wait_frames_turn_on == 0)
+			render_scanline();
 	}
 }
 
@@ -1098,6 +1203,19 @@ void					PPU::update_h_blank_status()
 		lyc_check();
 		if (_ly >= 144)
 		{
+			if (_wait_frames_turn_on > 0)
+				_wait_frames_turn_on--;
+			_nb_frames_rendered++;
+			if (_wait_frames_turn_on > 0)
+			{
+				for (uint32_t y = 0; y < LCD_HEIGHT; y++)
+				{
+					for (uint32_t x = 0; x < LCD_WIDTH; x++)
+					{
+						set_pixel(y, x, 0x000000FF);
+					}
+				}
+			}
 			_components.driver_screen->transfer_dirty_to_clean();
 			set_stat_mode(MODE_VBLANK);
 			_components.interrupt_controller->request_interrupt(_components.interrupt_controller->VBI);
@@ -1106,12 +1224,8 @@ void					PPU::update_h_blank_status()
 		}
 		else
 		{
-			if (is_hdma_active() == true && _h_blank_hdma_step_done == false)
-			{
+			if (is_hdma_active() == true)
 				hdma_h_blank_step();
-				_h_blank_hdma_step_done = true;
-			}
-
 			set_stat_mode(MODE_OAM_SEARCH);
 			if (test_bit(_stat, 5) == true)
 				_components.interrupt_controller->request_interrupt(_components.interrupt_controller->LCDCSI);
@@ -1122,7 +1236,7 @@ void					PPU::update_h_blank_status()
 //------------------------------------------------------------------------------
 void					PPU::update_lcd_status()
 {
-//	std::cerr << "update_lcd_status called, _stat = " << std::bitset<8>(_stat)  << std::endl;
+	//	std::cerr << "update_lcd_status called, _stat = " << std::bitset<8>(_stat)  << std::endl;
 	if (get_stat_mode() == MODE_HBLANK)
 		update_h_blank_status();
 	else if (get_stat_mode() == MODE_VBLANK)
