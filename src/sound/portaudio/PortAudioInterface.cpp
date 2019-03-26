@@ -72,6 +72,7 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   }
 
   if (_callback_lock or _cursor < SamplesTableSize) return false;
+  if (_mute.load()) return true;
   _fill_lock = true;
   _right_output = right;
   _left_output = left;
@@ -96,5 +97,7 @@ void PortAudioInterface::start() {
 void PortAudioInterface::terminate() {
   if (_stream) _stream->stop();
 }
+
+void PortAudioInterface::toggle_mute() { _mute = !_mute; }
 
 }  // namespace sound
