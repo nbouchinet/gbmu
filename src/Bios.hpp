@@ -1,13 +1,13 @@
 #ifndef BIOS_H
 #define BIOS_H
 
-#include "Fwd.hpp"
-
+#include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
 #include <exception>
 #include <vector>
 
 class Bios : public IReadWrite {
+
 public:
   class BadLogo : public std::exception {
   public:
@@ -15,6 +15,14 @@ public:
   };
 
 private:
+  ComponentsContainer &_components;
+
+public:
+  Bios(ComponentsContainer &components);
+  
+  bool is_cgb_bios() const;
+
+
   const std::vector<Byte> _dmg_bios = {
       {0x31, 0xfe, 0xff, 0xaf, 0x21, 0xff, 0x9f, 0x32, 0xcb, 0x7c, 0x20, 0xfb,
        0x21, 0x26, 0xff, 0x0e, 0x11, 0x3e, 0x80, 0x32, 0xe2, 0x0c, 0x3e, 0xf3,
@@ -212,18 +220,12 @@ private:
       0x82, 0x10, 0x11, 0x12, 0x12, 0xb0, 0x79, 0xb8, 0xad, 0x16, 0x17, 0x07,
       0xba, 0x05, 0x7c, 0x13, 0x00, 0x00, 0x00, 0x00};
 
-      // unsigned int _home_nbouchin_Downloads_gbc_bios_bin_len = 2304;
+  // unsigned int _home_nbouchin_Downloads_gbc_bios_bin_len = 2304;
 
-      public : bool _bios_type = 1;
+public:
+  Byte read(Word addr) const;
+  void write(Word, Byte) { }
 
-  Byte read(Word addr) const {
-	  return _cgb_bios[addr];
-  }
-
-  void write(Word, Byte) { /* Does nothing */
-  }
-
-  auto get_begin() { return _cgb_bios.begin(); }
+  auto get_begin();
 };
-
 #endif /* BIOS_H */

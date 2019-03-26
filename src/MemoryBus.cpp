@@ -9,7 +9,6 @@
 #include "src/cpu/InterruptController.hpp"
 #include "src/cpu/Timer.hpp"
 #include "src/sound/APU.hpp"
-#include "src/Bios.hpp"
 
 #include <iostream>
 
