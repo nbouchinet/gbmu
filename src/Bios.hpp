@@ -214,14 +214,14 @@ private:
 
 public:
   Byte read(Word addr) const {
-	  return _dmg_bios[addr];
+	  return _cgb_bios[addr];
   }
 
   void write(Word, Byte) {
 	  /* Does nothing */
   }
 
-  auto get_begin() { return _dmg_bios.begin(); }
+  auto get_begin() { return _cgb_bios.begin(); }
 };
 
 #endif /* BIOS_H */
