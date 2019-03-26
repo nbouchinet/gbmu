@@ -124,7 +124,7 @@
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
-     <normaloff>:/resources/mute.png</normaloff>:/resources/mute.png</iconset>
+     <normaloff>:/resources/sound.png</normaloff>:/resources/sound.png</iconset>
    </property>
    <property name="text">
     <string>Mute</string>

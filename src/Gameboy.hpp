@@ -77,6 +77,7 @@ class Gameboy {
   void set_is_abort(bool val) { _is_abort = val; }
   bool get_pause() const { return _pause.load(); }
   void set_pause(bool val) { _pause.store(val); }
+  void mute_gameboy() { _audio_interface.toggle_mute(); }
 
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }

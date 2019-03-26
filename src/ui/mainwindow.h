@@ -51,6 +51,9 @@ private:
 	GbmuScreen		*_gameboy_screen = nullptr;
 	QIcon			_pause_icon;
 	QIcon			_play_icon;
+	QIcon			_sound_icon;
+	QIcon			_mute_icon;
+	bool			_is_muted = false;
 
 
 	//Key Event function
