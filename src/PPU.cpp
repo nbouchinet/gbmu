@@ -3,6 +3,7 @@
 #include "PPU.hpp"
 #include "cpu/InterruptController.hpp"
 
+#include <bitset>
 #include <unistd.h>
 
 //------------------------------------------------------------------------------
@@ -76,10 +77,10 @@ void PPU::reset() {
   _hdma3 = 0xFF;
   _hdma4 = 0xFF;
   _hdma5 = 0xFF;
-  _bcps = 0xFF;
-  _ocps = 0xFF;
+  _bcps = 0xC0;
+  _ocps = 0xC1;
   _bcpd = 0xFF;
-  _bcpd = 0xFF;
+  _ocpd = 0x00;
 
   _lcd_cycles = 0;
   _background_data_start = 0;
@@ -126,8 +127,8 @@ void PPU::hdma_h_blank_step() {
   //	std::cerr << "hdma_h_blank_step called" << std::endl;
   for (int i = 0; i < 16; i++) {
     _components.mem_bus->write(
-        _h_blank_hdma_dst_addr + i,
-        _components.mem_bus->read<Byte>(_h_blank_hdma_src_addr + i));
+        _h_blank_hdma_dst_addr,
+        _components.mem_bus->read<Byte>(_h_blank_hdma_src_addr));
     _h_blank_hdma_src_addr++;
     _h_blank_hdma_dst_addr++;
   }
@@ -136,41 +137,20 @@ void PPU::hdma_h_blank_step() {
 
 //------------------------------------------------------------------------------
 void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
-  //	std::cerr << "Initiated an hdma transfer ! _ly = " << +_ly << std::endl;
-  if (test_bit(hdma5_arg, 7) ==
-      true) // horizontal blanking dma : only 16 bytes transfered per H-blank
-  {
-    //		if (get_stat_mode() == MODE_HBLANK)
-    //			std::cerr << "WARNING : H-Blank DMA should not be
-    //started (write to FF55) during a H-Blank period (STAT mode 0)." <<
-    //std::endl;
+  if (test_bit(hdma5_arg, 7) == true) {
     unset_bit(hdma5_arg, 7);
     _hdma5 = hdma5_arg;
     _h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
-    _h_blank_hdma_dst_addr = 0x8000 + (((_hdma3 << 8) + _hdma4) & 0x1FF0);
-    //		std::cerr << "hblank hdma, src = " << std::hex <<
-    //+_h_blank_hdma_src_addr
-    //			<< " -> dest : " << std::hex << +_h_blank_hdma_dst_addr
-    //			<< " | iters = " << extract_value(_hdma5, 0, 6)
-    //			<< " | _vbk = " << +_vbk << " | _ly = " << +_ly <<
-    // std::endl;
+    _h_blank_hdma_dst_addr = 0x8000 | (((_hdma3 << 8) | _hdma4) & 0x1FF0);
   } else // general purpose dma : everything is tranfered at once rignt away
   {
     uint16_t addr_source = 0;
     uint16_t addr_dest = 0;
-    uint16_t addr_add = 0;
     uint16_t lines_to_transfer = 0;
 
-    addr_source = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
-    addr_add = ((_hdma3 << 8) + _hdma4) & 0x1FF0;
-    addr_dest = 0x8000 + addr_add;
+    addr_source = ((_hdma1 << 8) | _hdma2) & 0xFFF0;
+    addr_dest = 0x8000 | (((_hdma3 << 8) | _hdma4) & 0x1FF0);
     lines_to_transfer = _hdma5 & 0x7F;
-
-    //		std::cerr << "general purpose hdma, src = " << std::hex <<
-    //+addr_source
-    //			<< " -> dest : " << std::hex << +addr_dest
-    //			<< " | iters = " << extract_value(_hdma5, 0, 6)
-    //			<< " _vbk = " << +_vbk << std::endl;
 
     for (int i = 0; i < (lines_to_transfer + 1) * 16; i++) {
       _components.mem_bus->write(
@@ -183,16 +163,8 @@ void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
 //------------------------------------------------------------------------------
 void PPU::handle_hdma_transfer(uint8_t hdma5_arg) {
   if (is_hdma_active() == false) {
-    //		std::cerr << "handle_hdma_transfer called : No hdma transfer
-    // currently in progress, _ly = "
-    //			<< +_ly << " | nb_frames " << _nb_frames_rendered <<
-    // std::endl;
     initiate_hdma_transfer(hdma5_arg);
   } else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false) {
-    //		std::cerr << "handle_hdma_transfer called : WARNING : hdma
-    // transfer currently in progress _ly = "
-    //			<< +_ly << " nb_frames = " << _nb_frames_rendered <<
-    // std::endl;
     set_bit(_hdma5, 7);
   }
 }
@@ -209,20 +181,6 @@ void PPU::dma_transfer(uint16_t address) {
 }
 
 //------------------------------------------------------------------------------
-uint16_t PPU::color_palette_array_case_wrapper(uint8_t specifier) const {
-  uint8_t palette_number;
-  uint8_t palette_data_number;
-  uint16_t ret = 0;
-
-  palette_number = extract_value(specifier, 3, 5);
-  palette_data_number = extract_value(specifier, 1, 2);
-
-  // ret = (palette_number * 4) + (palette_data_number);
-
-  return (ret);
-}
-
-//------------------------------------------------------------------------------
 void PPU::handle_cgb_bg_palette_write(uint8_t bcpd_arg) {
   uint16_t palette_tmp_value = 0;
 
@@ -231,19 +189,26 @@ void PPU::handle_cgb_bg_palette_write(uint8_t bcpd_arg) {
   {
     palette_tmp_value = bcpd_arg;
     palette_tmp_value = palette_tmp_value << 8;
-    palette_tmp_value |= _background_color_palettes[extract_value(_bcps, 3, 5)] [extract_value(_bcps, 1, 2)] &
+    palette_tmp_value |=
+        _background_color_palettes[extract_value(_bcps, 3, 5)]
+                                  [extract_value(_bcps, 1, 2)] &
         0x00FF;
   } else // low byte
   {
-    palette_tmp_value = _background_color_palettes[extract_value(_bcps, 3, 5)] [extract_value(_bcps, 1, 2)] & 0xFF00;
+    palette_tmp_value = _background_color_palettes[extract_value(_bcps, 3, 5)]
+                                                  [extract_value(_bcps, 1, 2)] &
+                        0xFF00;
     palette_tmp_value |= bcpd_arg;
   }
-  _background_color_palettes[extract_value(_bcps, 3, 5)] [extract_value(_bcps, 1, 2)] = palette_tmp_value;
-  _background_color_palettes_translated[extract_value( _bcps, 3, 5)][extract_value(_bcps, 1, 2)] = translate_cgb_color_value(palette_tmp_value);
-
+  _background_color_palettes[extract_value(_bcps, 3, 5)]
+                            [extract_value(_bcps, 1, 2)] = palette_tmp_value;
+  _background_color_palettes_translated[extract_value(
+      _bcps, 3, 5)][extract_value(_bcps, 1, 2)] =
+      translate_cgb_color_value(palette_tmp_value);
   if (test_bit(_bcps, 7) == true) {
-	_bcps += 1;
+    _bcps += 1;
   }
+  //  std::cerr << "================" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -255,16 +220,22 @@ void PPU::handle_cgb_obj_palette_write(uint8_t ocpd_arg) {
   {
     palette_tmp_value = ocpd_arg;
     palette_tmp_value = palette_tmp_value << 8;
-    palette_tmp_value |= _sprite_color_palettes[extract_value(_ocps, 3, 5)] [extract_value(_ocps, 1, 2)] & 0x00FF;
+    palette_tmp_value |= _sprite_color_palettes[extract_value(_ocps, 3, 5)]
+                                               [extract_value(_ocps, 1, 2)] &
+                         0x00FF;
   } else // low byte
   {
-    palette_tmp_value = _sprite_color_palettes[extract_value(_ocps, 3, 5)] [extract_value(_ocps, 1, 2)] & 0xFF00;
+    palette_tmp_value = _sprite_color_palettes[extract_value(_ocps, 3, 5)]
+                                              [extract_value(_ocps, 1, 2)] &
+                        0xFF00;
     palette_tmp_value |= ocpd_arg;
   }
-  _sprite_color_palettes[extract_value(_ocps, 3, 5)][extract_value(_ocps, 1, 2)] = palette_tmp_value;
-  _sprite_color_palettes_translated[extract_value(_ocps, 3, 5)][extract_value( _ocps, 1, 2)] = translate_cgb_color_value(palette_tmp_value);
+  _sprite_color_palettes[extract_value(_ocps, 3, 5)]
+                        [extract_value(_ocps, 1, 2)] = palette_tmp_value;
+  _sprite_color_palettes_translated[extract_value(_ocps, 3, 5)][extract_value(
+      _ocps, 1, 2)] = translate_cgb_color_value(palette_tmp_value);
   if (test_bit(_ocps, 7) == true) {
-	_ocps += 1;
+    _ocps += 1;
   }
 }
 
@@ -304,7 +275,6 @@ void PPU::write(Word address, Byte value) {
       _lcd_memory_bank_0[address - 0x8000] = value;
       return;
     } else if (test_bit(_vbk, 0) == true) {
-      std::cerr << "_vbk = 1" << std::endl;
       _lcd_memory_bank_1[address - 0x8000] = value;
       return;
     }
@@ -356,45 +326,35 @@ void PPU::write(Word address, Byte value) {
   case 0xFF4B:
     _wx = value;
     break;
+  case 0xFF4F:
+	_vbk = value;
+	break;
   case 0xFF51:
-    //			std::cerr << "write to _hdma1 " << +_hdma1 << std::endl;
     _hdma1 = value;
     break;
   case 0xFF52:
-    //			std::cerr << "write to _hdma2 " << +_hdma2 << std::endl;
     _hdma2 = value;
     break;
   case 0xFF53:
-    //			std::cerr << "write to _hdma3 " << +_hdma3 << std::endl;
     _hdma3 = value;
     break;
   case 0xFF54:
-    //			std::cerr << "write to _hdma4 " << +_hdma4 << std::endl;
     _hdma4 = value;
     break;
   case 0xFF55:
-    //			std::cerr << "write to _hdma5 " << +_hdma5 << std::endl;
     handle_hdma_transfer(value);
     break;
   case 0xFF68:
-    //						std::cerr << "write on _bcps "
-    //<< std::bitset<8>(value)
-    //<< std::endl;
     _bcps = value;
     break;
   case 0xFF69:
-    //			std::cerr << "write on _bcpd " << std::hex << +value <<
     // std::endl;
     handle_cgb_bg_palette_write(value);
     break;
   case 0xFF6A:
-    //						std::cerr << "write on _ocps "
-    //<< std::bitset<8>(value)
-    //<< std::endl;
     _ocps = value;
     break;
   case 0xFF6B:
-    //			std::cerr << "write on _ocpd " << std::hex << +value <<
     // std::endl;
     handle_cgb_obj_palette_write(value);
     break;
@@ -496,6 +456,9 @@ Byte PPU::read(Word address) const {
   case 0xFF4B:
     ret = _wx;
     break;
+  case 0xFF4F:
+	ret = _vbk;
+	break;
   case 0xFF51:
     ret = _hdma1;
     break;
@@ -1006,21 +969,14 @@ void PPU::send_pixel_pipeline() {
       }
     } else if (_gb_mode == MODE_GB_CGB) {
       // enforce_debug_palettes();
-
+ 
       uint8_t palette_number = 0;
       if (_pixel_pipeline[i].is_sprite == false) {
-        palette_number =
-            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-        set_pixel(
-            _ly, i,
-            _background_color_palettes_translated[palette_number]
-                                                 [_pixel_pipeline[i].value]);
+        palette_number = extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+        set_pixel( _ly, i, _background_color_palettes_translated[palette_number][_pixel_pipeline[i].value]);
       } else if (_pixel_pipeline[i].is_sprite == true) {
-        palette_number =
-            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-        set_pixel(_ly, i,
-                  _sprite_color_palettes_translated[palette_number]
-                                                   [_pixel_pipeline[i].value]);
+        palette_number = extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+        set_pixel(_ly, i, _sprite_color_palettes_translated[palette_number][_pixel_pipeline[i].value]);
       }
     }
   }
@@ -1032,6 +988,19 @@ void PPU::send_pixel_pipeline() {
 
 //------------------------------------------------------------------------------
 void PPU::render_scanline() {
+//  if (_ly == 0) {
+//    std::cout << "\n      Background      |||      Sprite      " << std::endl;
+//    for (int i = 0; i <= 7; i++) {
+//      std::cout << +i << " || " << std::bitset<16>(_background_color_palettes[i][0]) << " | "
+//                << std::bitset<16>(_background_color_palettes[i][1]) << " | "
+//                << std::bitset<16>(_background_color_palettes[i][2]) << " | "
+//                << std::bitset<16>(_background_color_palettes[i][3]) << " ||| "
+//                << std::bitset<16>(_sprite_color_palettes[i][0]) << " | "
+//                << std::bitset<16>(_sprite_color_palettes[i][1]) << " | "
+//                << std::bitset<16>(_sprite_color_palettes[i][2]) << " | "
+//                << std::bitset<16>(_sprite_color_palettes[i][3]) << std::endl;
+//    }
+//  }
   setup_gb_mode();
   setup_window();
   setup_background_data();
@@ -1065,13 +1034,13 @@ uint32_t PPU::translate_cgb_color_value(uint16_t value) {
   uint32_t ret = 0;
   uint32_t extracc;
 
-  extracc = extract_value(value, 0, 4) * 8; // extract red
+  extracc = extract_value(value, 0, 4) << 3; // * 8; // extract red
   ret += extracc;
   ret = ret << 8;
-  extracc = extract_value(value, 5, 9) * 8; // extract green
+  extracc = extract_value(value, 5, 9) << 3; // * 8; // extract green
   ret += extracc;
   ret = ret << 8;
-  extracc = extract_value(value, 10, 14) * 8; // extact blue
+  extracc = extract_value(value, 10, 14) << 3; // * 8; // extact blue
   ret += extracc;
   ret = ret << 8;
   ret += 255; // alpha value, default 255;
