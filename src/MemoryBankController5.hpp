@@ -17,7 +17,8 @@ private:
 
 public:
   MemoryBankController5(ROMContainer &rom, RAMContainer &ram)
-      : AMemoryBankController(rom, ram), _ram_bank(0), _is_ram_enabled(false) {}
+      : AMemoryBankController(rom, ram), _ram_bank(0), _rom_bank(0),
+        _is_ram_enabled(false) {}
 
   void write(uint16_t addr, uint8_t value) {
     switch (addr & 0xF000) {
