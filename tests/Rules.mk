@@ -1,6 +1,6 @@
 TEST_CC			:= clang++
 TEST_CFLAGS		:=
-TEST_LFLAGS		:= -lgtest -pthread
+TEST_LFLAGS		:= -lgtest -pthread -lportaudio -lportaudiocpp
 ifeq ($(shell uname -s), Darwin)
 	TEST_CFLAGS		+= -I ~/.brew/include
 	TEST_LFLAGS		+= -L ~/.brew/lib
@@ -16,9 +16,10 @@ TEST_FILES		:= 	sample.cpp \
 				MemoryBankController1.cpp \
 				MemoryBankController2.cpp \
 				MemoryBankController3.cpp \
-				RealTimeClock.cpp \
 				Timer.cpp \
-				Interrupt.cpp
+				Interrupt.cpp \
+				Sound.cpp \
+				RealTimeClock.cpp
 
 TEST_OBJECTS	:= $(addprefix $(CURR_DIR)/$(OBJECT_DIR)/, $(TEST_FILES:.cpp=.o))
 RUN_TEST_RULES	:= $(addprefix test_, $(TEST_FILES:.cpp=))

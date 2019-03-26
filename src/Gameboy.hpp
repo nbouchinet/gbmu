@@ -7,9 +7,12 @@
 #include "src/Fwd.hpp"
 #include "src/PPU.hpp"
 #include "src/ScreenOutput.hpp"
-#include <atomic>
+#include "src/sound/APU.hpp"
+#include "src/sound/portaudio/PortAudioInterface.hpp"
 
+#include <atomic>
 #include <memory>
+#include <iostream>
 
 struct ComponentsContainer {
   std::unique_ptr<MemoryBus> mem_bus;
@@ -21,23 +24,25 @@ struct ComponentsContainer {
   std::unique_ptr<LCDRegisters> lcd_registers;
   std::unique_ptr<UnitWorkingRAM> unit_working_ram;
   std::unique_ptr<PPU> ppu;
+  std::unique_ptr<sound::APU> apu;
   std::unique_ptr<ScreenOutput> driver_screen;
   std::unique_ptr<Bios> bios;
 
-  ComponentsContainer(const std::string &);
+  ComponentsContainer(const std::string &, sound::AudioInterface *);
   ~ComponentsContainer();
 };
 
 class Accessor;
 class Debugger;
 
-class Gameboy{
-private:
+class Gameboy {
+ private:
   struct GameSave {
     Byte ram[AMemoryBankController::RAMSize];
   };
 
   void set_cgb_flag();
+  sound::PortAudioInterface _audio_interface;
   ComponentsContainer _components;
   Debugger _debugger;
   uint8_t _cgb_flag;
@@ -52,7 +57,7 @@ private:
 
   void do_checksum();
 
-public:
+ public:
   Gameboy(const std::string &rom_path);
   Gameboy() = delete;
 
@@ -68,19 +73,24 @@ public:
   void key_released_wraper(int val);
   void notify_debugger(Debugger::e_dbg_state state, int duration = 0);
   bool is_screen_filled() { return _components.ppu->is_screen_filled(); }
-  const uint8_t &get_cgb_flag() const {return _cgb_flag;}
+  const uint8_t &get_cgb_flag() const { return _cgb_flag; }
   Debugger &get_debugger() { return _debugger; }
   bool get_is_abort() const { return _is_abort; }
   void set_is_abort(bool val) { _is_abort = val; }
   bool get_pause() const { return _pause.load(); }
   void set_pause(bool val) { _pause.store(val); }
 
-  void go() { _wait.store(false); }
+  void go() {
+    _wait.store(false);
+    _cycles = 0;
+  }
+
   bool is_cycling() { return !_wait; }
   bool is_cgb_bios();
   void set_bios_type();
 
 
+  const auto& components() const { return _components; }
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
   };

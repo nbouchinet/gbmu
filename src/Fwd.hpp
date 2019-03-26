@@ -20,5 +20,6 @@ class Gameboy;
 class Bios;
 struct ComponentsContainer;
 
+#include "src/sound/Fwd.hpp"
 
 #endif // FWD_HPP
