@@ -327,8 +327,8 @@ void PPU::write(Word address, Byte value) {
     _wx = value;
     break;
   case 0xFF4F:
-	_vbk = value;
-	break;
+    _vbk = value;
+    break;
   case 0xFF51:
     _hdma1 = value;
     break;
@@ -457,8 +457,8 @@ Byte PPU::read(Word address) const {
     ret = _wx;
     break;
   case 0xFF4F:
-	ret = _vbk;
-	break;
+    ret = _vbk;
+    break;
   case 0xFF51:
     ret = _hdma1;
     break;
@@ -555,18 +555,15 @@ void PPU::setup_background_data() {
 
 //------------------------------------------------------------------------------
 void PPU::setup_gb_mode() {
-  //	uint8_t			mode_flag =
-  //_components.mem_bus->read<Byte>(0x0143);
+  uint8_t mode_flag = _components.mem_bus->read<Byte>(0x0143);
 
-  //	if (mode_flag == 0xC0) {
-  _gb_mode = MODE_GB_CGB;
-  //	}
-  //	else if (mode_flag == 0x80) {
-  //		_gb_mode = MODE_GB_DMGC;
-  //	}
-  //	else {
-  //		_gb_mode = MODE_GB_DMG;
-  //	}
+  if (mode_flag == 0xC0 || mode_flag == 0x80) {
+    _gb_mode = MODE_GB_CGB;
+  } else if (mode_flag == 0x80) {
+    _gb_mode = MODE_GB_DMGC;
+  } else {
+    _gb_mode = MODE_GB_DMG;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -969,14 +966,21 @@ void PPU::send_pixel_pipeline() {
       }
     } else if (_gb_mode == MODE_GB_CGB) {
       // enforce_debug_palettes();
- 
+
       uint8_t palette_number = 0;
       if (_pixel_pipeline[i].is_sprite == false) {
-        palette_number = extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-        set_pixel( _ly, i, _background_color_palettes_translated[palette_number][_pixel_pipeline[i].value]);
+        palette_number =
+            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+        set_pixel(
+            _ly, i,
+            _background_color_palettes_translated[palette_number]
+                                                 [_pixel_pipeline[i].value]);
       } else if (_pixel_pipeline[i].is_sprite == true) {
-        palette_number = extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-        set_pixel(_ly, i, _sprite_color_palettes_translated[palette_number][_pixel_pipeline[i].value]);
+        palette_number =
+            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+        set_pixel(_ly, i,
+                  _sprite_color_palettes_translated[palette_number]
+                                                   [_pixel_pipeline[i].value]);
       }
     }
   }
@@ -988,19 +992,24 @@ void PPU::send_pixel_pipeline() {
 
 //------------------------------------------------------------------------------
 void PPU::render_scanline() {
-//  if (_ly == 0) {
-//    std::cout << "\n      Background      |||      Sprite      " << std::endl;
-//    for (int i = 0; i <= 7; i++) {
-//      std::cout << +i << " || " << std::bitset<16>(_background_color_palettes[i][0]) << " | "
-//                << std::bitset<16>(_background_color_palettes[i][1]) << " | "
-//                << std::bitset<16>(_background_color_palettes[i][2]) << " | "
-//                << std::bitset<16>(_background_color_palettes[i][3]) << " ||| "
-//                << std::bitset<16>(_sprite_color_palettes[i][0]) << " | "
-//                << std::bitset<16>(_sprite_color_palettes[i][1]) << " | "
-//                << std::bitset<16>(_sprite_color_palettes[i][2]) << " | "
-//                << std::bitset<16>(_sprite_color_palettes[i][3]) << std::endl;
-//    }
-//  }
+  //  if (_ly == 0) {
+  //    std::cout << "\n      Background      |||      Sprite      " <<
+  //    std::endl; for (int i = 0; i <= 7; i++) {
+  //      std::cout << +i << " || " <<
+  //      std::bitset<16>(_background_color_palettes[i][0]) << " | "
+  //                << std::bitset<16>(_background_color_palettes[i][1]) << " |
+  //                "
+  //                << std::bitset<16>(_background_color_palettes[i][2]) << " |
+  //                "
+  //                << std::bitset<16>(_background_color_palettes[i][3]) << "
+  //                ||| "
+  //                << std::bitset<16>(_sprite_color_palettes[i][0]) << " | "
+  //                << std::bitset<16>(_sprite_color_palettes[i][1]) << " | "
+  //                << std::bitset<16>(_sprite_color_palettes[i][2]) << " | "
+  //                << std::bitset<16>(_sprite_color_palettes[i][3]) <<
+  //                std::endl;
+  //    }
+  //  }
   setup_gb_mode();
   setup_window();
   setup_background_data();
