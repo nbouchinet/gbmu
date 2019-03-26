@@ -86,8 +86,6 @@ class Gameboy {
   }
 
   bool is_cycling() { return !_wait; }
-  bool is_cgb_bios();
-  void set_bios_type();
 
 
   const auto& components() const { return _components; }

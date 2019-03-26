@@ -69,6 +69,7 @@ SOURCES += \
 	src/Gameboy.cpp \
 	src/MemoryBus.cpp \
 	src/PPU.cpp \
+	src/Bios.cpp\
 	src/ScreenOutput.cpp \
 	src/cpu/Core.cpp \
 	src/cpu/CoreExecute.cpp \
