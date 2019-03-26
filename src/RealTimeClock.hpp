@@ -17,7 +17,7 @@ private:
   uint8_t day_low;
   uint8_t day_high;
 
-  void setActiveReg(RTCReg value) { active_reg = value; }
+  void set_active_reg(RTCReg value) { active_reg = value; }
 
   /*
   ** Members for the time counter
@@ -28,31 +28,31 @@ private:
 
 public:
   RealTimeClock(void)
-      : seconds(0), minutes(0), hours(0), day_low(0), day_high(0),
-        elapsed_time(0.0f) {
+      : active_reg(RTC_SEC), seconds(0), minutes(0), hours(0), day_low(0),
+        day_high(0), elapsed_time(0.0f) {
     clock_now = clock();
     clock_last = clock_now;
   }
 
-  uint8_t getSeconds() const { return seconds; }
-  uint8_t getMinutes() const { return minutes; }
-  uint8_t getHours() const { return hours; }
-  uint8_t getDayLow() const { return day_low; }
-  uint8_t getDayHigh() const { return day_high & 0x1; }
-  uint8_t getHalt() const { return ((day_high >> 6) & 0x1); }
-  uint8_t getCarry() const { return ((day_high >> 7) & 0x1); }
+  uint8_t get_seconds() const { return seconds; }
+  uint8_t get_minutes() const { return minutes; }
+  uint8_t get_hours() const { return hours; }
+  uint8_t get_day_low() const { return day_low; }
+  uint8_t get_day_high() const { return day_high & 0x1; }
+  uint8_t get_halt() const { return ((day_high >> 6) & 0x1); }
+  uint8_t get_carry() const { return ((day_high >> 7) & 0x1); }
 
-  void setSeconds(uint8_t value) { seconds = value & 0x3F; }
-  void setMinutes(uint8_t value) { minutes = value & 0x3F; }
-  void setHours(uint8_t value) { hours = value & 0x1F; }
-  void setDayLow(uint8_t value) { day_low = value; }
-  void setDayHigh(uint8_t value) {
+  void set_seconds(uint8_t value) { seconds = value & 0x3F; }
+  void set_minutes(uint8_t value) { minutes = value & 0x3F; }
+  void set_hours(uint8_t value) { hours = value & 0x1F; }
+  void set_day_low(uint8_t value) { day_low = value; }
+  void set_day_high(uint8_t value) {
     day_high = (day_high & 0xC0) | (value & 0x1);
   }
-  void setHalt(uint8_t value) {
+  void set_halt(uint8_t value) {
     day_high = (day_high & 0x81) | ((value & 0x1) << 6);
   }
-  void setCarry(uint8_t value) {
+  void set_carry(uint8_t value) {
     day_high = (day_high & 0x41) | ((value & 0x1) << 7);
   }
 
@@ -69,27 +69,27 @@ public:
     elapsed_time = 0.0f;
   }
 
-  void switchReg(uint8_t value) {
-    RTCReg newReg;
+  void switch_reg(uint8_t value) {
+    RTCReg new_reg;
 
     refresh();
     switch (value) {
     case 0x8:
-      newReg = RTC_SEC;
+      new_reg = RTC_SEC;
       break;
     case 0x9:
-      newReg = RTC_MIN;
+      new_reg = RTC_MIN;
       break;
     case 0xA:
-      newReg = RTC_HOUR;
+      new_reg = RTC_HOUR;
       break;
     case 0xB:
-      newReg = RTC_DLOW;
+      new_reg = RTC_DLOW;
       break;
     case 0xC:
-      newReg = RTC_DHIGH;
+      new_reg = RTC_DHIGH;
     }
-    setActiveReg(newReg);
+    set_active_reg(new_reg);
   }
 
   void set(uint8_t value) {
@@ -138,7 +138,7 @@ public:
   void refresh() {
     int elapsed_sec = 0;
 
-    if (getHalt())
+    if (get_halt())
       return;
     clock_now = clock();
     elapsed_time += clock_now - clock_last;

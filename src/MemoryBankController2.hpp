@@ -8,19 +8,16 @@
 
 class MemoryBankController2 : public AMemoryBankController {
 private:
-  uint8_t romBank : 4;
-  bool isRamEnabled;
+  uint8_t _rom_bank : 4;
+  bool _is_ram_enabled;
 
 private:
-  void enableRAM() { isRamEnabled = true; };
-  void disableRAM() { isRamEnabled = false; }
+  void enableRAM() { _is_ram_enabled = true; };
+  void disableRAM() { _is_ram_enabled = false; }
 
 public:
   MemoryBankController2(ROMContainer &rom, RAMContainer &ram)
-      : AMemoryBankController(rom, ram), romBank(0), isRamEnabled(false) {}
-
-  bool getRamEnabled() const { return isRamEnabled; }
-  uint8_t getRomBank() const { return romBank; };
+      : AMemoryBankController(rom, ram), _rom_bank(0), _is_ram_enabled(false) {}
 
   void write(uint16_t addr, uint8_t value) {
     switch (addr & 0xF000) {
@@ -32,19 +29,19 @@ public:
     case 0x2000:
     case 0x3000: /* 0x2000 to 0x3FFF */
       if (((addr >> 8) & 0x1) == 1)
-        romBank = value & 0xF;
+        _rom_bank = value & 0xF;
       break;
     case 0xA000:
-      if (!isRamEnabled)
+      if (!_is_ram_enabled)
         break;
       if (addr < 0xA200)
-        ramData[addr - 0xA000] = value & 0xF;
+        _ram[addr - 0xA000] = value & 0xF;
       break;
     default:
       break;
     }
-    if (romBank == 0x20 || romBank == 0x40 || romBank == 0x60 || romBank == 0x0)
-      romBank += 0x1;
+    if (_rom_bank == 0x20 || _rom_bank == 0x40 || _rom_bank == 0x60 || _rom_bank == 0x0)
+      _rom_bank += 0x1;
   };
 
   uint8_t read(uint16_t addr) const {
@@ -53,15 +50,15 @@ public:
     case 0x1000:
     case 0x2000:
     case 0x3000:
-      return romData[addr];
+      return _rom[addr];
     case 0x4000:
     case 0x5000:
     case 0x6000:
     case 0x7000:
-      return romData[(addr - 0x4000) + romBank * 0x4000];
+      return _rom[(addr - 0x4000) + _rom_bank * 0x4000];
     case 0xA000:
       if (addr < 0xA200)
-        return ramData[(addr - 0xA000)] & 0xF;
+        return _ram[(addr - 0xA000)] & 0xF;
     }
     return 0;
   }
