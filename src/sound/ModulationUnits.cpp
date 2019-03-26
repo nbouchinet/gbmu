@@ -5,7 +5,9 @@
 namespace sound {
 
 Word SweepUnit::frequency_calculation() {
-  return _shadow_freq + (_shadow_freq >> _shift) * -_negate;
+  Word ret= _shadow_freq + (_shadow_freq >> _shift) * -1;
+  std::cerr << "fqcalc: " << +ret << "\n";
+  return ret;
 }
 
 bool SweepUnit::call() {
@@ -18,9 +20,12 @@ bool SweepUnit::call() {
   else
     _current_period = _sweep_period;
   Word new_freq = frequency_calculation();
+  std::cerr << "f: " << _shadow_freq <<  ", newf: " << new_freq << "\n";
+  std::cerr << +_sweep_period << ", " << +_negate << ", " << +_shift <<  "\n";
+  assert(not _negate);
   if (does_overflow(new_freq)) return false;
   _frequency = _shadow_freq = new_freq;
-  return does_overflow(frequency_calculation());
+  return not does_overflow(frequency_calculation());
 }
 
 void SweepUnit::trigger() {
