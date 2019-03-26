@@ -6,8 +6,8 @@
 #include "src/sound/WaveChannel.hpp"
 #include "utils/Operations_utils.hpp"
 
-#include <cassert>
 #include <unistd.h>
+#include <cassert>
 #include <iostream>
 
 namespace sound {
@@ -23,8 +23,8 @@ APU::APU(AudioInterface* interface, ComponentsContainer& c)
           {0xff1a, 0xff1e, std::make_unique<WaveChannel>(_wave_ram)},
           {0xff1f, 0xff23, std::make_unique<NoiseChannel>()},
       }} {
-      _last_dump = std::chrono::system_clock::now();
-      }
+  _last_dump = std::chrono::system_clock::now();
+}
 
 void APU::update_clock() {
   if (--_update_countdown <= 0) {
@@ -35,12 +35,15 @@ void APU::update_clock() {
       ranged_channel.channel->update();
     }
     if (++_modulation_units_steps >= 8) _modulation_units_steps = 0;
+  } else if (--_downsampling_countdown > 0) {
+    for (auto& ranged_channel : _channels) {
+      ranged_channel.channel->update();
+    }
   } else {
-    for (auto& ranged_channel : _channels) ranged_channel.channel->update();
-  }
-
-  if (--_sampling_countdown <= 0) {
-    _sampling_countdown = (CPU_FREQ / SAMPLING_FREQ);
+    for (auto& ranged_channel : _channels) {
+      ranged_channel.channel->update();
+      ranged_channel.channel->downsample();
+    }
     float rvol = right_volume();
     float lvol = left_volume();
 
@@ -57,11 +60,13 @@ void APU::update_clock() {
       }
       _output_index = 0;
     }
+    _downsampling_countdown = (CPU_FREQ / SAMPLING_FREQ);
   }
 }
 
 float APU::fetch_and_mix_samples(Byte enabled_channels, float vol) const {
   std::vector<float> to_mix;
+  to_mix.reserve(_channels.size());
   Byte b = 0;
   for (const auto& chan : _channels) {
     if (chan.channel->is_enabled() and test_bit(b++, enabled_channels))
@@ -86,8 +91,8 @@ void APU::clear() {
 void APU::dump() const { _channels[3].channel->dump(); }
 
 Byte APU::read(Word addr) const {
-//  if (_dump)
-//    std::cerr << std::hex  << "APU read: " << addr << "\n";
+  //  if (_dump)
+  //    std::cerr << std::hex  << "APU read: " << addr << "\n";
   for (auto& ranged_channel : _channels) {
     if (addr >= ranged_channel.begin and addr <= ranged_channel.end)
       return ranged_channel.channel->read(addr);
@@ -116,11 +121,12 @@ Byte APU::read(Word addr) const {
 void APU::write(Word addr, Byte v) {
   if (_dump) {
     auto now = std::chrono::system_clock::now();
-    int ms = std::chrono::duration_cast<std::chrono::milliseconds>
-                             (now-_last_dump).count();
-    std::cerr << std::hex << "APU write: " << addr << " -> " << +v <<  " | delay: " << ms << "\n";
-    if (addr == 0xff23 and v & 0x80)
-      dump();
+    int ms =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_dump)
+            .count();
+    std::cerr << std::hex << "APU write: " << addr << " -> " << +v
+              << " | delay: " << ms << "\n";
+    if (addr == 0xff23 and v & 0x80) dump();
     _last_dump = std::chrono::system_clock::now();
   }
   if (addr == 0xff26) {

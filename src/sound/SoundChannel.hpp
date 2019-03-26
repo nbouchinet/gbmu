@@ -16,8 +16,8 @@ class SoundChannel : public IReadWrite {
  private:
   using ModUnitPtr = IModulationUnit*;
   std::vector<ModUnitPtr> _modulation_units;
-  mutable unsigned _summed_volumes = 0;
-  mutable unsigned _summed_volumes_nb = 1;
+  unsigned _summed_volumes = 0;
+  unsigned _summed_volumes_nb = 0;
 
   virtual void do_trigger() = 0;
   virtual void do_update() = 0;
@@ -40,12 +40,19 @@ class SoundChannel : public IReadWrite {
   void clear();
   virtual void dump() const {}
 
+  void downsample() {
+    if (_summed_volumes_nb == 0)
+      p_output_volume = 0;
+    else
+      p_output_volume = _summed_volumes / _summed_volumes_nb;
+    _summed_volumes = 0;
+    _summed_volumes_nb = 0;
+  }
+
   float get_output() const {
     if (not p_enabled) return 0.f;
-    Byte average = _summed_volumes / _summed_volumes_nb;
-    float ret = average / (static_cast<float>(MaxVolume + 1) / 2.f) - 1.f;
-    _summed_volumes = 0;
-    _summed_volumes_nb = 1;
+    float ret =
+        p_output_volume / (static_cast<float>(MaxVolume + 1) / 2.f) - 1.f;
     assert(ret <= 1.f and ret >= -1.f);
     return ret;
   }

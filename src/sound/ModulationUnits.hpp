@@ -68,7 +68,7 @@ class LengthUnit : public IModulationUnit {
   LengthUnit(Byte max_len) : _max_length(max_len) { clear(); }
   Byte trigger_steps() const override { return 0b01010101; }
 
-  void set_length(Byte l) { _length = l; }
+  void set_length(Byte l) { _length = (static_cast<Word>(_max_length) + 1) - l; }
   void enable(bool enable = true) { _enabled = enable; }
   auto length() const { return _length; }
   bool is_enabled() const { return _enabled; }

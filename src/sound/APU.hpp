@@ -26,7 +26,7 @@ class APU : public IReadWrite {
   };
 
   int _update_countdown = 0;
-  int _sampling_countdown = 0;
+  int _downsampling_countdown = 0;
   unsigned int _modulation_units_steps = 0;
   bool _APU_on = false;
   Byte _vin_and_volumes = 0;
