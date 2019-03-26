@@ -8,7 +8,10 @@
 #include "src/cpu/InputController.hpp"
 #include "src/cpu/InterruptController.hpp"
 #include "src/cpu/Timer.hpp"
+#include "src/sound/APU.hpp"
 #include "src/Bios.hpp"
+
+#include <iostream>
 
 #define push_component(begin, end, c)                                          \
   _ranged_components.push_back(RangedComponent{begin, end, c});
@@ -29,6 +32,7 @@ void MemoryBus::reset(ComponentsContainer &components) {
   push_component(0xFE00, 0xFE9F, components.ppu.get());
   push_component(0xFF04, 0xFF08, components.timer.get());
   push_component(0xFF0F, 0xFF0F, components.interrupt_controller.get());
+  push_component(0xFF10, 0xFF3F, components.apu.get());
   push_component(0xFF40, 0xFF4B, components.ppu.get());
   push_component(0xFF4F, 0xFF4F, components.ppu.get());
   push_component(0xFF51, 0xFF55, components.ppu.get());

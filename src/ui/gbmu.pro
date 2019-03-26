@@ -42,7 +42,12 @@ HEADERS += \
         gbmuscreen.h\
         mainwindow.h \
     debuggerwindow.h \
-	worker.h \
+	worker.h
+
+HOME = $$(HOME)
+
+INCLUDEPATH += $$HOME/.brew/include
+LIBS += -L $$HOME/.brew/lib -lportaudiocpp -lportaudio
 
 FORMS += \
         mainwindow.ui \
@@ -69,7 +74,14 @@ SOURCES += \
 	src/cpu/CoreExecute.cpp \
 	src/cpu/InputController.cpp \
 	src/cpu/InterruptController.cpp \
-	src/cpu/Timer.cpp
+	src/cpu/Timer.cpp \
+	src/sound/APU.cpp \
+	src/sound/ModulationUnits.cpp \
+	src/sound/NoiseChannel.cpp \
+	src/sound/SoundChannel.cpp \
+	src/sound/SquareChannel.cpp \
+	src/sound/WaveChannel.cpp \
+	src/sound/portaudio/PortAudioInterface.cpp \
 
 HEADERS += \
 	src/AMemoryBankController.hpp \
@@ -92,6 +104,15 @@ HEADERS += \
 	src/cpu/Core.hpp \
 	src/cpu/InputController.hpp \
 	src/cpu/InterruptController.hpp \
-	src/cpu/Timer.hpp
+	src/cpu/Timer.hpp \
+	src/sound/APU.hpp \
+	src/sound/AudioInterface.hpp \
+	src/sound/ModulationUnits.hpp \
+	src/sound/NoiseChannel.hpp \
+	src/sound/SoundChannel.hpp \
+	src/sound/SquareChannel.hpp \
+	src/sound/VolumeTable.hpp \
+	src/sound/WaveChannel.hpp \
+	src/sound/portaudio/PortAudioInterface.hpp \
 
 DISTFILES +=

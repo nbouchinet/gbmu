@@ -5,6 +5,7 @@
 #include "src/cpu/InterruptController.hpp"
 
 #include <cassert>
+#include <iostream>
 
 void Core::reset() {
   _pc.word = 0x0000;
