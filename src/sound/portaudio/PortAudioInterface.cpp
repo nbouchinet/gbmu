@@ -49,6 +49,7 @@ PortAudioInterface::~PortAudioInterface() { _stream->close(); }
 bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
                                               const MonoSamples& left) {
   if (_callback_lock or _cursor < SamplesTableSize) return false;
+  if (_mute.load()) return true;
   _fill_lock = true;
   _right_output = right;
   _left_output = left;
@@ -69,5 +70,7 @@ float PortAudioInterface::mix(const std::vector<float>& samples, float) const {
 void PortAudioInterface::start() { _stream->start(); }
 
 void PortAudioInterface::terminate() { _stream->stop(); }
+
+void PortAudioInterface::toggle_mute() { _mute = !_mute; }
 
 }  // namespace sound

@@ -19,6 +19,7 @@ class AudioInterface {
   virtual float mix(const std::vector<float>&, float volume) const = 0;
   virtual void start() = 0;
   virtual void terminate() = 0;
+  virtual void toggle_mute() = 0;
 };
 
 }  // namespace sound

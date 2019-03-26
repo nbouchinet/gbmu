@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
 	//Load icon
 	_pause_icon = QIcon(":/resources/pause.png");
 	_play_icon = QIcon(":/resources/play.png");
+	_sound_icon = QIcon(":/resources/sound.png");
+	_mute_icon = QIcon(":/resources/mute.png");
 
 	//Shortcut settings
 	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
@@ -125,7 +127,12 @@ void MainWindow::on_actionStop_triggered()
 
 void MainWindow::on_actionMute_triggered()
 {
-    QMessageBox::information(this, "tit", "Mute the game");
+	_is_muted = !_is_muted;
+	if (_is_muted)
+		ui->actionMute->setIcon(_mute_icon);
+	else
+		ui->actionMute->setIcon(_sound_icon);
+    g_gameboy->mute_gameboy();
 }
 
 void MainWindow::on_actionDebug_triggered()

@@ -6,6 +6,7 @@
 #include <memory>
 #include <utility>
 #include <portaudiocpp/PortAudioCpp.hxx>
+#include <atomic>
 
 namespace sound {
 class PortAudioInterface : public AudioInterface {
@@ -14,6 +15,7 @@ class PortAudioInterface : public AudioInterface {
   using Stream = portaudio::MemFunCallbackStream<PortAudioInterface>; 
   using StereoSample = std::pair<float, float>; // TODO define a Sample type
 
+
   MonoSamples _right_output = {};
   MonoSamples _left_output = {};
   std::size_t _cursor = SamplesTableSize;
@@ -21,6 +23,8 @@ class PortAudioInterface : public AudioInterface {
   volatile bool _fill_lock = false;
   StereoSample _last_sample_played = {0., 0.};
   std::unique_ptr<Stream> _stream = nullptr;
+
+  std::atomic_bool _mute = ATOMIC_VAR_INIT(false);
 
   int callback(const void* input_buffer, void* output_uffer,
                unsigned long frames_per_buffer, const PaStreamCallbackTimeInfo*,
@@ -35,6 +39,7 @@ class PortAudioInterface : public AudioInterface {
   float mix(const std::vector<float>&, float volume) const override;
   void start() override;
   void terminate() override;
+  void toggle_mute() override;
 };
 }  // namespace sound
 
