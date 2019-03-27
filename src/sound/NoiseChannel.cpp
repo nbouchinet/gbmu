@@ -36,11 +36,6 @@ void NoiseChannel::do_clear() {
 }
 
 void NoiseChannel::dump() const {
-  std::cerr << "NoiseChan dump: \n" << std::hex;
-  for (Word i = 0xff1f; i < 0xff24; ++i) {
-    std::cerr << +read(i) << "\n";
-  }
-  std::cerr << "length: " << +_length.length() << "\n";
 }
 
 void NoiseChannel::write(Word addr, Byte v) {

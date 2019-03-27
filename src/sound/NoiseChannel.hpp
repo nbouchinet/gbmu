@@ -24,6 +24,12 @@ class NoiseChannel : public SoundChannel {
   void do_trigger() override;
   void do_clear() override;
 
+  static constexpr Word get_divider(Byte code) noexcept {
+    Word ret = 8u;
+    if (code != 0) ret = 16 * code;
+    return ret;
+  }
+
  public:
   NoiseChannel() : _length(63), _envelope(_volume) {
     bind_module(&_length);

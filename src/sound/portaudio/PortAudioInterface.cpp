@@ -50,8 +50,6 @@ PortAudioInterface::~PortAudioInterface() { _stream->close(); }
 bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
                                               const MonoSamples& left) {
   if (_callback_lock or _cursor < SamplesTableSize) return false;
-  // for (auto & e : right)
-  //   std::cerr << e << ", ";
   _fill_lock = true;
   _right_output = right;
   _left_output = left;
@@ -60,12 +58,13 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   return true;
 }
 
-float PortAudioInterface::mix(const std::vector<float>& samples, float volume) const {
+float PortAudioInterface::mix(const std::vector<float>& samples, float) const {
   float ret = 0.f;
   for (const auto& sample : samples) {
     ret += sample / samples.size();
   }
-  return ret * volume / 100.;
+  // arbitrary volume lowering cause otherwise it's too aggressive
+  return ret / 4.;
 }
 
 void PortAudioInterface::start() { _stream->start(); }
