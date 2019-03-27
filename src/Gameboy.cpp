@@ -80,19 +80,13 @@ void Gameboy::step() {
     _debugger.fetch(_components.core->pc());
   }
 
-    _cycles = 0;
-  //if (!_wait) {
     _components.core->execute();
-	if (_components.mem_bus->read<Byte>(0xFF4D) == 0xFF) {
-		_cycles += _components.core->cycles() * 2;
-	} else {
-		_cycles += _components.core->cycles();
-	}
-    _components.timer->update(_components.core->cycles());
-    _components.ppu->update_graphics(_components.core->cycles());
+	int cycles = 0;
+	cycles = _components.core->cycles() / _components.core->speed();
+    _components.timer->update(cycles);
+    _components.ppu->update_graphics(cycles);
     _components.interrupt_controller->parse_interrupt();
-    _components.apu->update_clock(_components.core->cycles());
-  //}
+    _components.apu->update_clock(cycles);
 }
 
 void Gameboy::load_existing_save() {

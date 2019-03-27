@@ -35,6 +35,7 @@ void SoundChannel::trigger() {
 void SoundChannel::clear() {
   _summed_volumes = 0;
   _summed_volumes_nb = 0;
+  p_speed = 1;
   p_enabled = false;
   p_output_volume = 0;
   for (auto& unit : _modulation_units) unit->clear();

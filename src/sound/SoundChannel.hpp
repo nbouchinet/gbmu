@@ -26,9 +26,10 @@ class SoundChannel : public IReadWrite {
  protected:
   Byte p_output_volume = 0;
   bool p_enabled = false;
+  Byte p_speed = 1;
 
-  void bind_module(ModUnitPtr module) { _modulation_units.push_back(module); }
   SoundChannel() = default;
+  void bind_module(ModUnitPtr module) { _modulation_units.push_back(module); }
 
  public:
   static constexpr Byte MaxVolume = 0xf;
@@ -48,6 +49,8 @@ class SoundChannel : public IReadWrite {
     _summed_volumes = 0;
     _summed_volumes_nb = 0;
   }
+
+  void set_speed(Byte value) {p_speed = value;}
 
   float get_output() const {
     if (not p_enabled) return 0.f;

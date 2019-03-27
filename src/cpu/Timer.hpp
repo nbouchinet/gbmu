@@ -34,13 +34,11 @@ private:
   static constexpr Word TIMA = 0xFF05; // Timer counter
   static constexpr Word TMA = 0xFF06;  // Timer modulo
   static constexpr Word TAC = 0xFF07;  // Timer controller
-  static constexpr Word KEY1 = 0xFF4D; // Speed controller
 
   Byte _rDIV;
   Byte _rTIMA;
   Byte _rTMA;
   Byte _rTAC : 3;
-  Byte _rKEY1;
   int _counter;
   Word _rDIVCounter;
 

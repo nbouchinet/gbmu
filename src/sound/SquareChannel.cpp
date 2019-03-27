@@ -5,8 +5,8 @@
 #include <cassert>
 #include <iostream>
 
-static constexpr Word compute_timer(Word freq) noexcept {
-  return (2048 - freq) * 4;
+static constexpr Word compute_timer(Word freq, Byte speed) noexcept {
+  return ((2048 - freq) * 4) * speed;
 }
 
 namespace sound {
@@ -15,7 +15,7 @@ const std::array<Byte, 4> SquareChannel::s_waveforms{
 
 void SquareChannel::do_update() {
   if (_timer == 0) {
-    _timer = compute_timer(_frequency);
+    _timer = compute_timer(_frequency, p_speed);
     if (++_waveform_step >= 8) _waveform_step = 0;
   }
   Byte waveform = s_waveforms[_waveform_selected];
@@ -26,7 +26,7 @@ void SquareChannel::do_update() {
   --_timer;
 }
 
-void SquareChannel::do_trigger() { _timer = compute_timer(_frequency); }
+void SquareChannel::do_trigger() { _timer = compute_timer(_frequency, p_speed); }
 
 void SquareChannel::do_clear() {
   _waveform_selected = 0;

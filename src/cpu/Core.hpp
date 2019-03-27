@@ -9,6 +9,7 @@
 #include <array>
 #include <cstdint>
 #include <functional>
+#include <iostream>
 #include <vector>
 
 union Register {
@@ -18,10 +19,10 @@ union Register {
   };
 };
 
-class Accessor;  // Friend interface class for unit testing
+class Accessor; // Friend interface class for unit testing
 
 class Core : public IReadWrite {
- public:
+public:
   enum class Flags { C = 0x10, H = 0x20, N = 0x40, Z = 0x80 };
   static constexpr std::size_t StackSize = 0x7F;
 
@@ -32,13 +33,14 @@ class Core : public IReadWrite {
 
   friend class Accessor;
 
- private:
+private:
   Register _pc;
   Register _sp;
   Register _af;
   Register _bc;
   Register _de;
   Register _hl;
+  Byte _key1;
   Word _clock;
   Word _cycles;
   bool _in_jump_state;
@@ -49,7 +51,7 @@ class Core : public IReadWrite {
 
   ComponentsContainer &_components;
 
- public:
+public:
   void set_flag(Flags f, bool v) {
     int mask = static_cast<int>(f);
     if (v)
@@ -58,11 +60,8 @@ class Core : public IReadWrite {
       _af.low ^= mask;
   }
 
- public:
-  template <typename T>
-  void instr_ld(T &a, T b) {
-    a = b;
-  }
+public:
+  template <typename T> void instr_ld(T &a, T b) { a = b; }
   void instr_ldd(Byte &, Byte);
   void instr_ldi(Byte &, Byte);
   void instr_ldhl(Byte a);
@@ -70,8 +69,7 @@ class Core : public IReadWrite {
   void instr_push(Word v);
   void instr_pop(Word &dest);
 
-  template <typename A, typename B>
-  void instr_add(A &a, B b);
+  template <typename A, typename B> void instr_add(A &a, B b);
   void instr_adc(Byte &, Byte);
   void instr_sub(Byte &, Byte);
   void instr_sbc(Byte &, Byte);
@@ -91,7 +89,7 @@ class Core : public IReadWrite {
   void instr_scf();
   void instr_nop(Byte = 0) {}
   void instr_halt();
-  void instr_stop(Byte = 0) {}
+  void instr_stop(Byte = 0);
   void instr_di();
   void instr_ei();
 
@@ -146,6 +144,7 @@ class Core : public IReadWrite {
   bool get_flag(Flags f) const { return _af.low & static_cast<int>(f); }
   auto clock() const { return _clock; }
   auto cycles() const { return _cycles; }
+  uint8_t speed() const;
   auto pc() const { return _pc.word; }
   auto sp() const { return _sp.word; }
   auto af() const { return _af; }
@@ -169,14 +168,14 @@ class Core : public IReadWrite {
   void execute();
 
   void notify_interrupt() {
-    if (_halt) _halt = false;
+    if (_halt)
+      _halt = false;
   }
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
 };
 
-template <>
-inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
+template <> inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
   _af.low = 0u;
   set_flag(Flags::H, check_add_overflow_from(a, b, 4));
   set_flag(Flags::C, check_add_overflow_from(a, b, 8));
@@ -184,8 +183,7 @@ inline void Core::instr_add<Byte, Byte>(Byte &a, Byte b) {
   set_flag(Flags::Z, a == 0u);
 }
 
-template <>
-inline void Core::instr_add<Word, Word>(Word &a, Word b) {
+template <> inline void Core::instr_add<Word, Word>(Word &a, Word b) {
   set_flag(Flags::N, false);
   set_flag(Flags::C, check_add_overflow_from(a, b, 16));
   set_flag(Flags::H, check_add_overflow_from(a, b, 12));
@@ -194,14 +192,13 @@ inline void Core::instr_add<Word, Word>(Word &a, Word b) {
     set_flag(Flags::Z, a == 0u);
 }
 
-template <>
-inline void Core::instr_add<Word, Byte>(Word &a, Byte b) {
-    int8_t sb = b;
-    Word result = 0;
-    _af.low = 0u;
-    result = a + sb;
-    set_flag(Flags::H, ((result & 0xF) < (a & 0xF)));
-    set_flag(Flags::C, ((result & 0xFF) < (a & 0xFF)));
-    a = result;
+template <> inline void Core::instr_add<Word, Byte>(Word &a, Byte b) {
+  int8_t sb = b;
+  Word result = 0;
+  _af.low = 0u;
+  result = a + sb;
+  set_flag(Flags::H, ((result & 0xF) < (a & 0xF)));
+  set_flag(Flags::C, ((result & 0xFF) < (a & 0xFF)));
+  a = result;
 }
 #endif

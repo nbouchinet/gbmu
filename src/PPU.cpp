@@ -1090,8 +1090,8 @@ void PPU::translate_dmg_palettes() {
 
 //------------------------------------------------------------------------------
 void PPU::update_data_transfer_to_lcd_status() {
-  if (_lcd_cycles >= CYCLES_DATA_TRANSFER_TO_LCD) {
-    _lcd_cycles -= CYCLES_DATA_TRANSFER_TO_LCD;
+  if (_lcd_cycles >= CYCLES_DATA_TRANSFER_TO_LCD * _speed) {
+    _lcd_cycles -= CYCLES_DATA_TRANSFER_TO_LCD * _speed;
     set_stat_mode(MODE_HBLANK);
     if (_wait_frames_turn_on == 0) {
       if (test_bit(_stat, 3) == true) {
@@ -1105,8 +1105,8 @@ void PPU::update_data_transfer_to_lcd_status() {
 
 //------------------------------------------------------------------------------
 void PPU::update_oam_search_status() {
-  if (_lcd_cycles >= CYCLES_OAM_SEARCH) {
-    _lcd_cycles -= CYCLES_OAM_SEARCH;
+  if (_lcd_cycles >= CYCLES_OAM_SEARCH * _speed) {
+    _lcd_cycles -= CYCLES_OAM_SEARCH * _speed;
     get_sprites_for_line();
     set_stat_mode(MODE_DATA_TRANSFER_TO_LCD);
   }
@@ -1114,8 +1114,8 @@ void PPU::update_oam_search_status() {
 
 //------------------------------------------------------------------------------
 void PPU::update_v_blank_status() {
-  if (_lcd_cycles >= CYCLES_VBLANK) {
-    _lcd_cycles -= CYCLES_VBLANK;
+  if (_lcd_cycles >= CYCLES_VBLANK * _speed) {
+    _lcd_cycles -= CYCLES_VBLANK * _speed;
     if (_ly >= 153) {
       _ly = 0;
       set_stat_mode(MODE_OAM_SEARCH);
@@ -1130,8 +1130,8 @@ void PPU::update_v_blank_status() {
 
 //------------------------------------------------------------------------------
 void PPU::update_h_blank_status() {
-  if (_lcd_cycles >= CYCLES_HBLANK) {
-    _lcd_cycles -= CYCLES_HBLANK;
+  if (_lcd_cycles >= CYCLES_HBLANK * _speed) {
+    _lcd_cycles -= CYCLES_HBLANK * _speed;
     _ly++;
     lyc_check();
     if (_ly >= 144) {
@@ -1185,8 +1185,8 @@ void PPU::update_graphics(Word cycles) {
   if (is_lcd_enabled()) {
     update_lcd_status();
   } else {
-    if (_lcd_cycles >= 70224)
-      _lcd_cycles -= 70224;
+    if (_lcd_cycles >= 70224 * _speed)
+      _lcd_cycles -= 70224 * _speed;
   }
 }
 
