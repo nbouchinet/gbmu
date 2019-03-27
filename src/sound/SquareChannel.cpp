@@ -51,11 +51,13 @@ void SquareChannel::write(Word addr, Byte v) {
       _envelope.set_period(v & 0x7);
       break;
     case 0x3:
-      _frequency = v | ((static_cast<Word>(_frequency) & 0x7) << 8);
+      _frequency &= ~0xff;
+      _frequency |= v;
       break;
     case 0x4:
       _length.enable((v & 0x40) >> 6);
-      _frequency = (static_cast<Word>(v & 0x7) << 8) | (_frequency & 0xff);
+      _frequency &= 0xff;
+      _frequency |= (v & 0x7) << 8;
       if (v & 0x80) trigger();
       break;
   }

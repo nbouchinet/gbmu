@@ -39,7 +39,7 @@ void GbmuScreen::updateGbScreen(void) {
       image.setPixel(i, j, qRgba(r, g, b, a));
     }
   }
-  for (int i = 0; i < 4; ++i ) {
+  for (auto i = 0u; i < g_gameboy->components().apu->channels().size(); ++i ) {
     if (g_gameboy->components().apu->channels()[i].channel->get_raw_volume())
       image.setPixel(i, 0, qRgb(colors[i][0], colors[i][1], colors[i][2]));
     else 

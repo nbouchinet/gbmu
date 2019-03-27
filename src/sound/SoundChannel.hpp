@@ -50,12 +50,15 @@ class SoundChannel : public IReadWrite {
     _summed_volumes_nb = 0;
   }
 
-  void set_speed(Byte value) {p_speed = value;}
+  void set_speed(Byte value) { p_speed = value; }
 
-  float get_output() const {
+  AudioInterface::Sample get_output(Byte volume) const {
     if (not p_enabled) return 0.f;
-    float ret =
-        p_output_volume / (static_cast<float>(MaxVolume + 1) / 2.f) - 1.f;
+    assert(volume);
+    Byte out = p_output_volume * volume;
+    AudioInterface::Sample ret =
+        out / (static_cast<AudioInterface::Sample>(MaxVolume * volume) / 2.f) -
+        1.f;
     assert(ret <= 1.f and ret >= -1.f);
     return ret;
   }
