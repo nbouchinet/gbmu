@@ -7,8 +7,8 @@
 #include "src/sound/AudioInterface.hpp"
 #include "src/sound/VolumeTable.hpp"
 
-#include <memory>
 #include <chrono>
+#include <memory>
 
 #define CPU_FREQ (4194304)
 #define UPDATE_FREQ (512)
@@ -18,7 +18,7 @@ namespace sound {
 class SoundChannel;
 
 class APU : public IReadWrite {
- private:
+private:
   struct MemoryRangedChannel {
     Word begin, end;
     std::unique_ptr<SoundChannel> channel;
@@ -36,8 +36,9 @@ class APU : public IReadWrite {
   AudioInterface::MonoSamples _right_output;
   AudioInterface::MonoSamples _left_output;
 
-  AudioInterface* const _audio_interface;
-  ComponentsContainer& _comps;
+  Byte _speed = 1;
+  AudioInterface *const _audio_interface;
+  ComponentsContainer &_comps;
 
   VolumeTable _wave_ram = {};
 
@@ -46,26 +47,25 @@ class APU : public IReadWrite {
   void update_clock();
   void clear();
   float fetch_and_mix_samples(Byte enabled_channels, float vol) const;
-  float right_volume() const { return _vin_and_volumes & 0x07;}
-  float left_volume() const { return (_vin_and_volumes & 0x70) >> 4;}
+  float right_volume() const { return _vin_and_volumes & 0x07; }
+  float left_volume() const { return (_vin_and_volumes & 0x70) >> 4; }
 
   mutable bool _dump = false;
   std::chrono::time_point<std::chrono::system_clock> _last_dump;
 
- public:
-  APU(AudioInterface*, ComponentsContainer&);
+public:
+  APU(AudioInterface *, ComponentsContainer &);
 
   APU() = delete;
 
-  const auto& channels() const { return _channels; }
+  void set_speed(Byte value);
+  const auto &channels() const { return _channels; }
   void update_clock(Word);
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
-  void toggle_dump() const { 
-    _dump = !_dump; 
-  }
+  void toggle_dump() const { _dump = !_dump; }
   void dump() const;
 };
-}  // namespace sound
+} // namespace sound
 
-#endif  // APU_HPP
+#endif // APU_HPP

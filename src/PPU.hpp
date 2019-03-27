@@ -92,7 +92,10 @@ public:
     MODE_DATA_TRANSFER_TO_LCD = 3
   };
 
+  void set_speed(uint8_t value) {_speed = value;}
+
 private:
+  uint8_t _speed = 1;
   uint16_t get_tile_data_address(uint8_t tile_identifier);
   uint16_t determine_tile_number_address(uint8_t y_pos, uint8_t x_pos,
                                          bool boi_its_a_window);

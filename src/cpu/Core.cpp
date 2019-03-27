@@ -14,6 +14,7 @@ void Core::reset() {
   _bc.word = 0x0013;
   _de.word = 0x00d8;
   _hl.word = 0x014d;
+  _key1 = 0x00;
   _clock = 0x00;
   _cycles = 0x00;
   _in_jump_state = false;
@@ -178,6 +179,21 @@ void Core::instr_daa() {
 }
 
 void Core::instr_halt() { _halt = true; }
+
+void Core::instr_stop(Byte byte) {
+	(void)byte;
+  if (_key1 & 0x01) {
+    if (_key1 >= 0x80) {
+      _key1 = 0x00;
+      _components.ppu->set_speed(1);
+      _components.apu->set_speed(1);
+    } else {
+      _key1 = 0x80;
+      _components.ppu->set_speed(2);
+      _components.apu->set_speed(2);
+    }
+  }
+}
 
 // ----------------------------------------------------------------------------
 // Flags manipulation
@@ -462,11 +478,25 @@ void Core::exec_instruction(std::function<void(Word &)> instr, Word addr,
 // ----------------------------------------------------------------------------
 
 Byte Core::read(Word addr) const {
-  assert(addr >= 0xFF80 and addr <= 0xFFFE);
+  if (addr == 0xFF4D)
+    return _key1;
+
+  // assert(addr >= 0xFF80 and addr <= 0xFFFE);
   return _stack[addr - 0xFF80];
 }
 
 void Core::write(Word addr, Byte v) {
-  assert(addr >= 0xFF80 and addr <= 0xFFFE);
+  if (addr == 0xFF4D) {
+    _key1 = v;
+    return;
+  }
+  //  assert(addr >= 0xFF80 and addr <= 0xFFFE);
   _stack[addr - 0xFF80] = v;
+}
+
+uint8_t Core::speed() const {
+  if (_components.mem_bus->read<Byte>(0xFF4D) >= 0x80) {
+    return 2;
+  }
+  return 1;
 }

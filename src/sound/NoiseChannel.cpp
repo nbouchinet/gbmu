@@ -17,13 +17,13 @@ void NoiseChannel::do_update() {
       }
       p_output_volume = (~_lfsr & 1) * _volume;
     }
-    _timer = get_divider(_divisor_code) << _shift;
+    _timer = (get_divider(_divisor_code) << _shift) * p_speed;//TODO
   }
 }
 
 void NoiseChannel::do_trigger() {
   _lfsr = 0x7fff;
-  _timer = get_divider(_divisor_code) << _shift;
+  _timer = (get_divider(_divisor_code) << _shift) * p_speed;//TODO
 }
 
 void NoiseChannel::do_clear() {
