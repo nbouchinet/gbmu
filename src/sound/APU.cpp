@@ -21,7 +21,7 @@ APU::APU(AudioInterface *interface, ComponentsContainer &c)
           {0xff10, 0xff14, std::make_unique<SquareChannel>(true)},
           {0xff15, 0xff19, std::make_unique<SquareChannel>(false)},
           {0xff1a, 0xff1e, std::make_unique<WaveChannel>(_wave_ram)},
-          {0xff1f, 0xff23, std::make_unique<NoiseChannel>()},
+          /*{0xff1f, 0xff23, std::make_unique<NoiseChannel>()},*/
       }} {
   _last_dump = std::chrono::system_clock::now();
 }
@@ -44,8 +44,8 @@ void APU::update_clock() {
       ranged_channel.channel->update();
       ranged_channel.channel->downsample();
     }
-    float rvol = right_volume();
-    float lvol = left_volume();
+    Byte rvol = right_volume() + 1;
+    Byte lvol = left_volume() + 1;
 
     _right_output[_output_index] =
         fetch_and_mix_samples(_channel_to_terminal_output, rvol);
@@ -70,15 +70,16 @@ void APU::set_speed(Byte value) {
     chan.channel->set_speed(value);
   }
 }
-float APU::fetch_and_mix_samples(Byte enabled_channels, float vol) const {
-  std::vector<float> to_mix;
+
+float APU::fetch_and_mix_samples(Byte enabled_channels, Byte vol) const {
+  std::vector<AudioInterface::Sample> to_mix;
   to_mix.reserve(_channels.size());
   Byte b = 0;
   for (const auto &chan : _channels) {
     if (chan.channel->is_enabled() and test_bit(b++, enabled_channels))
-      to_mix.push_back(chan.channel->get_output());
+      to_mix.push_back(chan.channel->get_output(vol));
   }
-  return _audio_interface->mix(to_mix, vol);
+  return _audio_interface->mix(to_mix, 0);
 }
 
 void APU::update_clock(Word cycles) {

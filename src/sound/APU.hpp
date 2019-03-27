@@ -46,9 +46,9 @@ private:
 
   void update_clock();
   void clear();
-  float fetch_and_mix_samples(Byte enabled_channels, float vol) const;
-  float right_volume() const { return _vin_and_volumes & 0x07; }
-  float left_volume() const { return (_vin_and_volumes & 0x70) >> 4; }
+  float fetch_and_mix_samples(Byte enabled_channels, Byte vol) const;
+  Byte right_volume() const { return _vin_and_volumes & 0x07;}
+  Byte left_volume() const { return (_vin_and_volumes & 0x70) >> 4;}
 
   mutable bool _dump = false;
   std::chrono::time_point<std::chrono::system_clock> _last_dump;
