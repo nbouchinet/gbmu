@@ -14,6 +14,7 @@ void Core::reset() {
   _bc.word = 0x0013;
   _de.word = 0x00d8;
   _hl.word = 0x014d;
+  _key1 = 0x00;
   _clock = 0x00;
   _cycles = 0x00;
   _in_jump_state = false;

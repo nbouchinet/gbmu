@@ -40,7 +40,7 @@ private:
   Register _bc;
   Register _de;
   Register _hl;
-  Byte _key1 = 0x00;
+  Byte _key1;
   Word _clock;
   Word _cycles;
   bool _in_jump_state;
