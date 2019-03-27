@@ -83,7 +83,11 @@ void Gameboy::step() {
     _cycles = 0;
   //if (!_wait) {
     _components.core->execute();
-    _cycles += _components.core->cycles();
+	if (_components.mem_bus->read<Byte>(0xFF4D) == 0xFF) {
+		_cycles += _components.core->cycles() * 2;
+	} else {
+		_cycles += _components.core->cycles();
+	}
     _components.timer->update(_components.core->cycles());
     _components.ppu->update_graphics(_components.core->cycles());
     _components.interrupt_controller->parse_interrupt();
