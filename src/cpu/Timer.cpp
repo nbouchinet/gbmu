@@ -14,6 +14,7 @@ void Timer::reset() {
   _rTMA = 0x00;
   _counter = 0x400;
   _rDIVCounter = 0x00;
+  _rKEY1 = 0x00;
 
   _divider_counter = Counter(0x03);
   _timer_counter = Counter(0x00);
@@ -29,6 +30,8 @@ uint8_t Timer::read(Word addr) const {
     return _rTMA;
   case TAC:
     return _rTAC;
+  case KEY1:
+    return _rKEY1;
   default:
     return 0;
   }
@@ -46,13 +49,18 @@ void Timer::write(Word addr, uint8_t val) {
     _rTMA = val;
     break;
   case TAC:
-	if (test_bit(2, val)) {
-	  _timer_counter.start();
-	} else {
-	  _timer_counter.stop();
-	}
+    if (test_bit(2, val)) {
+      _timer_counter.start();
+    } else {
+      _timer_counter.stop();
+    }
     _timer_counter.set_frequency(val & 0x3);
     break;
+  case KEY1:
+	if (val == 1)
+		_rKEY1 = 0xFF;
+	else
+		_rKEY1 = val;
   }
 }
 

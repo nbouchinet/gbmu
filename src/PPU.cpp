@@ -91,7 +91,7 @@ void PPU::reset() {
   _unsigned_tile_numbers = false;
   _windowing_on = false;
   _nb_sprites = 0;
-  _gb_mode = MODE_GB_DMG;
+  _gb_mode = 0;
 
   _h_blank_hdma_src_addr = 0;
   _h_blank_hdma_dst_addr = 0;
@@ -243,7 +243,6 @@ void PPU::handle_cgb_obj_palette_write(uint8_t ocpd_arg) {
 void PPU::handle_lcdc_write(uint8_t value) {
   if (test_bit(_lcdc, 7) == true && test_bit(value, 7) == false) {
     _ly = 0;
-    _wait_frames_turn_on = 2;
     for (int y = 0; y < LCD_HEIGHT; y++) {
       for (int x = 0; x < LCD_WIDTH; x++) {
         set_pixel(y, x, 0xFFFFFFFF);
@@ -251,6 +250,7 @@ void PPU::handle_lcdc_write(uint8_t value) {
     }
     _components.driver_screen->transfer_dirty_to_clean();
   } else if (test_bit(_lcdc, 7) == false && test_bit(value, 7) == true) {
+    _wait_frames_turn_on = 2;
     lyc_check();
   }
   _lcdc = value;
@@ -261,7 +261,7 @@ void PPU::lyc_check() {
   if (_ly == _lyc) {
     set_bit(_stat, 2);
     if (test_bit(_stat, 6))
-      _components.interrupt_controller->request_interrupt(
+      _components.interrupt_controller->request_interrupt( // valid
           _components.interrupt_controller->LCDCSI);
   } else {
     unset_bit(_stat, 2);
@@ -289,7 +289,24 @@ void PPU::write(Word address, Byte value) {
     handle_lcdc_write(value);
     break;
   case 0xFF41:
-    _stat = value;
+    _stat = value; // need to set interrupt TODO
+
+    if (test_bit(_stat, 5) == true) {
+      _components.interrupt_controller->request_interrupt(
+          _components.interrupt_controller->LCDCSI);
+    }
+
+    if (test_bit(_stat, 4) == true) {
+      _components.interrupt_controller->request_interrupt(
+          _components.interrupt_controller->LCDCSI);
+    }
+
+    if (test_bit(_stat, 3) == true) {
+      _components.interrupt_controller->request_interrupt(
+          _components.interrupt_controller->LCDCSI);
+    }
+
+    lyc_check();
     break;
   case 0xFF42:
     _scy = value;
@@ -555,14 +572,17 @@ void PPU::setup_background_data() {
 
 //------------------------------------------------------------------------------
 void PPU::setup_gb_mode() {
-  uint8_t mode_flag = _components.mem_bus->read<Byte>(0x0143);
+  uint8_t mode_flag = 0;
 
-  if (mode_flag == 0xC0 || mode_flag == 0x80) {
-    _gb_mode = MODE_GB_CGB;
-  } else if (mode_flag == 0x80) {
-    _gb_mode = MODE_GB_DMGC;
-  } else {
-    _gb_mode = MODE_GB_DMG;
+  if (_gb_mode == 0) {
+    mode_flag = _components.mem_bus->read<Byte>(0x0143);
+    if (mode_flag == 0xC0 || mode_flag == 0x80) {
+      _gb_mode = MODE_GB_CGB;
+    } else if (mode_flag == 0x80) {
+      _gb_mode = MODE_GB_DMGC;
+    } else {
+      _gb_mode = MODE_GB_DMG;
+    }
   }
 }
 
@@ -992,25 +1012,6 @@ void PPU::send_pixel_pipeline() {
 
 //------------------------------------------------------------------------------
 void PPU::render_scanline() {
-  //  if (_ly == 0) {
-  //    std::cout << "\n      Background      |||      Sprite      " <<
-  //    std::endl; for (int i = 0; i <= 7; i++) {
-  //      std::cout << +i << " || " <<
-  //      std::bitset<16>(_background_color_palettes[i][0]) << " | "
-  //                << std::bitset<16>(_background_color_palettes[i][1]) << " |
-  //                "
-  //                << std::bitset<16>(_background_color_palettes[i][2]) << " |
-  //                "
-  //                << std::bitset<16>(_background_color_palettes[i][3]) << "
-  //                ||| "
-  //                << std::bitset<16>(_sprite_color_palettes[i][0]) << " | "
-  //                << std::bitset<16>(_sprite_color_palettes[i][1]) << " | "
-  //                << std::bitset<16>(_sprite_color_palettes[i][2]) << " | "
-  //                << std::bitset<16>(_sprite_color_palettes[i][3]) <<
-  //                std::endl;
-  //    }
-  //  }
-  setup_gb_mode();
   setup_window();
   setup_background_data();
   setup_sprite_data();
@@ -1092,8 +1093,13 @@ void PPU::update_data_transfer_to_lcd_status() {
   if (_lcd_cycles >= CYCLES_DATA_TRANSFER_TO_LCD) {
     _lcd_cycles -= CYCLES_DATA_TRANSFER_TO_LCD;
     set_stat_mode(MODE_HBLANK);
-    if (_wait_frames_turn_on == 0)
+    if (_wait_frames_turn_on == 0) {
+      if (test_bit(_stat, 3) == true) {
+        _components.interrupt_controller->request_interrupt( // valid
+            _components.interrupt_controller->LCDCSI);
+      }
       render_scanline();
+    }
   }
 }
 
@@ -1114,7 +1120,7 @@ void PPU::update_v_blank_status() {
       _ly = 0;
       set_stat_mode(MODE_OAM_SEARCH);
       if (test_bit(_stat, 5) == true)
-        _components.interrupt_controller->request_interrupt(
+        _components.interrupt_controller->request_interrupt( // valid
             _components.interrupt_controller->LCDCSI);
     } else
       _ly++;
@@ -1141,17 +1147,18 @@ void PPU::update_h_blank_status() {
       }
       _components.driver_screen->transfer_dirty_to_clean();
       set_stat_mode(MODE_VBLANK);
-      _components.interrupt_controller->request_interrupt(
+      _components.interrupt_controller->request_interrupt( // valid
           _components.interrupt_controller->VBI);
-      if (test_bit(_stat, 5) == true)
-        _components.interrupt_controller->request_interrupt(
+      if (test_bit(_stat, 4) == true)
+        _components.interrupt_controller->request_interrupt( // valid
             _components.interrupt_controller->LCDCSI);
     } else {
       if (is_hdma_active() == true)
         hdma_h_blank_step();
       set_stat_mode(MODE_OAM_SEARCH);
       if (test_bit(_stat, 5) == true)
-        _components.interrupt_controller->request_interrupt(
+        _components.interrupt_controller->request_interrupt( // valid
+
             _components.interrupt_controller->LCDCSI);
     }
   }
@@ -1173,6 +1180,7 @@ void PPU::update_lcd_status() {
 
 //------------------------------------------------------------------------------
 void PPU::update_graphics(Word cycles) {
+  setup_gb_mode();
   _lcd_cycles += cycles;
   if (is_lcd_enabled()) {
     update_lcd_status();

@@ -67,7 +67,7 @@ void InputController::key_pressed(int val)
 		|| (!is_button && !test_bit(4, key_requested)))
 		&& (was_unset))
 	{
-		//_components.interrupt_controller->request_interrupt(InterruptController::JOYI);
+		_components.interrupt_controller->request_interrupt(InterruptController::JOYI);
 	}
 }
 
