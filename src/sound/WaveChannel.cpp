@@ -2,7 +2,6 @@
 #include "src/sound/VolumeTable.hpp"
 
 #include <cassert>
-#include <iostream>
 
 static constexpr Word compute_timer(Word freq, Byte speed) noexcept {
   return ((2048 - freq) * 2) * speed;
@@ -14,7 +13,6 @@ const Byte WaveChannel::s_volume_shifts[VolumeShiftCount] = {4, 0, 1, 2};
 
 void WaveChannel::do_update() {
   if (_timer == 0) {
-    //assert(_frequency);
     _timer = compute_timer(_frequency, p_speed);
     if (++_table_index >= _table.size()) _table_index = 0;
   }
