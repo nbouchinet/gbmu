@@ -8,7 +8,6 @@
 
 #include <unistd.h>
 #include <cassert>
-#include <iostream>
 
 namespace sound {
 
@@ -21,10 +20,8 @@ APU::APU(AudioInterface *interface, ComponentsContainer &c)
           {0xff10, 0xff14, std::make_unique<SquareChannel>(true)},
           {0xff15, 0xff19, std::make_unique<SquareChannel>(false)},
           {0xff1a, 0xff1e, std::make_unique<WaveChannel>(_wave_ram)},
-          /*{0xff1f, 0xff23, std::make_unique<NoiseChannel>()},*/
-      }} {
-  _last_dump = std::chrono::system_clock::now();
-}
+          {0xff1f, 0xff23, std::make_unique<NoiseChannel>()},
+      }} {}
 
 void APU::update_clock() {
   if (--_update_countdown <= 0) {
@@ -95,11 +92,7 @@ void APU::clear() {
   _channel_to_terminal_output = 0;
 }
 
-void APU::dump() const { _channels[3].channel->dump(); }
-
 Byte APU::read(Word addr) const {
-  //  if (_dump)
-  //    std::cerr << std::hex  << "APU read: " << addr << "\n";
   for (auto &ranged_channel : _channels) {
     if (addr >= ranged_channel.begin and addr <= ranged_channel.end)
       return ranged_channel.channel->read(addr);
@@ -126,26 +119,6 @@ Byte APU::read(Word addr) const {
 }
 
 void APU::write(Word addr, Byte v) {
-  static std::map<Word, const char *> map{
-      {0xFF10, "NR10_REG"}, {0xFF11, "NR11_REG"}, {0xFF12, "NR12_REG"},
-      {0xFF13, "NR13_REG"}, {0xFF14, "NR14_REG"}, {0xFF16, "NR21_REG"},
-      {0xFF17, "NR22_REG"}, {0xFF18, "NR23_REG"}, {0xFF19, "NR24_REG"},
-      {0xFF1A, "NR30_REG"}, {0xFF1B, "NR31_REG"}, {0xFF1C, "NR32_REG"},
-      {0xFF1D, "NR33_REG"}, {0xFF1E, "NR34_REG"}, {0xFF20, "NR41_REG"},
-      {0xFF21, "NR42_REG"}, {0xFF22, "NR43_REG"}, {0xFF23, "NR44_REG"},
-      {0xFF24, "NR50_REG"}, {0xFF25, "NR51_REG"}, {0xFF26, "NR52_REG"}};
-  if (_dump) {
-    auto now = std::chrono::system_clock::now();
-    int ms =
-        std::chrono::duration_cast<std::chrono::milliseconds>(now - _last_dump)
-            .count();
-    if (ms) std::cerr << "delay(0x" << std::hex << ms << ");\n";
-    if (map.find(addr) != map.end()) {
-      std::cerr << std::hex << map[addr] << " = 0x" << +v << ";\n";
-      if (addr == 0xff23 and v & 0x80) dump();
-    }
-    _last_dump = std::chrono::system_clock::now();
-  }
   if (addr == 0xff26) {
     _APU_on = (v & 0x80) >> 7;
     if (not _APU_on) {

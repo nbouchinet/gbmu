@@ -7,7 +7,6 @@
 #include "src/sound/AudioInterface.hpp"
 #include "src/sound/VolumeTable.hpp"
 
-#include <chrono>
 #include <memory>
 
 #define CPU_FREQ (4194304)
@@ -18,7 +17,7 @@ namespace sound {
 class SoundChannel;
 
 class APU : public IReadWrite {
-private:
+ private:
   struct MemoryRangedChannel {
     Word begin, end;
     std::unique_ptr<SoundChannel> channel;
@@ -47,13 +46,10 @@ private:
   void update_clock();
   void clear();
   float fetch_and_mix_samples(Byte enabled_channels, Byte vol) const;
-  Byte right_volume() const { return _vin_and_volumes & 0x07;}
-  Byte left_volume() const { return (_vin_and_volumes & 0x70) >> 4;}
+  Byte right_volume() const { return _vin_and_volumes & 0x07; }
+  Byte left_volume() const { return (_vin_and_volumes & 0x70) >> 4; }
 
-  mutable bool _dump = false;
-  std::chrono::time_point<std::chrono::system_clock> _last_dump;
-
-public:
+ public:
   APU(AudioInterface *, ComponentsContainer &);
 
   APU() = delete;
@@ -63,9 +59,7 @@ public:
   void update_clock(Word);
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
-  void toggle_dump() const { _dump = !_dump; }
-  void dump() const;
 };
-} // namespace sound
+}  // namespace sound
 
-#endif // APU_HPP
+#endif  // APU_HPP

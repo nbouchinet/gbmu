@@ -39,7 +39,6 @@ class SoundChannel : public IReadWrite {
   void update();
   void trigger();
   void clear();
-  virtual void dump() const {}
 
   void downsample() {
     if (_summed_volumes_nb == 0)

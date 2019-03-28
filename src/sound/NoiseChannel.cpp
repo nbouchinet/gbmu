@@ -1,7 +1,6 @@
 #include "src/sound/NoiseChannel.hpp"
 
 #include <cassert>
-#include <iostream>
 
 namespace sound {
 
@@ -33,9 +32,6 @@ void NoiseChannel::do_clear() {
   _width_mode = false;
   _divisor_code = 0;
   _volume = 0;
-}
-
-void NoiseChannel::dump() const {
 }
 
 void NoiseChannel::write(Word addr, Byte v) {

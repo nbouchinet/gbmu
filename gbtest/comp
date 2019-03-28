@@ -1,6 +1,0 @@
-#! /bin/sh
-
- gbdk-n-compile.sh $1.c
- gbdk-n-link.sh $1.rel -o $1.ihx
- gbdk-n-make-rom.sh $1.ihx $1.gb
- chmod u+x $1.gb
