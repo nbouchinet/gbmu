@@ -3,7 +3,6 @@
 #include "utils/Operations_utils.hpp"
 
 #include <cassert>
-#include <iostream>
 
 static constexpr Word compute_timer(Word freq, Byte speed) noexcept {
   return ((2048 - freq) * 4) * speed;

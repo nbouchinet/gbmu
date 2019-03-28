@@ -1,7 +1,6 @@
 #include "src/sound/ModulationUnits.hpp"
 #include "src/sound/SoundChannel.hpp"
 
-#include <iostream>
 namespace sound {
 
 Word SweepUnit::frequency_calculation() {

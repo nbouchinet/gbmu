@@ -1,8 +1,6 @@
 #include "gbmuscreen.h"
 
 #include "mainwindow.h"
-#include "src/sound/APU.hpp"
-#include "src/sound/SoundChannel.hpp"
 
 #include <stdlib.h>
 #include <time.h>
@@ -20,9 +18,6 @@ GbmuScreen::GbmuScreen(QWidget *parent)
 }
 
 void GbmuScreen::updateGbScreen(void) {
-  static int colors[4][3] = {
-    {255, 0, 0}, {0, 255, 0}, {0, 0, 255}, { 0, 127, 127}
-  };
   if (_parent->width() != width() || _parent->height() != height())
     resize(_parent->width(), _parent->height() - SKIP_TOOLBAR * 2);
 
@@ -38,12 +33,6 @@ void GbmuScreen::updateGbScreen(void) {
 
       image.setPixel(i, j, qRgba(r, g, b, a));
     }
-  }
-  for (auto i = 0u; i < g_gameboy->components().apu->channels().size(); ++i ) {
-    if (g_gameboy->components().apu->channels()[i].channel->get_raw_volume())
-      image.setPixel(i, 0, qRgb(colors[i][0], colors[i][1], colors[i][2]));
-    else 
-      image.setPixel(i, 0, qRgb(0,0,0));
   }
   QPixmap p =
       QPixmap::fromImage(image.scaled(width(), height() - SKIP_TOOLBAR));

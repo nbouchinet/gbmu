@@ -169,9 +169,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 		case Qt::Key_M:
 			g_gameboy->key_pressed_wraper(6);
       break;
-    case Qt::Key_O:
-      g_gameboy->components().apu->toggle_dump();
-			break;
 	}
 }
 
@@ -204,9 +201,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 			break;
 		case Qt::Key_M:
 			g_gameboy->key_released_wraper(6);
-			break;
-    case Qt::Key_O:
-      g_gameboy->components().apu->toggle_dump();
 			break;
 	}
 }
