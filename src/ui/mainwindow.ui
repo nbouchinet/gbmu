@@ -10,6 +10,12 @@
     <height>300</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>160</width>
+    <height>172</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -39,6 +45,7 @@
     <addaction name="actionPlay"/>
     <addaction name="actionStop"/>
     <addaction name="actionMute"/>
+    <addaction name="actionSpeed"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -51,6 +58,9 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="iconSize">
     <size>
      <width>16</width>
@@ -69,6 +79,7 @@
    <addaction name="actionStop"/>
    <addaction name="actionMute"/>
    <addaction name="actionDebug"/>
+   <addaction name="actionSpeed"/>
   </widget>
   <action name="actionOpen">
    <property name="checkable">
@@ -76,6 +87,9 @@
    </property>
    <property name="checked">
     <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
    </property>
    <property name="icon">
     <iconset resource="resource.qrc">
@@ -158,6 +172,18 @@
    </property>
    <property name="text">
     <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSpeed">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/resources/speed.png</normaloff>:/resources/speed.png</iconset>
+   </property>
+   <property name="text">
+    <string>Speed</string>
    </property>
   </action>
  </widget>

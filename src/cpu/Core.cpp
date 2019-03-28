@@ -20,6 +20,7 @@ void Core::reset() {
   _in_jump_state = false;
   _has_jumped = false;
   _halt = false;
+  _cpu_freq.store(CPU_FREQ);
 }
 
 // ----------------------------------------------------------------------------
@@ -499,4 +500,13 @@ uint8_t Core::speed() const {
     return 2;
   }
   return 1;
+}
+
+// ----------------------------------------------------------------------------
+// Speed up cpu frequence
+// ----------------------------------------------------------------------------
+
+void Core::up_cpu_freq(int speed) {
+	_cpu_freq.store(CPU_FREQ);
+	_cpu_freq.store(_cpu_freq.load() * speed);
 }

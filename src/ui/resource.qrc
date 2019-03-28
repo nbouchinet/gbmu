@@ -10,5 +10,6 @@
         <file>resources/save.png</file>
         <file>resources/sound.png</file>
         <file>resources/stop.png</file>
+        <file>resources/speed.png</file>
     </qresource>
 </RCC>

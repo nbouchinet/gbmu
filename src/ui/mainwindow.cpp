@@ -12,6 +12,8 @@
 #include <QThread>
 #include <QGraphicsPixmapItem>
 #include <QInputDialog>
+#include <QBoxLayout>
+#include <QPoint>
 
 Gameboy *g_gameboy = nullptr;
 QMutex mutexGb;
@@ -37,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
 	ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
 	ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+	ui->actionSpeed->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
 }
 
 MainWindow::~MainWindow()
@@ -84,6 +87,7 @@ void MainWindow::on_actionOpen_triggered()
 	ui->actionStop->setEnabled(true);
 	ui->actionMute->setEnabled(true);
 	ui->actionDebug->setEnabled(true);
+	ui->actionSpeed->setEnabled(true);
 }
 
 void MainWindow::on_actionSave_triggered()
@@ -146,6 +150,18 @@ void MainWindow::on_actionDebug_triggered()
 	}
 }
 
+void MainWindow::on_actionSpeed_triggered()
+{
+	pause_gameboy(true);
+	bool ok;
+	int speed = QInputDialog::getInt(this, tr("Set speed"), tr("Value"), 1, 1, 10, 1, &ok);
+	if (ok && g_gameboy)
+	{
+		g_gameboy->components().core->up_cpu_freq(speed);
+	}
+	pause_gameboy(false);
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
 	if (!g_gameboy)
@@ -175,7 +191,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 			break;
 		case Qt::Key_M:
 			g_gameboy->key_pressed_wraper(6);
-      break;
+			break;
 	}
 }
 
@@ -209,5 +225,13 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
 		case Qt::Key_M:
 			g_gameboy->key_released_wraper(6);
 			break;
+	}
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+	if (_gameboy_screen && event->size().width() > GB_WIDTH && event->size().height() > GB_HEIGTH)
+	{
+		_gameboy_screen->do_resize();
 	}
 }
