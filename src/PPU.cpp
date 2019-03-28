@@ -1141,7 +1141,7 @@ void PPU::update_h_blank_status() {
       if (_wait_frames_turn_on > 0) {
         for (uint32_t y = 0; y < LCD_HEIGHT; y++) {
           for (uint32_t x = 0; x < LCD_WIDTH; x++) {
-            set_pixel(y, x, 0x000000FF);
+            set_pixel(y, x, 0xFFFFFFFF);
           }
         }
       }
