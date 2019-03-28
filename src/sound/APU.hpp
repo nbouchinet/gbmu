@@ -8,8 +8,9 @@
 #include "src/sound/VolumeTable.hpp"
 
 #include <memory>
+#include <chrono>
+#include <atomic>
 
-#define CPU_FREQ (4194304)
 #define UPDATE_FREQ (512)
 
 namespace sound {

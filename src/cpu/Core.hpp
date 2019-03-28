@@ -11,6 +11,9 @@
 #include <functional>
 #include <iostream>
 #include <vector>
+#include <atomic>
+
+#define CPU_FREQ (4194304)
 
 union Register {
   Word word = 0;
@@ -48,6 +51,7 @@ private:
   std::array<Byte, StackSize> _stack;
   bool _halt;
   Byte _current_opcode = 0x00;
+  std::atomic_uint _cpu_freq;
 
   ComponentsContainer &_components;
 
@@ -163,6 +167,8 @@ public:
                         Byte clock_cycles);
   void exec_instruction(std::function<void(Word &)> instr, Word addr,
                         Byte clock_cycles);
+  void up_cpu_freq(int speed);
+  unsigned int get_cpu_freq() { return _cpu_freq.load(); }
 
   using Iterator = std::vector<Byte>::const_iterator;
   void execute();
