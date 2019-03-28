@@ -137,12 +137,12 @@ void PPU::hdma_h_blank_step() {
 
 //------------------------------------------------------------------------------
 void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
-  if (test_bit(hdma5_arg, 7) == true) {
-    unset_bit(hdma5_arg, 7);
+//  if (test_bit(hdma5_arg, 7) == true) {
+//    unset_bit(hdma5_arg, 7);
     _hdma5 = hdma5_arg;
     _h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
     _h_blank_hdma_dst_addr = 0x8000 | (((_hdma3 << 8) | _hdma4) & 0x1FF0);
-  } else // general purpose dma : everything is tranfered at once rignt away
+//  } else // general purpose dma : everything is tranfered at once rignt away
   {
     uint16_t addr_source = 0;
     uint16_t addr_dest = 0;
@@ -162,11 +162,11 @@ void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
 
 //------------------------------------------------------------------------------
 void PPU::handle_hdma_transfer(uint8_t hdma5_arg) {
-  if (is_hdma_active() == false) {
+//  if (is_hdma_active() == false) {
     initiate_hdma_transfer(hdma5_arg);
-  } else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false) {
-    set_bit(_hdma5, 7);
-  }
+ // } else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false) {
+ //   set_bit(_hdma5, 7);
+ // }
 }
 
 //------------------------------------------------------------------------------
@@ -1154,7 +1154,7 @@ void PPU::update_h_blank_status() {
             _components.interrupt_controller->LCDCSI);
     } else {
       if (is_hdma_active() == true)
-        hdma_h_blank_step();
+	   	  hdma_h_blank_step();//TODO: know when this have to happend
       set_stat_mode(MODE_OAM_SEARCH);
       if (test_bit(_stat, 5) == true)
         _components.interrupt_controller->request_interrupt( // valid
