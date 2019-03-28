@@ -10,17 +10,18 @@ GbmuScreen::GbmuScreen(QWidget *parent)
   // srand(time(NULL));
   setAutoFillBackground(false);
   move(FIT_VIEW_W, FIT_VIEW_H);
-  resize(parent->width(), parent->height());
+  //resize(parent->width(), parent->height());
 
   _scene = std::make_unique<QGraphicsScene>(this);
-
+  setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setScene(_scene.get());
 }
 
 void GbmuScreen::updateGbScreen(void) {
-  if (_parent->width() != width() || _parent->height() != height())
-    resize(_parent->width(), _parent->height() - SKIP_TOOLBAR * 2);
-
+  static int colors[4][3] = {
+    {255, 0, 0}, {0, 255, 0}, {0, 0, 255}, { 0, 127, 127}
+  };
   QImage image = QImage(GB_WIDTH, GB_HEIGTH, QImage::Format_RGBA8888);
   for (int j = 0; j < GB_HEIGTH; j++) {
     for (int i = 0; i < GB_WIDTH; i++) {
@@ -34,8 +35,20 @@ void GbmuScreen::updateGbScreen(void) {
       image.setPixel(i, j, qRgba(r, g, b, a));
     }
   }
-  QPixmap p =
-      QPixmap::fromImage(image.scaled(width(), height() - SKIP_TOOLBAR));
+  for (int i = 0; i < 4; ++i ) {
+    if (g_gameboy->components().apu->channels()[i].channel->get_raw_volume())
+      image.setPixel(i, 0, qRgb(colors[i][0], colors[i][1], colors[i][2]));
+    else 
+      image.setPixel(i, 0, qRgb(0,0,0));
+  }
+  image = image.scaled(_parent->width(), _parent->height() - 28, Qt::KeepAspectRatio);
+  QPixmap p = QPixmap::fromImage(image);
+  if (_do_resize)
+  {
+    resize(image.width(), image.height());
+	move(QPoint( (_parent->width() - image.width()) / 2, ((_parent->height() - image.height()) / 2) + 14));
+	_do_resize = false;
+  }
   _scene->clear();
   _scene->addPixmap(p);
 }

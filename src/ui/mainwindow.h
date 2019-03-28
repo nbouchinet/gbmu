@@ -42,6 +42,8 @@ private slots:
     
 	void on_actionSave_triggered();
 
+	void on_actionSpeed_triggered();
+
 private:
     Ui::MainWindow *ui;
 	QString			_rom_path;
@@ -60,6 +62,7 @@ private:
 	void keyPressEvent(QKeyEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
 	void pause_gameboy(bool stop = false);
+	void resizeEvent(QResizeEvent *event);
 };
 
 #endif // MAINWINDOW_H

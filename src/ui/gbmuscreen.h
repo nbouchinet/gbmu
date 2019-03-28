@@ -23,10 +23,12 @@ class GbmuScreen : public QGraphicsView
 	private:
         QWidget *_parent;
 		std::unique_ptr<QGraphicsScene> _scene;
+		bool _do_resize = false;
 	public slots:
         void updateGbScreen(void);
 	public:
         GbmuScreen(QWidget *parent);
+		void do_resize() { _do_resize = true; }
 };
 
 #endif

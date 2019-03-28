@@ -26,8 +26,8 @@ APU::APU(AudioInterface *interface, ComponentsContainer &c)
 void APU::update_clock() {
   if (--_update_countdown <= 0) {
     (void)_comps;
-    _update_countdown = (CPU_FREQ * _speed / UPDATE_FREQ);
-    for (auto &ranged_channel : _channels) {
+    _update_countdown = (_comps.core->get_cpu_freq() / UPDATE_FREQ);
+    for (auto& ranged_channel : _channels) {
       ranged_channel.channel->update_modules(_modulation_units_steps);
       ranged_channel.channel->update();
     }
@@ -57,7 +57,7 @@ void APU::update_clock() {
       }
       _output_index = 0;
     }
-    _downsampling_countdown = (CPU_FREQ * _speed / SAMPLING_FREQ);
+    _downsampling_countdown = (_comps.core->get_cpu_freq() / SAMPLING_FREQ);
   }
 }
 
