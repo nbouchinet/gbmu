@@ -7,7 +7,7 @@
 
 class MemoryBankController5 : public AMemoryBankController {
 private:
-  uint8_t _ram_bank : 2;
+  uint8_t _ram_bank : 4;
   uint16_t _rom_bank : 9;
   bool _is_ram_enabled;
 
