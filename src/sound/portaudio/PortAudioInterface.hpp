@@ -12,7 +12,6 @@ class PortAudioInterface : public AudioInterface {
  private:
   static constexpr std::size_t FramesPerBuffer = 64;
   using Stream = portaudio::MemFunCallbackStream<PortAudioInterface>; 
-  using StereoSample = std::pair<float, float>; // TODO define a Sample type
 
   MonoSamples _right_output = {};
   MonoSamples _left_output = {};
@@ -32,7 +31,7 @@ class PortAudioInterface : public AudioInterface {
   PortAudioInterface();
   ~PortAudioInterface();
   bool queue_stereo_samples(const MonoSamples&, const MonoSamples&) override;
-  float mix(const std::vector<float>&, float volume) const override;
+  float mix(const std::vector<float>&) const override;
   void start() override;
   void terminate() override;
 };
