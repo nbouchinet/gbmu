@@ -59,6 +59,7 @@ class APU : public IReadWrite {
   void update_clock(Word);
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
+  void reset();
 };
 }  // namespace sound
 

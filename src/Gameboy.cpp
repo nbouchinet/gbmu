@@ -66,6 +66,7 @@ void Gameboy::reset() {
   _components.timer->reset();
   _components.lcd_registers->reset();
   _components.ppu->reset();
+  _components.apu->reset();
   _components.driver_screen->reset_screen();
   init();
   _debugger.reset();

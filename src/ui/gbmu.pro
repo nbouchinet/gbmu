@@ -83,6 +83,7 @@ SOURCES += \
 	src/sound/SquareChannel.cpp \
 	src/sound/WaveChannel.cpp \
 	src/sound/portaudio/PortAudioInterface.cpp \
+	utils/Logger.cpp
 
 HEADERS += \
 	src/AMemoryBankController.hpp \
@@ -115,5 +116,7 @@ HEADERS += \
 	src/sound/VolumeTable.hpp \
 	src/sound/WaveChannel.hpp \
 	src/sound/portaudio/PortAudioInterface.hpp \
+	utils/Logger.hpp \
+	utils/Operations_utils.hpp
 
 DISTFILES +=

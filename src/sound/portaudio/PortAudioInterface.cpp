@@ -1,6 +1,10 @@
 #include "PortAudioInterface.hpp"
 
 #include <cassert>
+#include <chrono>
+#include <exception>
+#include <iostream>
+#include <thread>
 #include <vector>
 
 namespace sound {
@@ -20,11 +24,11 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
 
   for (auto i = 0u; i < frames_per_buffer; ++i) {
     bool can_cpy = _cursor < SamplesTableSize and not _fill_lock;
-    out[0][i] = (can_cpy) ? _left_output[_cursor] : _last_sample_played.second;
-    out[1][i] = (can_cpy) ? _right_output[_cursor] : _last_sample_played.first;
+    out[0][i] = (can_cpy) ? _left_output[_cursor] : _last_sample_played.left;
+    out[1][i] = (can_cpy) ? _right_output[_cursor] : _last_sample_played.right;
     if (can_cpy) {
-      _last_sample_played.first = _right_output[_cursor];
-      _last_sample_played.second = _left_output[_cursor];
+      _last_sample_played.right = _right_output[_cursor];
+      _last_sample_played.left = _left_output[_cursor];
       ++_cursor;
     }
   }
@@ -34,20 +38,39 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
 
 PortAudioInterface::PortAudioInterface() {
   portaudio::System& sys = get_system();
-  portaudio::DirectionSpecificStreamParameters out_params(
-      sys.defaultOutputDevice(), 2, portaudio::FLOAT32, false,
-      sys.defaultOutputDevice().defaultLowOutputLatency(), NULL);
-  portaudio::StreamParameters params(
-      portaudio::DirectionSpecificStreamParameters::null(), out_params,
-      SAMPLING_FREQ, FramesPerBuffer, paClipOff);
-  _stream =
-      std::make_unique<Stream>(params, *this, &PortAudioInterface::callback);
+  try {
+    portaudio::Device& default_device =
+        sys.defaultOutputDevice();
+    portaudio::DirectionSpecificStreamParameters out_params(
+        default_device, 2, portaudio::FLOAT32, false,
+        default_device.defaultLowOutputLatency(), NULL);
+    portaudio::StreamParameters params(
+        portaudio::DirectionSpecificStreamParameters::null(), out_params,
+        SAMPLING_FREQ, FramesPerBuffer, paClipOff);
+    _stream =
+        std::make_unique<Stream>(params, *this, &PortAudioInterface::callback);
+  } catch (std::exception& e) {
+    std::cerr << "[Warning] Unable to initialize audio output: " << e.what()
+              << "\n";
+    _stream = nullptr;
+  }
 }
 
-PortAudioInterface::~PortAudioInterface() { _stream->close(); }
+PortAudioInterface::~PortAudioInterface() {
+  if (_stream) _stream->close();
+}
 
 bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
                                               const MonoSamples& left) {
+  if (_stream == nullptr) {
+    // Since gameboy is synchronized on the sound device sample retrieving, if no
+    // sound device is available, we kinda do as if there is one by waiting the good amount
+    // of time.
+    std::chrono::milliseconds wait((SamplesTableSize * 1'000) / SAMPLING_FREQ - 1);
+    std::this_thread::sleep_for(wait);
+    return true;
+  }
+
   if (_callback_lock or _cursor < SamplesTableSize) return false;
   _fill_lock = true;
   _right_output = right;
@@ -57,7 +80,7 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   return true;
 }
 
-float PortAudioInterface::mix(const std::vector<float>& samples, float) const {
+float PortAudioInterface::mix(const std::vector<float>& samples) const {
   float ret = 0.f;
   for (const auto& sample : samples) {
     ret += sample / samples.size();
@@ -66,8 +89,12 @@ float PortAudioInterface::mix(const std::vector<float>& samples, float) const {
   return ret / 4.;
 }
 
-void PortAudioInterface::start() { _stream->start(); }
+void PortAudioInterface::start() {
+  if (_stream) _stream->start();
+}
 
-void PortAudioInterface::terminate() { _stream->stop(); }
+void PortAudioInterface::terminate() {
+  if (_stream) _stream->stop();
+}
 
 }  // namespace sound

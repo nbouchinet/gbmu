@@ -11,13 +11,13 @@ Logger::Logger() : _level(Error) {
 	_file.open(_logFilename, std::ios::app);
 }
 
-std::string Logger::makeLogEntry(LogLevel level, std::string const &message) {
+std::string make_log_entry(Logger::LogLevel level, std::string const &message) {
 	std::stringstream ss;
 	char str[32] = { 0 };
 	time_t current = std::time(nullptr);
 
-	std::pair<LogLevel, std::string> level_str[] = {
-		{ Debug, "DEBUG" }, { Warning, "WARNING" }, { Error, "ERROR" }
+	std::pair<Logger::LogLevel, std::string> level_str[] = {
+		{ Logger::Debug, "DEBUG" }, { Logger::Warning, "WARNING" }, { Logger::Error, "ERROR" }
 	};
 
 	for (int i = 0; i < 3; i++) {
@@ -33,11 +33,11 @@ std::string Logger::makeLogEntry(LogLevel level, std::string const &message) {
 	return ss.str();
 }
 
-void Logger::logToConsole(std::string const &message) {
+void Logger::log_to_console(std::string const &message) {
 	std::cout << message << std::endl;
 }
 
-void Logger::logToFile(std::string const &message) {
+void Logger::log_to_file(std::string const &message) {
 	if (!_file.is_open())
 		return ;
 	_file << message << std::endl;
@@ -45,8 +45,8 @@ void Logger::logToFile(std::string const &message) {
 
 void Logger::log(LogLevel level, LogOutput output, std::string const &message) {
 	void (Logger::*f[2])(const std::string &) = {
-		&Logger::logToConsole,
-		&Logger::logToFile
+		&Logger::log_to_console,
+		&Logger::log_to_file
 	};
 	LogOutput outputs[2] = { Console, File };
 
@@ -55,6 +55,6 @@ void Logger::log(LogLevel level, LogOutput output, std::string const &message) {
 	for (int i = 0; i < 2; i++)
 	{
 		if (output == outputs[i])
-			(this->*f[i])(makeLogEntry(level, message));
+			(this->*f[i])(make_log_entry(level, message));
 	}
 }

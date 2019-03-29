@@ -76,7 +76,7 @@ float APU::fetch_and_mix_samples(Byte enabled_channels, Byte vol) const {
     if (chan.channel->is_enabled() and test_bit(b++, enabled_channels))
       to_mix.push_back(chan.channel->get_output(vol));
   }
-  return _audio_interface->mix(to_mix, 0);
+  return _audio_interface->mix(to_mix);
 }
 
 void APU::update_clock(Word cycles) {
@@ -84,12 +84,6 @@ void APU::update_clock(Word cycles) {
   while (cycles--) {
     update_clock();
   }
-}
-
-void APU::clear() {
-  _vin_and_volumes = 0;
-  _modulation_units_steps = 0;
-  _channel_to_terminal_output = 0;
 }
 
 Byte APU::read(Word addr) const {
@@ -152,5 +146,26 @@ void APU::write(Word addr, Byte v) {
   return;
   assert(false);
 }
+
+void APU::clear() {
+  _vin_and_volumes = 0;
+  _modulation_units_steps = 0;
+  _channel_to_terminal_output = 0;
+}
+
+void APU::reset() {
+  clear();
+  _APU_on = false;
+  _update_countdown = 0;
+  _downsampling_countdown = 0;
+  _modulation_units_steps = 0;
+  _output_index = 0;
+  _right_output.fill(0);
+  _left_output.fill(0);
+  _speed = 1;
+  _wave_ram.clear();
+  for (auto &c : _channels) c.channel->clear();
+}
+
 }  // namespace sound
 

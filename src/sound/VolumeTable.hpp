@@ -26,6 +26,8 @@ class VolumeTable {
       return (_volume_table[i / 2] & 0xf0) >> 4;
   }
 
+  void clear() { _volume_table.fill(0); }
+
   Byte& operator[](Byte i) { return _volume_table[i]; }
   Byte operator[](Byte i) const { return _volume_table[i]; }
 
