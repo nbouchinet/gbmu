@@ -677,7 +677,8 @@ void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
 			{
 				replace_pixel_segment(holder, contender);
 			}
-		} else if (holder.is_sprite == true) // sprite VS sprite
+		}
+		else if (holder.is_sprite == true) // sprite VS sprite
 		{
 			if (holder.value == 0 &&
 					contender.value != 0) // transparent pixel vs not transparent
@@ -687,12 +688,9 @@ void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
 			{
 				if (contender.sprite_info.x_pos <
 						holder.sprite_info.x_pos // comparing x_pos
-						||
-						(contender.sprite_info.x_pos ==
-						 holder.sprite_info
-						 .x_pos // if still can't determine, use obj number instead
-						 && contender.sprite_info.obj_number <
-						 holder.sprite_info.obj_number)) {
+						|| (contender.sprite_info.x_pos == holder.sprite_info.x_pos // if still can't determine, use obj number instead
+						 && contender.sprite_info.obj_number < holder.sprite_info.obj_number))
+				{
 					replace_pixel_segment(holder, contender);
 				}
 			}
@@ -706,16 +704,12 @@ void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
 			// tiles also have priority flag in CGB
 			if (test_bit(holder.sprite_info.flags, 7) == false) // priority according to sprite flag
 			{
-				if (test_bit(contender.sprite_info.flags, 7) ==
-						false               // contender sprite has priority to BG
-						&& contender.value > 0) // == not transparent pixel | value 0 is
-					// always transparent for sprites
+				if (test_bit(contender.sprite_info.flags, 7) == false // contender sprite has priority to BG
+						&& contender.value > 0) // == not transparent pixel | value 0 is always transparent for sprites
 				{
 					replace_pixel_segment(holder, contender);
 				}
-				else if (test_bit(contender.sprite_info.flags, 7) ==
-						true // contender sprite does not have priority to BG
-						) // background is transparent;
+				else if (test_bit(contender.sprite_info.flags, 7) == true && holder.value == 0 && contender.value > 0) // contender sprite does not have priority to BG
 				{
 					replace_pixel_segment(holder, contender);
 				}
@@ -723,13 +717,12 @@ void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
 		}
 		else if (holder.is_sprite == true) // same as DMG
 		{
-			if (holder.sprite_info.obj_number > contender.sprite_info.obj_number
+			if (holder.value == 0 && contender.value != 0) // transparent pixel vs not transparent
+				replace_pixel_segment(holder, contender);
+			else if (holder.sprite_info.obj_number > contender.sprite_info.obj_number
 					&& contender.value > 0) {
 				replace_pixel_segment(holder, contender);
 			}
-			//if (holder.value == 0 &&
-			//    contender.value != 0) // transparent pixel vs not transparent
-			//  replace_pixel_segment(holder, contender);
 		}
 	}
 }
