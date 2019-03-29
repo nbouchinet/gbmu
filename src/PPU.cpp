@@ -137,13 +137,17 @@ void PPU::hdma_h_blank_step() {
 
 //------------------------------------------------------------------------------
 void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
-	//  if (test_bit(hdma5_arg, 7) == true) {
-	//    unset_bit(hdma5_arg, 7);
-	_hdma5 = hdma5_arg;
-	_h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
-	_h_blank_hdma_dst_addr = 0x8000 | (((_hdma3 << 8) | _hdma4) & 0x1FF0);
-	//  } else // general purpose dma : everything is tranfered at once rignt away
+	if (test_bit(hdma5_arg, 7) == true) // we setup the h blank dma (1 step at each hblank)
 	{
+//		std::cerr << "h blank dma transfer initiated" << std::endl;
+	    unset_bit(hdma5_arg, 7);
+		_hdma5 = hdma5_arg;
+		_h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
+		_h_blank_hdma_dst_addr = 0x8000 | (((_hdma3 << 8) | _hdma4) & 0x1FF0);
+	}
+	else // general purpose dma : everything is tranfered at once rignt away
+	{
+//		std::cerr << "general purpose dma transfer initiated" << std::endl;
 		uint16_t addr_source = 0;
 		uint16_t addr_dest = 0;
 		uint16_t lines_to_transfer = 0;
@@ -152,7 +156,8 @@ void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
 		addr_dest = 0x8000 | (((_hdma3 << 8) | _hdma4) & 0x1FF0);
 		lines_to_transfer = _hdma5 & 0x7F;
 
-		for (int i = 0; i < (lines_to_transfer + 1) * 16; i++) {
+		for (int i = 0; i < (lines_to_transfer + 1) * 16; i++)
+		{
 			_components.mem_bus->write(
 					addr_dest + i, _components.mem_bus->read<Byte>(addr_source + i));
 		}
@@ -162,16 +167,20 @@ void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
 
 //------------------------------------------------------------------------------
 void PPU::handle_hdma_transfer(uint8_t hdma5_arg) {
-	//  if (is_hdma_active() == false) {
-	initiate_hdma_transfer(hdma5_arg);
-	// } else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false) {
-	//   set_bit(_hdma5, 7);
-	// }
+//	if (is_hdma_active() == false)
+//	{
+		initiate_hdma_transfer(hdma5_arg);
+//	}
+//	else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false) {
+//	   set_bit(_hdma5, 7);
+//	}
 }
 
 //------------------------------------------------------------------------------
 void PPU::dma_transfer(uint16_t address) {
 	uint16_t dma_addr;
+
+//	std::cerr << "dma transfer (dmg mode)" << std::endl;
 
 	dma_addr = address << 8;
 	for (int i = 0; i < 0xA0; i++) {
@@ -347,6 +356,8 @@ void PPU::write(Word address, Byte value) {
 			_wx = value;
 			break;
 		case 0xFF4F:
+			if (test_bit(_hdma5, 7) == false && _vbk != value)
+				std::cerr << "changing vbk during a transfer, BAD!" << std::endl;
 			_vbk = value;
 			break;
 		case 0xFF51:
