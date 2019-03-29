@@ -24,19 +24,22 @@ public:
     } else if (addr >= Bank0Begin && addr <= Bank0End) {
       return _ram[addr - Bank0Begin];
     } else if (addr >= BankNBegin && addr <= BankNEnd) {
-      return _ram[(addr - Bank0Begin) + _svbk * UWRAMBankSize];
+      return _ram[(addr - BankNBegin) + _svbk * UWRAMBankSize];
     }
     return 0;
   }
 
   void write(Word addr, Byte v) override {
     if (addr == SVBKAddr) {
-      v == 0 ? v++ : 0;
-      _svbk = v & 0x3;
+      _svbk = v & 0x7;
+
+      if (_svbk == 0)
+        _svbk = 1;
+
     } else if (addr >= Bank0Begin && addr <= Bank0End) {
       _ram[addr - Bank0Begin] = v;
     } else if (addr >= BankNBegin && addr <= BankNEnd) {
-      _ram[(addr - Bank0Begin) + _svbk * UWRAMBankSize] = v;
+      _ram[(addr - BankNBegin) + _svbk * UWRAMBankSize] = v;
     }
   }
 };
