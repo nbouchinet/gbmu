@@ -254,6 +254,9 @@ void PPU::handle_lcdc_write(uint8_t value) {
     lyc_check();
   }
   _lcdc = value;
+  setup_window();
+  setup_background_data();
+  setup_sprite_data();
 }
 
 //------------------------------------------------------------------------------
@@ -547,6 +550,8 @@ void PPU::setup_sprite_data() {
 void PPU::setup_window() {
   if (test_bit(_lcdc, 5) == true)
     _windowing_on = true;
+  else
+	_windowing_on = false;
 
   if (test_bit(_lcdc, 6) == true)
     _window_chr_attr_start = 0x9C00;
@@ -642,7 +647,7 @@ void PPU::replace_pixel_segment(t_pixel_segment &holder,
 
 //------------------------------------------------------------------------------
 void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
-  // note : we assume that contender is always a sprite because we first render
+  // note : we can assume that contender is always a sprite because we first render
   // all tiles (which cannot intersect)
 
   if (_gb_mode == MODE_GB_DMG) // is DMG
@@ -711,9 +716,13 @@ void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
       }
     } else if (holder.is_sprite == true) // same as DMG
     {
-      if (holder.value == 0 &&
-          contender.value != 0) // transparent pixel vs not transparent
-        replace_pixel_segment(holder, contender);
+	  if (holder.sprite_info.obj_number > contender.sprite_info.obj_number
+			  && contender.value > 0) {
+		  replace_pixel_segment(holder, contender);
+	  }
+      //if (holder.value == 0 &&
+      //    contender.value != 0) // transparent pixel vs not transparent
+      //  replace_pixel_segment(holder, contender);
     }
   }
 }
@@ -1012,10 +1021,6 @@ void PPU::send_pixel_pipeline() {
 
 //------------------------------------------------------------------------------
 void PPU::render_scanline() {
-  setup_window();
-  setup_background_data();
-  setup_sprite_data();
-
   if (_gb_mode == MODE_GB_CGB ||
       (_gb_mode == MODE_GB_DMG && test_bit(_lcdc, 0) == true))
     render_tiles();
