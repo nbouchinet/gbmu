@@ -2,6 +2,7 @@
 #define AUDIOINTERFACE_HPP
 
 #include <array>
+#include <vector>
 
 #define SAMPLING_FREQ (44100)
 
