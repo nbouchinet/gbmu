@@ -18,6 +18,8 @@ private:
   Byte _svbk;
 
 public:
+  UnitWorkingRAM() : _svbk(1) {}
+
   Byte read(Word addr) const override {
     if (addr == SVBKAddr) {
       return _svbk;
