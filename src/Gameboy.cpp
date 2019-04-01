@@ -17,7 +17,7 @@
 ComponentsContainer::ComponentsContainer(
     const std::string &rom_path, sound::AudioInterface *audio_interace) {
   cartridge = std::make_unique<Cartridge>(rom_path);
-  bios = std::make_unique<Bios>(*this);
+  bios = std::make_unique<Bios>();
   interrupt_controller = std::make_unique<InterruptController>(*this);
   input_controller = std::make_unique<InputController>(*this);
   core = std::make_unique<Core>(*this);
@@ -98,10 +98,9 @@ void Gameboy::load_existing_save() {
 }
 
 int Gameboy::run() {
-  //_components.mem_bus->write(0xFF50, 1);
-  set_cgb_flag();
-  //_components.core->instr_jp(0x0000);
   do_checksum();
+  read_type();
+  _components.bios->set_type(_type);
   load_existing_save();
   _audio_interface.start();
   while (!_is_abort) {
@@ -185,6 +184,13 @@ void Gameboy::do_checksum() {
   if (cartridge_sum != sum) throw BadChecksum();
 }
 
-void Gameboy::set_cgb_flag() {
-  _cgb_flag = _components.mem_bus->read<Byte>(0x143);
+void Gameboy::read_type() {
+  Byte value = _components.mem_bus->read<Byte>(0x143);
+  if (value == 0x80 or value == 0xC0)
+  {
+    std::cerr << std::hex << +value << "\n";
+    _type = static_cast<GbType>(value);
+  }
+  else
+    _type = GbType::Unknown;
 }

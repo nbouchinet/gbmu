@@ -16,14 +16,6 @@
   _ranged_components.push_back(RangedComponent{begin, end, c});
 
 MemoryBus::MemoryBus(ComponentsContainer &components) {
-	reset(components);
-}
-
-void MemoryBus::reset(ComponentsContainer &components) {
-  _ranged_components.clear();
-  _bios_is_enabled = true;
-  _bios = components.bios.get();
-
   push_component(0x0000, 0x7FFF, components.cartridge.get());
   push_component(0x8000, 0x9FFF, components.ppu.get());
   push_component(0xA000, 0xBFFF, components.cartridge.get());
@@ -41,6 +33,12 @@ void MemoryBus::reset(ComponentsContainer &components) {
   push_component(0xFF80, 0xFFFE, components.core.get());
   push_component(0xFFFF, 0xFFFF, components.interrupt_controller.get());
   push_component(0xFF00, 0xFF00, components.input_controller.get());
+	reset(components);
+}
+
+void MemoryBus::reset(ComponentsContainer &components) {
+  _bios_is_enabled = true;
+  _bios = components.bios.get();
 }
 
 void MemoryBus::disable_bios() {

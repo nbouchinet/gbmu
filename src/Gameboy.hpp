@@ -9,6 +9,7 @@
 #include "src/ScreenOutput.hpp"
 #include "src/sound/APU.hpp"
 #include "src/sound/portaudio/PortAudioInterface.hpp"
+#include "src/GbType.hpp"
 
 #include <atomic>
 #include <memory>
@@ -33,7 +34,6 @@ struct ComponentsContainer {
 };
 
 class Accessor;
-class Debugger;
 
 class Gameboy {
  private:
@@ -41,11 +41,10 @@ class Gameboy {
     Byte ram[AMemoryBankController::RAMSize];
   };
 
-  void set_cgb_flag();
   sound::PortAudioInterface _audio_interface;
   ComponentsContainer _components;
   Debugger _debugger;
-  uint8_t _cgb_flag;
+  GbType _type;
 
   std::atomic<bool> _wait;
   int _cycles = 0;
@@ -56,6 +55,7 @@ class Gameboy {
   friend class Accessor;
 
   void do_checksum();
+  void read_type();
 
  public:
   Gameboy(const std::string &rom_path);
@@ -73,7 +73,7 @@ class Gameboy {
   void key_released_wraper(int val);
   void notify_debugger(Debugger::e_dbg_state state, int duration = 0);
   bool is_screen_filled() { return _components.ppu->is_screen_filled(); }
-  const uint8_t &get_cgb_flag() const { return _cgb_flag; }
+  auto getType() const { return _type; }
   Debugger &get_debugger() { return _debugger; }
   bool get_is_abort() const { return _is_abort; }
   void set_is_abort(bool val) { _is_abort = val; }
