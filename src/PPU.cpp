@@ -614,10 +614,10 @@ void PPU::setup_gb_mode() {
 
   if (_gb_mode == 0) {
     mode_flag = _components.mem_bus->read<Byte>(0x0143);
-    if (mode_flag == 0xC0 || mode_flag == 0x80) {
+    if (mode_flag == 0xC0) {
       _gb_mode = MODE_GB_CGB;
     } else if (mode_flag == 0x80) {
-      _gb_mode = MODE_GB_DMGC;
+      _gb_mode = MODE_GB_CGB; // Need to set custom palettes
     } else {
       _gb_mode = MODE_GB_DMG;
     }

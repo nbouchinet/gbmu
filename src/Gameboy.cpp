@@ -189,8 +189,10 @@ void Gameboy::do_checksum() {
 
 void Gameboy::read_type() {
   Byte value = _components.mem_bus->read<Byte>(0x143);
-  if (value == 0x80 or value == 0xC0)
+  if (value == 0xC0)
     _type = GbType::CGB;
+  else if (value == 0x80)
+	  _type = GbType::CGB_DMG;
   else
     _type = GbType::DMG;
 }

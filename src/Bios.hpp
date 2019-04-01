@@ -22,7 +22,7 @@ private:
 
   const std::vector<Byte>& get_bios() const;
 
-  GbType _type = GbType::Unknown;
+  GbType _type = GbType::DMG;
 
 public:
   Byte read(Word addr) const { return get_bios()[addr]; }
