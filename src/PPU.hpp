@@ -30,6 +30,7 @@ typedef struct s_sprite_info {
   uint8_t flags;
   uint8_t obj_number;
 
+  friend class boost::serialization::access;
   template <class Archive> void serialize(Archive &ar, const unsigned int) {
     ar &y_pos;
     ar &x_pos;
@@ -46,6 +47,7 @@ typedef struct s_pixel_segment {
   t_sprite_info sprite_info;
   // need to add stuff related to palette // actually maybe not
 
+  friend class boost::serialization::access;
   template <class Archive> void serialize(Archive &ar, const unsigned int) {
     ar &value;
     ar &is_sprite;

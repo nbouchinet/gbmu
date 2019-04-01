@@ -26,6 +26,7 @@ private:
   clock_t clock_last;
   float elapsed_time;
 
+  friend class boost::serialization::access;
   template <class Archive> void serialize(Archive &ar, const unsigned int) {
     ar &active_reg;
     ar &seconds;
