@@ -68,9 +68,6 @@ void Cartridge::save_ram_to_buffer(
   std::copy(ram.begin(), ram.end(), buffer.begin());
 }
 
-void Cartridge::set_ram_content(
-    Byte (&buffer)[AMemoryBankController::RAMSize]) {
-  for (unsigned int i = 0; i < ram.size(); i++) {
-    ram[i] = buffer[i];
-  }
+void Cartridge::set_ram_content(const Byte *data, std::size_t size) {
+  std::copy(data, data + size, ram.begin());
 }

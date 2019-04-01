@@ -34,7 +34,11 @@ ComponentsContainer::ComponentsContainer(
 ComponentsContainer::~ComponentsContainer() {}
 
 Gameboy::Gameboy(const std::string &rom_path)
-    : _components(rom_path, &_audio_interface), _debugger(_components), _wait(false), _rom_path(rom_path), _is_abort(false), _pause(false) {}
+    : _components(rom_path, &_audio_interface),
+      _debugger(_components),
+      _rom_path(rom_path),
+      _is_abort(false),
+      _pause(false) {}
 
 void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
   switch (state) {
@@ -80,13 +84,12 @@ void Gameboy::step() {
     _debugger.fetch(_components.core->pc());
   }
 
-    _components.core->execute();
-	int cycles = 0;
-	cycles = _components.core->cycles() / _components.core->speed();
-    _components.timer->update(cycles);
-    _components.ppu->update_graphics(cycles);
-    _components.interrupt_controller->parse_interrupt();
-    _components.apu->update_clock(cycles);
+  _components.core->execute();
+  int cycles = _components.core->cycles() / _components.core->speed();
+  _components.timer->update(cycles);
+  _components.ppu->update_graphics(cycles);
+  _components.interrupt_controller->parse_interrupt();
+  _components.apu->update_clock(cycles);
 }
 
 void Gameboy::load_existing_save() {
@@ -165,10 +168,9 @@ void Gameboy::load_save(std::string save_name) {
   std::ifstream in(save_name, std::ios::binary | std::ios::in | std::ios::ate);
 
   if (in.is_open()) {
-    std::streamsize size = in.tellg();
     in.seekg(0, std::ios::beg);
-    in.read(reinterpret_cast<char *>(&gs), size);
-    _components.cartridge->set_ram_content(gs.ram);
+    in.read(reinterpret_cast<char *>(gs.data()), gs.size());
+    _components.cartridge->set_ram_content(gs.data(), gs.size());
   }
 }
 
@@ -187,10 +189,7 @@ void Gameboy::do_checksum() {
 void Gameboy::read_type() {
   Byte value = _components.mem_bus->read<Byte>(0x143);
   if (value == 0x80 or value == 0xC0)
-  {
-    std::cerr << std::hex << +value << "\n";
     _type = static_cast<GbType>(value);
-  }
   else
     _type = GbType::Unknown;
 }
