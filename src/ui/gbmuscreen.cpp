@@ -19,9 +19,6 @@ GbmuScreen::GbmuScreen(QWidget *parent)
 }
 
 void GbmuScreen::updateGbScreen(void) {
-  static int colors[4][3] = {
-    {255, 0, 0}, {0, 255, 0}, {0, 0, 255}, { 0, 127, 127}
-  };
   QImage image = QImage(GB_WIDTH, GB_HEIGTH, QImage::Format_RGBA8888);
   for (int j = 0; j < GB_HEIGTH; j++) {
     for (int i = 0; i < GB_WIDTH; i++) {
@@ -34,12 +31,6 @@ void GbmuScreen::updateGbScreen(void) {
 
       image.setPixel(i, j, qRgba(r, g, b, a));
     }
-  }
-  for (int i = 0; i < 4; ++i ) {
-    if (g_gameboy->components().apu->channels()[i].channel->get_raw_volume())
-      image.setPixel(i, 0, qRgb(colors[i][0], colors[i][1], colors[i][2]));
-    else 
-      image.setPixel(i, 0, qRgb(0,0,0));
   }
   image = image.scaled(_parent->width(), _parent->height() - 28, Qt::KeepAspectRatio);
   QPixmap p = QPixmap::fromImage(image);
