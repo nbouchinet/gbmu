@@ -124,7 +124,12 @@ bool PPU::is_hdma_active() {
 
 //------------------------------------------------------------------------------
 void PPU::hdma_h_blank_step() {
-  //	std::cerr << "hdma_h_blank_step called" << std::endl;
+  // if destination address overflows, stop the transfer
+  if (_h_blank_hdma_dst_addr + 16 < _h_blank_hdma_dst_addr) {
+    set_bit(_hdma5, 7);
+	return ;
+  }
+
   for (int i = 0; i < 16; i++) {
     _components.mem_bus->write(
         _h_blank_hdma_dst_addr + 0x8000,
@@ -142,15 +147,9 @@ void PPU::hdma_h_blank_step() {
 }
 
 //------------------------------------------------------------------------------
-void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
-  if (test_bit(hdma5_arg, 7) == true) {
-    unset_bit(hdma5_arg, 7);
-    _hdma5 = hdma5_arg;
-    _h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
-    _h_blank_hdma_dst_addr = ((_hdma3 << 8) | _hdma4) & 0x1FF0;
-  } else // general purpose dma : everything is tranfered at once rignt away
-  {
-    uint16_t addr_source = 0;
+void PPU::general_purpose_hdma(uint8_t hdma5_arg)
+{
+	uint16_t addr_source = 0;
     uint16_t addr_dest = 0;
     uint16_t lines_to_transfer = 0;
 
@@ -172,25 +171,43 @@ void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
     _hdma3 = addr_dest >> 8;
     _hdma4 = addr_dest & 0xFF;
     _hdma5 = 0xFF;
+}
+
+//------------------------------------------------------------------------------
+void PPU::initiate_h_blank_hdma_transfer(uint8_t hdma5_arg)
+{
+    unset_bit(hdma5_arg, 7);
+    _hdma5 = hdma5_arg;
+    _h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
+    _h_blank_hdma_dst_addr = ((_hdma3 << 8) | _hdma4) & 0x1FF0;
+}
+
+//------------------------------------------------------------------------------
+void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
+  if (test_bit(hdma5_arg, 7) == true) {
+	  initiate_h_blank_hdma_transfer(hdma5_arg);
+  } else {
+	  general_purpose_hdma(hdma5_arg);
   }
 }
 
 //------------------------------------------------------------------------------
 void PPU::handle_hdma_transfer(uint8_t hdma5_arg) {
-//	if (is_hdma_active() == false)
-//	{
+	if (is_hdma_active() == false)
+	{
 		initiate_hdma_transfer(hdma5_arg);
-//	}
-//	else if (is_hdma_active() == true && test_bit(hdma5_arg, 7) == false) {
-//	   set_bit(_hdma5, 7);
-//	}
+	}
+	else if (is_hdma_active()) {
+		if (test_bit(hdma5_arg, 7) == false)
+			set_bit(_hdma5, 7);
+//		else
+//			initiate_hdma_transfer(hdma5_arg);
+	}
 }
 
 //------------------------------------------------------------------------------
 void PPU::dma_transfer(uint16_t address) {
 	uint16_t dma_addr;
-
-//	std::cerr << "dma transfer (dmg mode)" << std::endl;
 
 	dma_addr = address << 8;
 	for (int i = 0; i < 0xA0; i++) {
@@ -227,7 +244,6 @@ void PPU::handle_cgb_bg_palette_write(uint8_t bcpd_arg) {
 	if (test_bit(_bcps, 7) == true) {
 		_bcps += 1;
 	}
-	//  std::cerr << "================" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -739,9 +755,6 @@ void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
 
 //------------------------------------------------------------------------------
 void PPU::render_sprites() {
-	if (_nb_sprites > MAX_SPRITE_PER_LINE)
-		std::cerr << "SOMETHING IS BADLY FUCKED UP M8" << std::endl;
-
 	for (int sprite = _nb_sprites - 1; sprite >= 0;
 			sprite--) // up to 10 sprites on the line
 	{
@@ -835,7 +848,7 @@ void PPU::render_tiles() {
 	uint8_t y_pos;
 	bool in_window = false;
 	uint16_t tile_number_address; // from tile_number_address we get the
-	// tile_number (in BG display Data)
+	// tile_number (CHR code)
 	uint8_t tile_number;          // from BG display data we get tile_number
 	uint16_t tile_location; // from tile_number we deduce where the data for each
 	// pixel of the tile starts
