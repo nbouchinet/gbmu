@@ -168,7 +168,7 @@ public:
   void exec_instruction(std::function<void(Word &)> instr, Word addr,
                         Byte clock_cycles);
   void up_cpu_freq(int speed);
-  unsigned int get_cpu_freq() { return _cpu_freq.load(); }
+  unsigned int get_cpu_freq() { return _cpu_freq; }
 
   using Iterator = std::vector<Byte>::const_iterator;
   void execute();
