@@ -26,7 +26,7 @@ public:
   auto get_end() const { return rom.cend(); }
 
   void save_ram_to_buffer(AMemoryBankController::RAMContainer &buffer);
-  void set_ram_content(Byte (&buffer)[AMemoryBankController::RAMSize]);
+  void set_ram_content(const Byte *, std::size_t);
 
   Byte read(Word addr) const override {
     if (mbc)

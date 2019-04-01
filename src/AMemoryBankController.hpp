@@ -8,7 +8,7 @@
 
 class AMemoryBankController {
 public:
-  static const unsigned int RAMSize = 0x20000;
+  static constexpr unsigned int RAMSize = 0x20000;
   typedef std::array<Byte, RAMSize> RAMContainer;
   typedef std::vector<Byte> ROMContainer;
 
