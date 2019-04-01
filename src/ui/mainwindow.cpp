@@ -118,8 +118,8 @@ void MainWindow::on_actionStop_triggered()
 {
 	if (g_gameboy)
 	{
-		g_gameboy->reset();
 		pause_gameboy(true);
+		g_gameboy->reset();
 	}
 }
 
