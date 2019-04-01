@@ -64,6 +64,7 @@ class Gameboy {
   void reset();
   void save(std::string save_name);
   void load_save(std::string save_name);
+  const auto& components() const { return _components; }
   uint32_t get_pixel(uint8_t y, uint8_t x) {
     return (_components.driver_screen->get_rgba(y, x));
   }
