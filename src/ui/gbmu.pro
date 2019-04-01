@@ -67,8 +67,10 @@ ICON = gbmu.png
 SOURCES += \
 	src/Cartridge.cpp \
 	src/Debugger.cpp \
+	src/Dma.cpp \
 	src/Gameboy.cpp \
 	src/MemoryBus.cpp \
+	src/Palettes.cpp \
 	src/PPU.cpp \
 	src/Bios.cpp\
 	src/ScreenOutput.cpp \
