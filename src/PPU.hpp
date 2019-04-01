@@ -109,6 +109,8 @@ private:
   Byte handle_cgb_obj_palette_read() const;
   void handle_cgb_bg_palette_write(uint8_t bcpd_arg);
   void handle_cgb_obj_palette_write(uint8_t ocpd_arg);
+  void initiate_h_blank_hdma_transfer(uint8_t hdma5_arg);
+  void general_purpose_hdma(uint8_t hdma5_arg);
   void handle_hdma_transfer(uint8_t hdma5_arg);
   void lyc_check();
   bool is_hdma_active();
