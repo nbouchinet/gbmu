@@ -72,10 +72,15 @@ bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
   }
 
   if (_callback_lock or _cursor < SamplesTableSize) return false;
-  if (_mute.load()) return true;
   _fill_lock = true;
-  _right_output = right;
-  _left_output = left;
+  if (_mute){
+	_right_output.fill(0);
+	_left_output.fill(0);
+  }
+  else{
+	_right_output = right;
+	_left_output = left;
+  }
   _cursor = 0;
   _fill_lock = false;
   return true;
