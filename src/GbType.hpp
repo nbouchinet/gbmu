@@ -2,8 +2,8 @@
 #define GBTYPE_HPP
 
 enum class GbType {
-  Unknown = 0,
-  DMG = 0x80,
+  DMG = 0,
+  CGB_DMG = 0x80,
   CGB = 0xC0,
 };
 
