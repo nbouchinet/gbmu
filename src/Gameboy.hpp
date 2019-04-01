@@ -5,15 +5,15 @@
 #include "src/AMemoryBankController.hpp"
 #include "src/Debugger.hpp"
 #include "src/Fwd.hpp"
+#include "src/GbType.hpp"
 #include "src/PPU.hpp"
 #include "src/ScreenOutput.hpp"
 #include "src/sound/APU.hpp"
 #include "src/sound/portaudio/PortAudioInterface.hpp"
-#include "src/GbType.hpp"
 
 #include <atomic>
-#include <memory>
 #include <iostream>
+#include <memory>
 
 struct ComponentsContainer {
   std::unique_ptr<MemoryBus> mem_bus;
@@ -37,17 +37,13 @@ class Accessor;
 
 class Gameboy {
  private:
-  struct GameSave {
-    Byte ram[AMemoryBankController::RAMSize];
-  };
+  using GameSave = std::array<Byte, AMemoryBankController::RAMSize>;
 
   sound::PortAudioInterface _audio_interface;
   ComponentsContainer _components;
   Debugger _debugger;
   GbType _type;
 
-  std::atomic<bool> _wait;
-  int _cycles = 0;
   std::string _rom_path;
   bool _is_abort;
   std::atomic<bool> _pause;
@@ -68,7 +64,9 @@ class Gameboy {
   void reset();
   void save(std::string save_name);
   void load_save(std::string save_name);
-  uint32_t get_pixel(uint8_t y, uint8_t x) { return (_components.driver_screen->get_rgba(y, x)); }
+  uint32_t get_pixel(uint8_t y, uint8_t x) {
+    return (_components.driver_screen->get_rgba(y, x));
+  }
   void key_pressed_wraper(int val);
   void key_released_wraper(int val);
   void notify_debugger(Debugger::e_dbg_state state, int duration = 0);
@@ -80,15 +78,6 @@ class Gameboy {
   bool get_pause() const { return _pause.load(); }
   void set_pause(bool val) { _pause.store(val); }
 
-  void go() {
-    _wait.store(false);
-    _cycles = 0;
-  }
-
-  bool is_cycling() { return !_wait; }
-
-
-  const auto& components() const { return _components; }
   class BadChecksum : public std::exception {
     const char *what() const noexcept { return "Invalid ROM checksum."; }
   };
