@@ -507,6 +507,5 @@ uint8_t Core::speed() const {
 // ----------------------------------------------------------------------------
 
 void Core::up_cpu_freq(int speed) {
-	_cpu_freq.store(CPU_FREQ);
-	_cpu_freq.store(_cpu_freq.load() * speed);
+	_cpu_freq.store(CPU_FREQ * speed);
 }
