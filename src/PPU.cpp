@@ -117,159 +117,6 @@ void PPU::unset_bit(uint8_t &src, uint8_t bit_number) {
 }
 
 //------------------------------------------------------------------------------
-bool PPU::is_hdma_active() {
-  return (test_bit(_hdma5, 7) == true ? false : true);
-}
-
-//------------------------------------------------------------------------------
-void PPU::hdma_h_blank_step() {
-  // if destination address overflows, stop the transfer
-  if (_h_blank_hdma_dst_addr + 16 < _h_blank_hdma_dst_addr) {
-    set_bit(_hdma5, 7);
-    return;
-  }
-
-  for (int i = 0; i < 16; i++) {
-    _components.mem_bus->write(
-        _h_blank_hdma_dst_addr + 0x8000,
-        _components.mem_bus->read<Byte>(_h_blank_hdma_src_addr));
-    _h_blank_hdma_src_addr++;
-    _h_blank_hdma_dst_addr++;
-  }
-
-  _hdma1 = _h_blank_hdma_src_addr >> 8;
-  _hdma2 = _h_blank_hdma_src_addr & 0xFF;
-  _hdma3 = _h_blank_hdma_dst_addr >> 8;
-  _hdma4 = _h_blank_hdma_dst_addr & 0xFF;
-
-  _hdma5--;
-}
-
-//------------------------------------------------------------------------------
-void PPU::general_purpose_hdma(uint8_t hdma5_arg) {
-  uint16_t addr_source = 0;
-  uint16_t addr_dest = 0;
-  uint16_t lines_to_transfer = 0;
-
-  addr_source = ((_hdma1 << 8) | _hdma2) & 0xFFF0;
-  addr_dest = ((_hdma3 << 8) | _hdma4) & 0x1FF0;
-  lines_to_transfer = ((hdma5_arg & 0x7F) + 1) * 16;
-
-  for (int i = 0; i < lines_to_transfer; i++) {
-    _components.mem_bus->write(
-        0x8000 + addr_dest + i,
-        _components.mem_bus->read<Byte>(addr_source + i));
-  }
-
-  addr_source += lines_to_transfer;
-  addr_dest += lines_to_transfer;
-
-  _hdma1 = addr_source >> 8;
-  _hdma2 = addr_source & 0xFF;
-  _hdma3 = addr_dest >> 8;
-  _hdma4 = addr_dest & 0xFF;
-  _hdma5 = 0xFF;
-}
-
-//------------------------------------------------------------------------------
-void PPU::initiate_h_blank_hdma_transfer(uint8_t hdma5_arg) {
-  unset_bit(hdma5_arg, 7);
-  _hdma5 = hdma5_arg;
-  _h_blank_hdma_src_addr = ((_hdma1 << 8) + _hdma2) & 0xFFF0;
-  _h_blank_hdma_dst_addr = ((_hdma3 << 8) | _hdma4) & 0x1FF0;
-}
-
-//------------------------------------------------------------------------------
-void PPU::initiate_hdma_transfer(uint8_t hdma5_arg) {
-  if (test_bit(hdma5_arg, 7) == true) {
-    initiate_h_blank_hdma_transfer(hdma5_arg);
-  } else {
-    general_purpose_hdma(hdma5_arg);
-  }
-}
-
-//------------------------------------------------------------------------------
-void PPU::handle_hdma_transfer(uint8_t hdma5_arg) {
-  if (is_hdma_active() == false) {
-    initiate_hdma_transfer(hdma5_arg);
-  } else if (is_hdma_active()) {
-    if (test_bit(hdma5_arg, 7) == false)
-      set_bit(_hdma5, 7);
-    //		else
-    //			initiate_hdma_transfer(hdma5_arg);
-  }
-}
-
-//------------------------------------------------------------------------------
-void PPU::dma_transfer(uint16_t address) {
-  uint16_t dma_addr;
-
-  dma_addr = address << 8;
-  for (int i = 0; i < 0xA0; i++) {
-    _lcd_oam_ram[i] = _components.mem_bus->read<Byte>(
-        dma_addr + i); // dma's are always written into OAM ram
-  }
-}
-
-//------------------------------------------------------------------------------
-void PPU::handle_cgb_bg_palette_write(uint8_t bcpd_arg) {
-  uint16_t palette_tmp_value = 0;
-
-  _bcpd = bcpd_arg;
-  if (test_bit(_bcps, 0) == true) // high byte
-  {
-    palette_tmp_value = bcpd_arg;
-    palette_tmp_value = palette_tmp_value << 8;
-    palette_tmp_value |=
-        _background_color_palettes[extract_value(_bcps, 3, 5)]
-                                  [extract_value(_bcps, 1, 2)] &
-        0x00FF;
-  } else // low byte
-  {
-    palette_tmp_value = _background_color_palettes[extract_value(_bcps, 3, 5)]
-                                                  [extract_value(_bcps, 1, 2)] &
-                        0xFF00;
-    palette_tmp_value |= bcpd_arg;
-  }
-  _background_color_palettes[extract_value(_bcps, 3, 5)]
-                            [extract_value(_bcps, 1, 2)] = palette_tmp_value;
-  _background_color_palettes_translated[extract_value(
-      _bcps, 3, 5)][extract_value(_bcps, 1, 2)] =
-      translate_cgb_color_value(palette_tmp_value);
-  if (test_bit(_bcps, 7) == true) {
-    _bcps += 1;
-  }
-}
-
-//------------------------------------------------------------------------------
-void PPU::handle_cgb_obj_palette_write(uint8_t ocpd_arg) {
-  uint16_t palette_tmp_value = 0;
-
-  _ocpd = ocpd_arg;
-  if (test_bit(_ocps, 0) == true) // high byte
-  {
-    palette_tmp_value = ocpd_arg;
-    palette_tmp_value = palette_tmp_value << 8;
-    palette_tmp_value |= _sprite_color_palettes[extract_value(_ocps, 3, 5)]
-                                               [extract_value(_ocps, 1, 2)] &
-                         0x00FF;
-  } else // low byte
-  {
-    palette_tmp_value = _sprite_color_palettes[extract_value(_ocps, 3, 5)]
-                                              [extract_value(_ocps, 1, 2)] &
-                        0xFF00;
-    palette_tmp_value |= ocpd_arg;
-  }
-  _sprite_color_palettes[extract_value(_ocps, 3, 5)]
-                        [extract_value(_ocps, 1, 2)] = palette_tmp_value;
-  _sprite_color_palettes_translated[extract_value(_ocps, 3, 5)][extract_value(
-      _ocps, 1, 2)] = translate_cgb_color_value(palette_tmp_value);
-  if (test_bit(_ocps, 7) == true) {
-    _ocps += 1;
-  }
-}
-
-//------------------------------------------------------------------------------
 void PPU::handle_lcdc_write(uint8_t value) {
   if (test_bit(_lcdc, 7) == true && test_bit(value, 7) == false) {
     _ly = 0;
@@ -411,46 +258,6 @@ void PPU::write(Word address, Byte value) {
     handle_cgb_obj_palette_write(value);
     break;
   }
-}
-
-//------------------------------------------------------------------------------
-Byte PPU::handle_cgb_obj_palette_read() const {
-  uint16_t palette_tmp_value = 0;
-  Byte ret = 0;
-
-  palette_tmp_value = _background_color_palettes[extract_value(_bcps, 3, 5)]
-                                                [extract_value(_bcps, 1, 2)];
-  if (test_bit(_bcps, 0) == true) {
-    // high byte
-    palette_tmp_value = palette_tmp_value & 0xFF00;
-    palette_tmp_value = palette_tmp_value >> 8;
-    ret = palette_tmp_value;
-  } else {
-    // low byte
-    palette_tmp_value = palette_tmp_value & 0x00FF;
-    ret = palette_tmp_value;
-  }
-  return (ret);
-}
-
-//------------------------------------------------------------------------------
-Byte PPU::handle_cgb_bg_palette_read() const {
-  uint16_t palette_tmp_value = 0;
-  Byte ret = 0;
-
-  palette_tmp_value = _sprite_color_palettes[extract_value(_ocps, 3, 5)]
-                                            [extract_value(_ocps, 1, 2)];
-  if (test_bit(_ocps, 0) == true) {
-    // high byte
-    palette_tmp_value = palette_tmp_value & 0xFF00;
-    palette_tmp_value = palette_tmp_value >> 8;
-    ret = palette_tmp_value;
-  } else {
-    // low byte
-    palette_tmp_value = palette_tmp_value & 0x00FF;
-    ret = palette_tmp_value;
-  }
-  return (ret);
 }
 
 //------------------------------------------------------------------------------
@@ -905,129 +712,42 @@ void PPU::render_tiles() {
 }
 
 //------------------------------------------------------------------------------
-void PPU::enforce_debug_palettes() {
-  _background_color_palettes_translated[0][0] = 0xFFE6E6FF; // Rouge
-  _background_color_palettes_translated[0][1] = 0xFF4D4DFF;
-  _background_color_palettes_translated[0][2] = 0xe60000FF;
-  _background_color_palettes_translated[0][3] = 0x800000FF;
-
-  _background_color_palettes_translated[1][0] = 0xFFCCE6FF; // Rose
-  _background_color_palettes_translated[1][1] = 0xFF66B5FF;
-  _background_color_palettes_translated[1][2] = 0xFF0084FF;
-  _background_color_palettes_translated[1][3] = 0xB3005CFF;
-
-  _background_color_palettes_translated[2][0] = 0xf9e6ffFF; // Violet
-  _background_color_palettes_translated[2][1] = 0xd966ffFF;
-  _background_color_palettes_translated[2][2] = 0xFF0084FF;
-  _background_color_palettes_translated[2][3] = 0x9900ccFF;
-
-  _background_color_palettes_translated[3][0] = 0xe6e6ffFF; // Bleu
-  _background_color_palettes_translated[3][1] = 0x6666ffFF;
-  _background_color_palettes_translated[3][2] = 0x0000ccFF;
-  _background_color_palettes_translated[3][3] = 0x000099FF;
-
-  _background_color_palettes_translated[4][0] = 0xe6ffffFF; // Cyan
-  _background_color_palettes_translated[4][1] = 0x66ffffFF;
-  _background_color_palettes_translated[4][2] = 0x00ccccFF;
-  _background_color_palettes_translated[4][3] = 0x009999FF;
-
-  _background_color_palettes_translated[5][0] = 0xf2ffe6FF; // Vert
-  _background_color_palettes_translated[5][1] = 0xb3ff66FF;
-  _background_color_palettes_translated[5][2] = 0x66cc00FF;
-  _background_color_palettes_translated[5][3] = 0x4d9900FF;
-
-  _background_color_palettes_translated[6][0] = 0xffffe6FF; // Jaune
-  _background_color_palettes_translated[6][1] = 0xffff66FF;
-  _background_color_palettes_translated[6][2] = 0xcccc00FF;
-  _background_color_palettes_translated[6][3] = 0x999900FF;
-
-  _background_color_palettes_translated[7][0] = 0xfff0e6FF; // Orange
-  _background_color_palettes_translated[7][1] = 0xffa366FF;
-  _background_color_palettes_translated[7][2] = 0xcc5200FF;
-  _background_color_palettes_translated[7][3] = 0x993d00FF;
-
-  _sprite_color_palettes_translated[7][0] = 0xFFE6E6FF; // Orange
-  _sprite_color_palettes_translated[7][1] = 0xFF4D4DFF;
-  _sprite_color_palettes_translated[7][2] = 0xe60000FF;
-  _sprite_color_palettes_translated[7][3] = 0x800000FF;
-
-  _sprite_color_palettes_translated[6][0] = 0xFFCCE6FF; // Jaune
-  _sprite_color_palettes_translated[6][1] = 0xFF66B5FF;
-  _sprite_color_palettes_translated[6][2] = 0xFF0084FF;
-  _sprite_color_palettes_translated[6][3] = 0xB3005CFF;
-
-  _sprite_color_palettes_translated[5][0] = 0xf9e6ffFF; // Vert
-  _sprite_color_palettes_translated[5][1] = 0xd966ffFF;
-  _sprite_color_palettes_translated[5][2] = 0xFF0084FF;
-  _sprite_color_palettes_translated[5][3] = 0x9900ccFF;
-
-  _sprite_color_palettes_translated[4][0] = 0xe6e6ffFF; // Cyan
-  _sprite_color_palettes_translated[4][1] = 0x6666ffFF;
-  _sprite_color_palettes_translated[4][2] = 0x0000ccFF;
-  _sprite_color_palettes_translated[4][3] = 0x000099FF;
-
-  _sprite_color_palettes_translated[3][0] = 0xe6ffffFF; // Bleu
-  _sprite_color_palettes_translated[3][1] = 0x66ffffFF;
-  _sprite_color_palettes_translated[3][2] = 0x00ccccFF;
-  _sprite_color_palettes_translated[3][3] = 0x009999FF;
-
-  _sprite_color_palettes_translated[2][0] = 0xf2ffe6FF; // Violet
-  _sprite_color_palettes_translated[2][1] = 0xb3ff66FF;
-  _sprite_color_palettes_translated[2][2] = 0x66cc00FF;
-  _sprite_color_palettes_translated[2][3] = 0x4d9900FF;
-
-  _sprite_color_palettes_translated[1][0] = 0xffffe6FF; // Rose
-  _sprite_color_palettes_translated[1][1] = 0xffff66FF;
-  _sprite_color_palettes_translated[1][2] = 0xcccc00FF;
-  _sprite_color_palettes_translated[1][3] = 0x999900FF;
-
-  _sprite_color_palettes_translated[0][0] = 0xfff0e6FF; // Rouge
-  _sprite_color_palettes_translated[0][1] = 0xffa366FF;
-  _sprite_color_palettes_translated[0][2] = 0xcc5200FF;
-  _sprite_color_palettes_translated[0][3] = 0x993d00FF;
-}
-
-//------------------------------------------------------------------------------
 void PPU::send_pixel_pipeline() {
-  for (int i = 0; i < LCD_WIDTH; i++) {
-    if (_gb_mode == MODE_GB_DMG) {
-      if (_pixel_pipeline[i].is_sprite == false) {
-        set_pixel(_ly, i,
-                  _background_dmg_palette_translated[_pixel_pipeline[i].value]);
-      } else if (_pixel_pipeline[i].is_sprite == true) {
-        if (test_bit(_pixel_pipeline[i].sprite_info.flags, 4) == true)
-          set_pixel(
-              _ly, i,
-              _sprites_dmg_palettes_translated[1][_pixel_pipeline[i].value]);
-        else
-          set_pixel(
-              _ly, i,
-              _sprites_dmg_palettes_translated[0][_pixel_pipeline[i].value]);
-      }
-    } else if (_gb_mode == MODE_GB_CGB) {
-      // enforce_debug_palettes();
+	for (int i = 0; i < LCD_WIDTH; i++) {
+		if (_gb_mode == MODE_GB_DMG) {
+			if (_pixel_pipeline[i].is_sprite == false) {
+				set_pixel(_ly, i,
+						_background_dmg_palette_translated[_pixel_pipeline[i].value]);
+			} else if (_pixel_pipeline[i].is_sprite == true) {
+				if (test_bit(_pixel_pipeline[i].sprite_info.flags, 4) == true)
+					set_pixel(
+							_ly, i,
+							_sprites_dmg_palettes_translated[1][_pixel_pipeline[i].value]);
+				else
+					set_pixel(
+							_ly, i,
+							_sprites_dmg_palettes_translated[0][_pixel_pipeline[i].value]);
+			}
+		} else if (_gb_mode == MODE_GB_CGB) {
+			// enforce_debug_palettes();
 
-      uint8_t palette_number = 0;
-      if (_pixel_pipeline[i].is_sprite == false) {
-        palette_number =
-            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-        set_pixel(
-            _ly, i,
-            _background_color_palettes_translated[palette_number]
-                                                 [_pixel_pipeline[i].value]);
-      } else if (_pixel_pipeline[i].is_sprite == true) {
-        palette_number =
-            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-        set_pixel(_ly, i,
-                  _sprite_color_palettes_translated[palette_number]
-                                                   [_pixel_pipeline[i].value]);
-      }
-    }
-  }
-  set_pixel(0, 0, 0xFF0000FF);
-  set_pixel(0, 159, 0xFF0000FF);
-  set_pixel(143, 159, 0xFF0000FF);
-  set_pixel(143, 0, 0xFF0000FF);
+			uint8_t palette_number = 0;
+			if (_pixel_pipeline[i].is_sprite == false) {
+				palette_number =
+					extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+				set_pixel(
+						_ly, i,
+						_background_color_palettes_translated[palette_number]
+						[_pixel_pipeline[i].value]);
+			} else if (_pixel_pipeline[i].is_sprite == true) {
+				palette_number =
+					extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+				set_pixel(_ly, i,
+						_sprite_color_palettes_translated[palette_number]
+						[_pixel_pipeline[i].value]);
+			}
+		}
+	}
 }
 
 //------------------------------------------------------------------------------
@@ -1053,55 +773,6 @@ uint8_t PPU::extract_value(uint32_t val, uint8_t bit_start,
     weight *= 2;
   }
   return (ret);
-}
-
-//------------------------------------------------------------------------------
-uint32_t PPU::translate_cgb_color_value(uint16_t value) {
-  uint32_t ret = 0;
-  uint32_t extracc;
-
-  extracc = extract_value(value, 0, 4) << 3; // * 8; // extract red
-  ret += extracc;
-  ret = ret << 8;
-  extracc = extract_value(value, 5, 9) << 3; // * 8; // extract green
-  ret += extracc;
-  ret = ret << 8;
-  extracc = extract_value(value, 10, 14) << 3; // * 8; // extact blue
-  ret += extracc;
-  ret = ret << 8;
-  ret += 255; // alpha value, default 255;
-  return (ret);
-}
-
-//------------------------------------------------------------------------------
-uint32_t PPU::translate_dmg_color_value(uint8_t value) {
-  switch (value) {
-  case 0:
-    return (0xE0F8D0FF);
-  case 1:
-    return (0x88C070FF);
-  case 2:
-    return (0x346856FF);
-  case 3:
-    return (0x081820FF);
-  }
-  return (0);
-}
-
-//------------------------------------------------------------------------------
-void PPU::translate_dmg_palettes() {
-  for (int i = 0; i < 4; i++) {
-    _background_dmg_palette[i] = extract_value(_bgp, (i * 2), (i * 2) + 1);
-    _background_dmg_palette_translated[i] =
-        translate_dmg_color_value(extract_value(_bgp, (i * 2), (i * 2) + 1));
-
-    _sprites_dmg_palettes[0][i] = extract_value(_obp0, (i * 2), (i * 2) + 1);
-    _sprites_dmg_palettes[1][i] = extract_value(_obp1, (i * 2), (i * 2) + 1);
-    _sprites_dmg_palettes_translated[0][i] =
-        translate_dmg_color_value(extract_value(_obp0, (i * 2), (i * 2) + 1));
-    _sprites_dmg_palettes_translated[1][i] =
-        translate_dmg_color_value(extract_value(_obp1, (i * 2), (i * 2) + 1));
-  }
 }
 
 //------------------------------------------------------------------------------
