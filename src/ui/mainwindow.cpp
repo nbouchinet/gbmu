@@ -14,30 +14,35 @@
 #include <QThread>
 #include <QTimer>
 #include <QUrl>
+#include <QFileInfo>
 
 Gameboy *g_gameboy = nullptr;
 QMutex mutexGb;
 
 #include <unistd.h>
-#include <iostream>
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
-  ui->setupUi(this);
 
-  // Load icon
-  _pause_icon = QIcon(":/resources/pause.png");
-  _play_icon = QIcon(":/resources/play.png");
-  _sound_icon = QIcon(":/resources/sound.png");
-  _mute_icon = QIcon(":/resources/mute.png");
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
 
-  // Shortcut settings
-  ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
-  ui->actionSave->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-  ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
-  ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
-  ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
-  ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
-  ui->actionSpeed->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+	//Load icon
+	_pause_icon = QIcon(":/resources/pause.png");
+	_play_icon = QIcon(":/resources/play.png");
+	_sound_icon = QIcon(":/resources/sound.png");
+	_mute_icon = QIcon(":/resources/mute.png");
+
+	//Shortcut settings
+	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+	ui->actionSave->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+	ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
+	ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+	ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+	ui->actionSpeed->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+	ui->actionSnapshot->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Shift + Qt::Key_S));
+	ui->actionLoad_Snapshot->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Shift + Qt::Key_O));
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -64,6 +69,7 @@ void MainWindow::on_actionOpen_triggered() {
   if (_is_muted)
     g_gameboy->mute_gameboy();
 
+<<<<<<< HEAD
   // Setting up gameboy's screen
   _gameboy_screen = new GbmuScreen(this);
   _timer_screen = new QTimer(this);
@@ -87,6 +93,11 @@ void MainWindow::on_actionOpen_triggered() {
   ui->actionMute->setEnabled(true);
   ui->actionDebug->setEnabled(true);
   ui->actionSpeed->setEnabled(true);
+  ui->actionSnapshot->setEnabled(true);
+  ui->actionLoad_Snapshot->setEnabled(true);
+
+  QFileInfo fi(_rom_path);
+  setWindowTitle(fi.baseName());
 }
 
 void MainWindow::on_actionSave_triggered() {
