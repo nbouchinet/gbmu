@@ -1,11 +1,14 @@
 #include "src/Bios.hpp"
 
 #include <cassert>
+#include <iostream>
 
 const std::vector<Byte>& Bios::get_bios() const {
   switch (_type) {
     case GbType::CGB:
       return s_cgb_bios;
+	case GbType::CGB_DMG:
+	  return s_cgb_bios;
     default:
       return s_dmg_bios;
   }
