@@ -57,6 +57,7 @@ class Gameboy {
   Gameboy(const std::string &rom_path);
   Gameboy() = delete;
 
+  ComponentsContainer &components() { return _components; }
   int run();
   void step();
   void init();
