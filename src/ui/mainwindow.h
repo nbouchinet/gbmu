@@ -44,6 +44,10 @@ private slots:
 
 	void on_actionSpeed_triggered();
 
+	void on_actionSnapshot_triggered();
+
+	void on_actionLoad_Snapshot_triggered();
+
 private:
     Ui::MainWindow *ui;
 	QString			_rom_path;
