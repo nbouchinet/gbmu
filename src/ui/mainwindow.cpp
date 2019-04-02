@@ -69,7 +69,6 @@ void MainWindow::on_actionOpen_triggered() {
   if (_is_muted)
     g_gameboy->mute_gameboy();
 
-<<<<<<< HEAD
   // Setting up gameboy's screen
   _gameboy_screen = new GbmuScreen(this);
   _timer_screen = new QTimer(this);
