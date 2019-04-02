@@ -47,6 +47,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow() { delete ui; }
 
+GbType MainWindow::get_gb_type(){
+	if (ui->actionDefault->isChecked())
+		return (GbType::DEFAULT);
+	if (ui->actionDMG->isChecked())
+		return (GbType::DMG);
+	if (ui->actionCGB->isChecked())
+		return (GbType::CGB);
+	else
+		return (GbType::DEFAULT);
+}
+
 void MainWindow::on_actionOpen_triggered() {
   _rom_path = QFileDialog::getOpenFileName(
       this, tr("Open ROM"),
@@ -65,7 +76,7 @@ void MainWindow::on_actionOpen_triggered() {
     delete g_gameboy;
     g_gameboy = nullptr;
   }
-  g_gameboy = new Gameboy(_rom_path.toUtf8().constData());
+  g_gameboy = new Gameboy(_rom_path.toUtf8().constData(), get_gb_type());
   if (_is_muted)
     g_gameboy->mute_gameboy();
 
@@ -251,9 +262,6 @@ void MainWindow::on_actionDefault_toggled(bool arg1){
 		ui->actionDMG->setChecked(false);
 		ui->actionCGB->setChecked(false);
 	}
-	else{
-		ui->actionCGB->setChecked(true);
-	}
 }
 
 void MainWindow::on_actionDMG_toggled(bool arg1){
@@ -261,17 +269,11 @@ void MainWindow::on_actionDMG_toggled(bool arg1){
 		ui->actionDefault->setChecked(false);
 		ui->actionCGB->setChecked(false);
 	}
-	else{
-		ui->actionCGB->setChecked(true);
-	}
 }
 
 void MainWindow::on_actionCGB_toggled(bool arg1){
 	if (arg1){
 		ui->actionDefault->setChecked(false);
 		ui->actionDMG->setChecked(false);
-	}
-	else{
-		ui->actionCGB->setChecked(true);
 	}
 }

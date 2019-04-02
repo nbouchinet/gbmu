@@ -54,7 +54,7 @@ class Gameboy {
   void read_type();
 
  public:
-  Gameboy(const std::string &rom_path);
+  Gameboy(const std::string &rom_path, GbType gb_type);
   Gameboy() = delete;
 
   int run();

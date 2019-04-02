@@ -36,9 +36,10 @@ ComponentsContainer::ComponentsContainer(
 // Dtor Implementation MUST be here where the types are complete
 ComponentsContainer::~ComponentsContainer() {}
 
-Gameboy::Gameboy(const std::string &rom_path)
+Gameboy::Gameboy(const std::string &rom_path, GbType type)
     : _components(rom_path, &_audio_interface),
       _debugger(_components),
+	  _type(type),
       _rom_path(rom_path),
       _is_abort(false),
       _pause(false) {}
@@ -194,12 +195,16 @@ void Gameboy::do_checksum() {
 
 void Gameboy::read_type() {
   Byte value = _components.mem_bus->read<Byte>(0x143);
-  if (value == 0xC0)
-    _type = GbType::CGB;
-  else if (value == 0x80)
-	  _type = GbType::CGB_DMG;
-  else
-    _type = GbType::DMG;
+  if (_type == GbType::DEFAULT) {
+    if (value == 0xC0)
+      _type = GbType::CGB;
+    else if (value == 0x80)
+	    _type = GbType::CGB_DMG;
+    else
+      _type = GbType::DMG;
+  }
+  else if (_type == GbType::CGB && value == 0x80)
+    _type = GbType::CGB_DMG;
 }
 
 void Gameboy::save_state(std::string save_name) {

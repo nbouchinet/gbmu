@@ -73,6 +73,7 @@ private:
 	void keyReleaseEvent(QKeyEvent *event);
 	void pause_gameboy(bool stop = false);
 	void resizeEvent(QResizeEvent *event);
+	GbType get_gb_type();
 };
 
 #endif // MAINWINDOW_H
