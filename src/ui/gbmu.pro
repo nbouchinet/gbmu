@@ -115,6 +115,7 @@ HEADERS += \
 	src/sound/SquareChannel.hpp \
 	src/sound/VolumeTable.hpp \
 	src/sound/WaveChannel.hpp \
+	src/sound/FadeEffect.hpp \
 	src/sound/portaudio/PortAudioInterface.hpp \
 	utils/Logger.hpp \
 	utils/Operations_utils.hpp
