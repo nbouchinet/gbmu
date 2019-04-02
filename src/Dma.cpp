@@ -19,6 +19,7 @@ void PPU::hdma_h_blank_step() {
 	return ;
   }
 
+  _components.core->instr_halt();
   for (int i = 0; i < 16; i++) {
     _components.mem_bus->write(
         _h_blank_hdma_dst_addr + 0x8000,
@@ -26,6 +27,7 @@ void PPU::hdma_h_blank_step() {
     _h_blank_hdma_src_addr++;
     _h_blank_hdma_dst_addr++;
   }
+  _components.core->notify_interrupt();
 
   _hdma1 = _h_blank_hdma_src_addr >> 8;
   _hdma2 = _h_blank_hdma_src_addr & 0xFF;
@@ -46,11 +48,13 @@ void PPU::general_purpose_hdma(uint8_t hdma5_arg)
     addr_dest = ((_hdma3 << 8) | _hdma4) & 0x1FF0;
     lines_to_transfer = ((hdma5_arg & 0x7F) + 1) * 16;
 
+	_components.core->instr_halt();
     for (int i = 0; i < lines_to_transfer; i++) {
       _components.mem_bus->write(
           0x8000 + addr_dest + i,
           _components.mem_bus->read<Byte>(addr_source + i));
     }
+	_components.core->notify_interrupt();
 
     addr_source += lines_to_transfer;
     addr_dest += lines_to_transfer;
@@ -98,11 +102,11 @@ void PPU::handle_hdma_transfer(uint8_t hdma5_arg) {
 void PPU::dma_transfer(uint16_t address) {
 	uint16_t dma_addr;
 
+//	_components.core->instr_halt();
 	dma_addr = address << 8;
 	for (int i = 0; i < 0xA0; i++) {
 		_lcd_oam_ram[i] = _components.mem_bus->read<Byte>(
 				dma_addr + i); // dma's are always written into OAM ram
 	}
+//	_components.core->notify_interrupt();
 }
-
-
