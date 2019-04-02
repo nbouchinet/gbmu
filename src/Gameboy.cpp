@@ -214,6 +214,7 @@ void Gameboy::save_state(std::string save_name) {
     oa << *_components.interrupt_controller;
     oa << *_components.input_controller;
     oa << *_components.timer;
+    oa << *_components.apu;
     oa << *_components.driver_screen;
     oa << *_components.bios;
   }
@@ -232,6 +233,7 @@ void Gameboy::load_state(std::string save_name) {
     ia >> *_components.interrupt_controller;
     ia >> *_components.input_controller;
     ia >> *_components.timer;
+    ia >> *_components.apu;
     ia >> *_components.driver_screen;
     ia >> *_components.bios;
   }

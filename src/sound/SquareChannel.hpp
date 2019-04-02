@@ -27,6 +27,23 @@ class SquareChannel : public SoundChannel {
   void do_trigger() override;
   void do_clear() override;
 
+#define __serial_square(OP) \
+  ar OP _waveform_selected; \
+  ar OP _waveform_step;     \
+  ar OP _frequency;         \
+  ar OP _volume;            \
+  ar OP _timer;             \
+  ar OP _sweep;             \
+  ar OP _length;            \
+  ar OP _envelope;
+
+  void do_serialize(boost::archive::text_iarchive& ar) override {
+    __serial_square(>>);
+  }
+  void do_serialize(boost::archive::text_oarchive& ar) override {
+    __serial_square(<<);
+  }
+
  public:
   SquareChannel(bool sweep_enabled = true)
       : _sweep(_frequency), _length(63), _envelope(_volume) {

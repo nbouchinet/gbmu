@@ -3,6 +3,8 @@
 
 #include "src/Fwd.hpp"
 
+#include <boost/serialization/access.hpp>
+
 namespace sound {
 
 class IModulationUnit {
@@ -17,9 +19,9 @@ class IModulationUnit {
 
 class SweepUnit : public IModulationUnit {
  private:
-  Byte _sweep_period : 3;
-  Byte _negate : 1;
-  Byte _shift : 3;
+  Byte _sweep_period;
+  Byte _negate;
+  Byte _shift;
 
   Byte _current_period;
   bool _enabled;
@@ -56,6 +58,18 @@ class SweepUnit : public IModulationUnit {
   bool call() override;
   void trigger() override;
   void clear() override;
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int) {
+    ar& _sweep_period;
+    ar& _negate;
+    ar& _shift;
+    ar& _current_period;
+    ar& _enabled;
+    ar& _trigger_overflowed;
+    ar& _shadow_freq;
+  }
 };
 
 class LengthUnit : public IModulationUnit {
@@ -68,7 +82,9 @@ class LengthUnit : public IModulationUnit {
   LengthUnit(Byte max_len) : _max_length(max_len) { clear(); }
   Byte trigger_steps() const override { return 0b01010101; }
 
-  void set_length(Byte l) { _length = (static_cast<Word>(_max_length) + 1) - l; }
+  void set_length(Byte l) {
+    _length = (static_cast<Word>(_max_length) + 1) - l;
+  }
   void enable(bool enable = true) { _enabled = enable; }
   auto length() const { return _length; }
   bool is_enabled() const { return _enabled; }
@@ -76,12 +92,20 @@ class LengthUnit : public IModulationUnit {
   bool call() override;
   void trigger() override;
   void clear() override;
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int) {
+    ar& _max_length;
+    ar& _length;
+    ar& _enabled;
+  }
 };
 
 class EnvelopeUnit : public IModulationUnit {
  private:
-  bool _add : 1;
-  Byte _period : 3;
+  bool _add;
+  Byte _period;
   bool _enabled;
   Byte _current_period;
   Byte& _volume;
@@ -102,6 +126,16 @@ class EnvelopeUnit : public IModulationUnit {
   bool call() override;
   void trigger() override;
   void clear() override;
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, const unsigned int) {
+    ar& _add;
+    ar& _period;
+    ar& _enabled;
+    ar& _current_period;
+    ar& _volume;
+  }
 };
 }  // namespace sound
 
