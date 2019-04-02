@@ -55,9 +55,18 @@
     </property>
     <addaction name="actionDebug"/>
    </widget>
+   <widget class="QMenu" name="menuModel">
+    <property name="title">
+     <string>Model</string>
+    </property>
+    <addaction name="actionDefault"/>
+    <addaction name="actionDMG"/>
+    <addaction name="actionCGB"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAction"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuModel"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="enabled">
@@ -212,6 +221,33 @@
    </property>
    <property name="text">
     <string>Load Snapshot</string>
+   </property>
+  </action>
+  <action name="actionDefault">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionDMG">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>DMG</string>
+   </property>
+  </action>
+  <action name="actionCGB">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>CGB</string>
    </property>
   </action>
  </widget>

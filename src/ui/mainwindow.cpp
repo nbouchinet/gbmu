@@ -245,3 +245,33 @@ void MainWindow::on_actionLoad_Snapshot_triggered(){
     g_gameboy->load_state(snapshot_path.toUtf8().constData());
   }
 }
+
+void MainWindow::on_actionDefault_toggled(bool arg1){
+	if (arg1){
+		ui->actionDMG->setChecked(false);
+		ui->actionCGB->setChecked(false);
+	}
+	else{
+		ui->actionCGB->setChecked(true);
+	}
+}
+
+void MainWindow::on_actionDMG_toggled(bool arg1){
+	if (arg1){
+		ui->actionDefault->setChecked(false);
+		ui->actionCGB->setChecked(false);
+	}
+	else{
+		ui->actionCGB->setChecked(true);
+	}
+}
+
+void MainWindow::on_actionCGB_toggled(bool arg1){
+	if (arg1){
+		ui->actionDefault->setChecked(false);
+		ui->actionDMG->setChecked(false);
+	}
+	else{
+		ui->actionCGB->setChecked(true);
+	}
+}

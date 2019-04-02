@@ -48,6 +48,12 @@ private slots:
 
 	void on_actionLoad_Snapshot_triggered();
 
+    void on_actionDefault_toggled(bool arg1);
+
+    void on_actionDMG_toggled(bool arg1);
+
+    void on_actionCGB_toggled(bool arg1);
+
 private:
     Ui::MainWindow *ui;
 	QString			_rom_path;
