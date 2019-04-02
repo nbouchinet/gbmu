@@ -2,18 +2,20 @@
 #define PORTAUDIOINTERFACE_HPP
 
 #include "src/sound/AudioInterface.hpp"
+#include "src/sound/FadeEffect.hpp"
 
-#include <memory>
-#include <utility>
-#include <portaudiocpp/PortAudioCpp.hxx>
 #include <atomic>
+#include <memory>
+#include <iostream>
+#include <portaudiocpp/PortAudioCpp.hxx>
+#include <utility>
 
 namespace sound {
+
 class PortAudioInterface : public AudioInterface {
  private:
   static constexpr std::size_t FramesPerBuffer = 64;
-  using Stream = portaudio::MemFunCallbackStream<PortAudioInterface>; 
-
+  using Stream = portaudio::MemFunCallbackStream<PortAudioInterface>;
 
   MonoSamples _right_output = {};
   MonoSamples _left_output = {};
@@ -24,6 +26,7 @@ class PortAudioInterface : public AudioInterface {
   std::unique_ptr<Stream> _stream = nullptr;
 
   std::atomic_bool _mute = ATOMIC_VAR_INIT(false);
+  FadeEffect _fade;
 
   int callback(const void* input_buffer, void* output_uffer,
                unsigned long frames_per_buffer, const PaStreamCallbackTimeInfo*,

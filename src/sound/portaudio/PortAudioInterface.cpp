@@ -31,6 +31,10 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
       _last_sample_played.left = _left_output[_cursor];
       ++_cursor;
     }
+    out[0][i] = _fade.apply(out[0][i]);
+    out[1][i] = _fade.apply(out[1][i]);
+
+    if (not _fill_lock) _fade.step();
   }
   _callback_lock = false;
   return paContinue;
@@ -39,8 +43,7 @@ int PortAudioInterface::callback(const void*, void* output_buffer,
 PortAudioInterface::PortAudioInterface() {
   portaudio::System& sys = get_system();
   try {
-    portaudio::Device& default_device =
-        sys.defaultOutputDevice();
+    portaudio::Device& default_device = sys.defaultOutputDevice();
     portaudio::DirectionSpecificStreamParameters out_params(
         default_device, 2, portaudio::FLOAT32, false,
         default_device.defaultLowOutputLatency(), NULL);
@@ -63,23 +66,23 @@ PortAudioInterface::~PortAudioInterface() {
 bool PortAudioInterface::queue_stereo_samples(const MonoSamples& right,
                                               const MonoSamples& left) {
   if (_stream == nullptr) {
-    // Since gameboy is synchronized on the sound device sample retrieving, if no
-    // sound device is available, we kinda do as if there is one by waiting the good amount
-    // of time.
-    std::chrono::milliseconds wait((SamplesTableSize * 1'000) / SAMPLING_FREQ - 1);
+    // Since gameboy is synchronized on the sound device sample retrieving, if
+    // no sound device is available, we kinda do as if there is one by waiting
+    // the good amount of time.
+    std::chrono::milliseconds wait((SamplesTableSize * 1'000) / SAMPLING_FREQ -
+                                   1);
     std::this_thread::sleep_for(wait);
     return true;
   }
 
   if (_callback_lock or _cursor < SamplesTableSize) return false;
   _fill_lock = true;
-  if (_mute){
-	_right_output.fill(0);
-	_left_output.fill(0);
-  }
-  else{
-	_right_output = right;
-	_left_output = left;
+  if (_mute and _fade.done()) {
+    _right_output.fill(0);
+    _left_output.fill(0);
+  } else {
+    _right_output = right;
+    _left_output = left;
   }
   _cursor = 0;
   _fill_lock = false;
@@ -103,6 +106,17 @@ void PortAudioInterface::terminate() {
   if (_stream) _stream->stop();
 }
 
-void PortAudioInterface::toggle_mute() { _mute = !_mute; }
+void PortAudioInterface::toggle_mute() {
+  constexpr float fade_time = .25;  // seconds
+  _mute = !_mute;
+  _fill_lock = true;
+  if (_mute)
+    _fade = FadeEffect(SAMPLING_FREQ * fade_time,
+                               FadeEffect::Type::Descending);
+  else
+    _fade = FadeEffect(SAMPLING_FREQ * fade_time,
+                               FadeEffect::Type::Ascending);
+  _fill_lock = false;
+}
 
 }  // namespace sound
