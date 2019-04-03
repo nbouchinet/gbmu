@@ -415,7 +415,6 @@ void PPU::setup_background_data() {
 }
 
 //------------------------------------------------------------------------------
-//------------------------------------------------------------------------------
 void PPU::set_pixel(uint8_t y, uint8_t x, uint32_t value) {
   _components.driver_screen->set_rgba(y, x, value);
 }
