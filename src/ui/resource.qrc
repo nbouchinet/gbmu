@@ -11,5 +11,7 @@
         <file>resources/sound.png</file>
         <file>resources/stop.png</file>
         <file>resources/speed.png</file>
+        <file>resources/create_snapshot.png</file>
+        <file>resources/load_snapshot.png</file>
     </qresource>
 </RCC>

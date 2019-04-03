@@ -17,6 +17,13 @@ private:
   Byte _ram[UWRAMSize];
   Byte _svbk;
 
+  friend class boost::serialization::access;
+  template<class Archive>
+  void serialize(Archive &ar, const unsigned int) {
+	  ar & _ram;
+	  ar & _svbk;
+  }
+
 public:
   UnitWorkingRAM() : _svbk(1) {}
 
@@ -43,6 +50,10 @@ public:
     } else if (addr >= BankNBegin && addr <= BankNEnd) {
       _ram[(addr - BankNBegin) + _svbk * UWRAMBankSize] = v;
     }
+  }
+
+  void dump(std::array<Byte,0x8000> &buffer) {
+	  std::copy(std::begin(_ram), std::end(_ram), buffer.begin());
   }
 };
 

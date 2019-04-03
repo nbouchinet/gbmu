@@ -4,6 +4,9 @@
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 class InterruptController : public IReadWrite {
 private:
   ComponentsContainer &_components;
@@ -19,6 +22,18 @@ public:
   static constexpr Word JOYI = 0x0060;   // Joypad
 
   InterruptController(ComponentsContainer &components);
+
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    Byte rIE = _rIE;
+    Byte rIF = _rIF;
+
+    ar &rIF;
+    ar &rIE;
+    ar &_IME;
+
+    _rIE = rIE;
+    _rIF = rIF;
+  }
 
   void write(Word addr, Byte val) override;
   Byte read(Word addr) const override;

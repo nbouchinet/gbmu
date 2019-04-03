@@ -9,6 +9,9 @@
 #include "src/cpu/InterruptController.hpp"
 #include "src/cpu/Timer.hpp"
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/export.hpp>
 #include <exception>
 #include <fstream>
 #include <iostream>
@@ -33,27 +36,28 @@ ComponentsContainer::ComponentsContainer(
 // Dtor Implementation MUST be here where the types are complete
 ComponentsContainer::~ComponentsContainer() {}
 
-Gameboy::Gameboy(const std::string &rom_path)
+Gameboy::Gameboy(const std::string &rom_path, GbType type)
     : _components(rom_path, &_audio_interface),
       _debugger(_components),
+	  _type(type),
       _rom_path(rom_path),
       _is_abort(false),
       _pause(false) {}
 
 void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
   switch (state) {
-    case Debugger::RUN_DURATION:
-      _debugger.run_duration(duration);
-      break;
-    case Debugger::RUN_ONE_FRAME:
-      _debugger.run_one_frame();
-      break;
-    case Debugger::RUN_ONE_STEP:
-      _debugger.run_one_step();
-      break;
-    case Debugger::RUN_CPU_SEC:
-      _debugger.run_cpu_sec();
-      break;
+  case Debugger::RUN_DURATION:
+    _debugger.run_duration(duration);
+    break;
+  case Debugger::RUN_ONE_FRAME:
+    _debugger.run_one_frame();
+    break;
+  case Debugger::RUN_ONE_STEP:
+    _debugger.run_one_step();
+    break;
+  case Debugger::RUN_CPU_SEC:
+    _debugger.run_cpu_sec();
+    break;
   }
 }
 
@@ -108,42 +112,43 @@ int Gameboy::run() {
   load_existing_save();
   _audio_interface.start();
   while (!_is_abort) {
-    if (!_pause) step();
+    if (!_pause)
+      step();
   }
   return (0);
 }
 
 void Gameboy::init() {
-  _components.mem_bus->write(0xFF05, 0x00);  // Timer Counter Register
-  _components.mem_bus->write(0xFF06, 0x00);  // Timer Modulo Register
-  _components.mem_bus->write(0xFF07, 0x00);  // Timer Controller Registerr
-  _components.mem_bus->write(0xFF10, 0x80);  // Sound1 Register
-  _components.mem_bus->write(0xFF11, 0xBF);  // Sound1 Register
-  _components.mem_bus->write(0xFF12, 0xF3);  // Sound1 Register
-  _components.mem_bus->write(0xFF14, 0xBF);  // Sound1 Register
-  _components.mem_bus->write(0xFF16, 0x3F);  // Sound2 Register
-  _components.mem_bus->write(0xFF17, 0x00);  // Sound2 Register
-  _components.mem_bus->write(0xFF19, 0xBF);  // Sound2 Register
-  _components.mem_bus->write(0xFF1A, 0x7F);  // Sound3 Register
-  _components.mem_bus->write(0xFF1B, 0xFF);  // Sound3 Register
-  _components.mem_bus->write(0xFF1C, 0x9F);  // Sound3 Register
-  _components.mem_bus->write(0xFF1E, 0xBF);  // Sound3 Register
-  _components.mem_bus->write(0xFF20, 0xFF);  // Sound4 Register
-  _components.mem_bus->write(0xFF21, 0x00);  // Sound4 Register
-  _components.mem_bus->write(0xFF22, 0x00);  // Sound4 Register
-  _components.mem_bus->write(0xFF23, 0xBF);  // Sound4 Register
-  _components.mem_bus->write(0xFF24, 0x77);  // Sound4 Register
-  _components.mem_bus->write(0xFF25, 0xF3);  // Sound4 Register
-  _components.mem_bus->write(0xFF26, 0xF1);  // Sound4 Register
-  _components.mem_bus->write(0xFF40, 0x91);  // LCD Register
-  _components.mem_bus->write(0xFF42, 0x00);  // LCD Register
-  _components.mem_bus->write(0xFF43, 0x00);  // LCD Register
-  _components.mem_bus->write(0xFF45, 0x00);  // LCD Register
-  _components.mem_bus->write(0xFF47, 0xFC);  // LCD Register
-  _components.mem_bus->write(0xFF48, 0xFF);  // LCD Register
-  _components.mem_bus->write(0xFF49, 0xFF);  // LCD Register
-  _components.mem_bus->write(0xFF4A, 0x00);  // LCD Register
-  _components.mem_bus->write(0xFF4B, 0x00);  // LCD Register
+  _components.mem_bus->write(0xFF05, 0x00); // Timer Counter Register
+  _components.mem_bus->write(0xFF06, 0x00); // Timer Modulo Register
+  _components.mem_bus->write(0xFF07, 0x00); // Timer Controller Registerr
+  _components.mem_bus->write(0xFF10, 0x80); // Sound1 Register
+  _components.mem_bus->write(0xFF11, 0xBF); // Sound1 Register
+  _components.mem_bus->write(0xFF12, 0xF3); // Sound1 Register
+  _components.mem_bus->write(0xFF14, 0xBF); // Sound1 Register
+  _components.mem_bus->write(0xFF16, 0x3F); // Sound2 Register
+  _components.mem_bus->write(0xFF17, 0x00); // Sound2 Register
+  _components.mem_bus->write(0xFF19, 0xBF); // Sound2 Register
+  _components.mem_bus->write(0xFF1A, 0x7F); // Sound3 Register
+  _components.mem_bus->write(0xFF1B, 0xFF); // Sound3 Register
+  _components.mem_bus->write(0xFF1C, 0x9F); // Sound3 Register
+  _components.mem_bus->write(0xFF1E, 0xBF); // Sound3 Register
+  _components.mem_bus->write(0xFF20, 0xFF); // Sound4 Register
+  _components.mem_bus->write(0xFF21, 0x00); // Sound4 Register
+  _components.mem_bus->write(0xFF22, 0x00); // Sound4 Register
+  _components.mem_bus->write(0xFF23, 0xBF); // Sound4 Register
+  _components.mem_bus->write(0xFF24, 0x77); // Sound4 Register
+  _components.mem_bus->write(0xFF25, 0xF3); // Sound4 Register
+  _components.mem_bus->write(0xFF26, 0xF1); // Sound4 Register
+  _components.mem_bus->write(0xFF40, 0x91); // LCD Register
+  _components.mem_bus->write(0xFF42, 0x00); // LCD Register
+  _components.mem_bus->write(0xFF43, 0x00); // LCD Register
+  _components.mem_bus->write(0xFF45, 0x00); // LCD Register
+  _components.mem_bus->write(0xFF47, 0xFC); // LCD Register
+  _components.mem_bus->write(0xFF48, 0xFF); // LCD Register
+  _components.mem_bus->write(0xFF49, 0xFF); // LCD Register
+  _components.mem_bus->write(0xFF4A, 0x00); // LCD Register
+  _components.mem_bus->write(0xFF4B, 0x00); // LCD Register
   _components.mem_bus->write(0xFFFF, 0x00);
 }
 
@@ -184,15 +189,59 @@ void Gameboy::do_checksum() {
 
   Byte cartridge_sum = _components.mem_bus->read<Byte>(0x14D);
 
-  if (cartridge_sum != sum) throw BadChecksum();
+  if (cartridge_sum != sum)
+    throw BadChecksum();
 }
 
 void Gameboy::read_type() {
   Byte value = _components.mem_bus->read<Byte>(0x143);
-  if (value == 0xC0)
-    _type = GbType::CGB;
-  else if (value == 0x80)
-	  _type = GbType::CGB_DMG;
-  else
-    _type = GbType::DMG;
+  if (_type == GbType::DEFAULT) {
+    if (value == 0xC0)
+      _type = GbType::CGB;
+    else if (value == 0x80)
+	    _type = GbType::CGB_DMG;
+    else
+      _type = GbType::DMG;
+  }
+  else if (_type == GbType::CGB && value == 0x80)
+    _type = GbType::CGB_DMG;
+  _components.ppu->set_gb_type(_type);
+}
+
+void Gameboy::save_state(std::string save_name) {
+  std::ofstream ofs(save_name);
+
+  {
+    boost::archive::text_oarchive oa(ofs);
+    oa << *_components.core;
+    oa << *_components.cartridge;
+    oa << *_components.ppu;
+    oa << *_components.unit_working_ram;
+    oa << *_components.interrupt_controller;
+    oa << *_components.input_controller;
+    oa << *_components.timer;
+    oa << *_components.apu;
+    oa << *_components.driver_screen;
+    oa << *_components.bios;
+  }
+  ofs.close();
+}
+
+void Gameboy::load_state(std::string save_name) {
+  std::ifstream ifs(save_name);
+
+  {
+    boost::archive::text_iarchive ia(ifs);
+    ia >> *_components.core;
+    ia >> *_components.cartridge;
+    ia >> *_components.ppu;
+    ia >> *_components.unit_working_ram;
+    ia >> *_components.interrupt_controller;
+    ia >> *_components.input_controller;
+    ia >> *_components.timer;
+    ia >> *_components.apu;
+    ia >> *_components.driver_screen;
+    ia >> *_components.bios;
+  }
+  ifs.close();
 }

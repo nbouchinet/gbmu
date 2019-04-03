@@ -28,6 +28,20 @@ class WaveChannel : public SoundChannel {
   void do_trigger() override;
   void do_clear() override;
 
+#define __serial_wave(OP) \
+  ar OP _frequency;       \
+  ar OP _timer;           \
+  ar OP _volume_code;     \
+  ar OP _table_index;     \
+  ar OP _length;
+
+  void do_serialize(boost::archive::text_iarchive& ar) override {
+    __serial_wave(>>);
+  }
+  void do_serialize(boost::archive::text_oarchive& ar) override {
+    __serial_wave(<<);
+  }
+
  public:
   WaveChannel(VolumeTable& table) : _table(table), _length(255) {
     bind_module(&_length);

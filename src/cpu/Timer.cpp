@@ -9,11 +9,7 @@ constexpr Word Timer::Frequencies[];
 
 void Timer::reset() {
   _rTAC = 0;
-  _rDIV = 0x00;
-  _rTIMA = 0x00;
   _rTMA = 0x00;
-  _counter = 0x400;
-  _rDIVCounter = 0x00;
 
   _divider_counter = Counter(0x03);
   _timer_counter = Counter(0x00);
@@ -56,23 +52,6 @@ void Timer::write(Word addr, uint8_t val) {
   }
 }
 
-void Timer::set_frequence() {
-  switch (get_frequence()) {
-  case 0x0:
-    _counter = 0x400;
-    break; // 4
-  case 0x1:
-    _counter = 0x10;
-    break; // 262
-  case 0x2:
-    _counter = 0x40;
-    break; // 65
-  case 0x3:
-    _counter = 0x100;
-    break; // 16
-  }
-}
-
 void Timer::update(Word cycles) {
   _divider_counter.step(cycles);
 
@@ -80,15 +59,6 @@ void Timer::update(Word cycles) {
     _timer_counter.set_value(_rTMA);
     _components.interrupt_controller->request_interrupt(
         InterruptController::TOI);
-  }
-}
-
-void Timer::update_divider(Word cycles) {
-  if (_rDIVCounter + cycles >= 255) {
-    _rDIVCounter = (_rDIVCounter + cycles) - 255;
-    _rDIV++;
-  } else {
-    _rDIVCounter += cycles;
   }
 }
 

@@ -9,6 +9,9 @@
 #include <iostream>
 #include <vector>
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+
 class MemoryBus {
 private:
   struct RangedComponent {
@@ -18,6 +21,11 @@ private:
   std::vector<RangedComponent> _ranged_components;
   Bios *_bios;
   bool _bios_is_enabled;
+
+  friend class boost::serialization::access;
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &_bios_is_enabled;
+  }
 
 public:
   MemoryBus(ComponentsContainer &components);

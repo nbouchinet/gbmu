@@ -37,6 +37,8 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionSnapshot"/>
+    <addaction name="actionLoad_Snapshot"/>
    </widget>
    <widget class="QMenu" name="menuAction">
     <property name="title">
@@ -53,9 +55,18 @@
     </property>
     <addaction name="actionDebug"/>
    </widget>
+   <widget class="QMenu" name="menuModel">
+    <property name="title">
+     <string>Model</string>
+    </property>
+    <addaction name="actionDefault"/>
+    <addaction name="actionDMG"/>
+    <addaction name="actionCGB"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAction"/>
    <addaction name="menuHelp"/>
+   <addaction name="menuModel"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="enabled">
@@ -80,6 +91,8 @@
    <addaction name="actionMute"/>
    <addaction name="actionDebug"/>
    <addaction name="actionSpeed"/>
+   <addaction name="actionSnapshot"/>
+   <addaction name="actionLoad_Snapshot"/>
   </widget>
   <action name="actionOpen">
    <property name="checkable">
@@ -184,6 +197,57 @@
    </property>
    <property name="text">
     <string>Speed</string>
+   </property>
+  </action>
+  <action name="actionSnapshot">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/resources/create_snapshot.png</normaloff>:/resources/create_snapshot.png</iconset>
+   </property>
+   <property name="text">
+    <string>Snapshot</string>
+   </property>
+  </action>
+  <action name="actionLoad_Snapshot">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/resources/load_snapshot.png</normaloff>:/resources/load_snapshot.png</iconset>
+   </property>
+   <property name="text">
+    <string>Load Snapshot</string>
+   </property>
+  </action>
+  <action name="actionDefault">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionDMG">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>DMG</string>
+   </property>
+  </action>
+  <action name="actionCGB">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>CGB</string>
    </property>
   </action>
  </widget>

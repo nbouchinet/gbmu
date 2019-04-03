@@ -54,7 +54,7 @@ class Gameboy {
   void read_type();
 
  public:
-  Gameboy(const std::string &rom_path);
+  Gameboy(const std::string &rom_path, GbType gb_type);
   Gameboy() = delete;
 
   int run();
@@ -65,6 +65,8 @@ class Gameboy {
   void save(std::string save_name);
   void load_save(std::string save_name);
   const auto& components() const { return _components; }
+  void save_state(std::string);
+  void load_state(std::string save_name);
   uint32_t get_pixel(uint8_t y, uint8_t x) {
     return (_components.driver_screen->get_rgba(y, x));
   }
