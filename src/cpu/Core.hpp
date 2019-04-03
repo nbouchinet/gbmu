@@ -15,6 +15,8 @@
 
 #define CPU_FREQ (4194304)
 
+#include <boost/serialization/access.hpp>
+
 union Register {
   Word word = 0;
   struct {
@@ -55,6 +57,23 @@ private:
 
   ComponentsContainer &_components;
 
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar &_af.word;
+    ar &_bc.word;
+    ar &_de.word;
+    ar &_hl.word;
+    ar &_sp.word;
+    ar &_clock;
+    ar &_cycles;
+    ar &_in_jump_state;
+    ar &_has_jumped;
+    ar &_stack;
+    ar &_halt;
+    ar &_current_opcode;
+  }
+
 public:
   void set_flag(Flags f, bool v) {
     int mask = static_cast<int>(f);
@@ -64,7 +83,6 @@ public:
       _af.low ^= mask;
   }
 
-public:
   template <typename T> void instr_ld(T &a, T b) { a = b; }
   void instr_ldd(Byte &, Byte);
   void instr_ldi(Byte &, Byte);

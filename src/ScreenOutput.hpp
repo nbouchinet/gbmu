@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <array>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 #define LCD_HEIGHT 144
 #define LCD_WIDTH 160
@@ -44,6 +46,12 @@ public:
 private:
 	std::array<std::array<uint32_t, LCD_WIDTH>, LCD_HEIGHT>			_buffer_dirty;
 	std::array<std::array<uint32_t, LCD_WIDTH>, LCD_HEIGHT>			_buffer_clean;
+
+	friend class boost::serialization::access;
+	template<class Archive> void serialize(Archive &ar, const unsigned int) {
+		ar & _buffer_dirty;
+		ar & _buffer_clean;
+	}
 };
 
 #endif

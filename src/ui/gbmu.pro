@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 QMAKE_CXX=clang++
 CONFIG += c++14
 QMAKE_CXXFLAGS += -Wall -Wextra -Werror -std=c++14
+LIBS += -lboost_serialization
 
 OBJECTS_DIR = ./src/obj
 UI_DIR = ./src/ui

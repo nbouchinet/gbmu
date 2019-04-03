@@ -3,6 +3,8 @@
 
 #include "AMemoryBankController.hpp"
 #include <array>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <cstdint>
 #include <type_traits>
 #include <vector>
@@ -16,6 +18,14 @@ private:
 
   void enableRAM() { _is_ram_enabled = true; };
   void disableRAM() { _is_ram_enabled = false; }
+
+  friend class boost::serialization::access;
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar & _rom_bank;
+    ar & _ram_bank;
+    ar & _is_rom_banking;
+    ar & _is_ram_enabled;
+  }
 
 public:
   MemoryBankController1(ROMContainer &rom, RAMContainer &ram)

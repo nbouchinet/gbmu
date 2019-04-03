@@ -6,10 +6,13 @@
 
 #include "src/sound/AudioInterface.hpp"
 #include "src/sound/VolumeTable.hpp"
+#include "src/sound/SoundChannel.hpp"
 
 #include <memory>
 #include <chrono>
 #include <atomic>
+
+#include <boost/serialization/access.hpp>
 
 #define UPDATE_FREQ (512)
 
@@ -61,6 +64,18 @@ class APU : public IReadWrite {
   Byte read(Word addr) const override;
   void write(Word addr, Byte) override;
   void reset();
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & _APU_on;
+    ar & _vin_and_volumes;
+    ar & _channel_to_terminal_output;
+    ar & _speed;
+    ar & _wave_ram;
+    for (auto &chan : _channels)
+      ar & *chan.channel;
+  }
 };
 }  // namespace sound
 

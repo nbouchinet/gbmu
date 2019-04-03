@@ -5,6 +5,9 @@
 #include "src/IReadWrite.hpp"
 #include "src/sound/AudioInterface.hpp"
 
+#include <boost/serialization/access.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <cassert>
 #include <vector>
 
@@ -22,6 +25,9 @@ class SoundChannel : public IReadWrite {
   virtual void do_trigger() = 0;
   virtual void do_update() = 0;
   virtual void do_clear() = 0;
+
+  virtual void do_serialize(boost::archive::text_iarchive&) = 0;
+  virtual void do_serialize(boost::archive::text_oarchive&) = 0;
 
  protected:
   Byte p_output_volume = 0;
@@ -66,6 +72,15 @@ class SoundChannel : public IReadWrite {
 
   bool is_enabled() const { return p_enabled; }
   void enable(bool v) { p_enabled = v; }
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & p_output_volume;
+    ar & p_enabled;
+    ar & p_speed;
+    do_serialize(ar);
+  }
 };
 
 }  // namespace sound

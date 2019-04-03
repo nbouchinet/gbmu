@@ -24,6 +24,22 @@ class NoiseChannel : public SoundChannel {
   void do_trigger() override;
   void do_clear() override;
 
+#define __serial_noise(OP) \
+  ar OP _timer;            \
+  ar OP _lfsr;             \
+  ar OP _width_mode;       \
+  ar OP _divisor_code;     \
+  ar OP _volume;           \
+  ar OP _length;           \
+  ar OP _envelope;
+
+  void do_serialize(boost::archive::text_iarchive& ar) override {
+    __serial_noise(>>);
+  }
+  void do_serialize(boost::archive::text_oarchive& ar) override {
+    __serial_noise(<<);
+  }
+
   static constexpr Word get_divider(Byte code) noexcept {
     Word ret = 8u;
     if (code != 0) ret = 16 * code;

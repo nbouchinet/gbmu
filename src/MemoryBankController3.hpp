@@ -3,6 +3,8 @@
 
 #include "AMemoryBankController.hpp"
 #include "RealTimeClock.hpp"
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -23,6 +25,15 @@ private:
 
   void enableRAM_RTC() { _is_ram_rtc_enabled = true; };
   void disableRAM_RTC() { _is_ram_rtc_enabled = false; };
+
+  friend class boost::serialization::access;
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &_rom_bank;
+    ar &_ram_bank;
+    ar &_is_ram_rtc_enabled;
+    ar &rtc;
+    ar &_latch_data;
+  }
 
 public:
   MemoryBankController3(ROMContainer &rom, RAMContainer &ram)
