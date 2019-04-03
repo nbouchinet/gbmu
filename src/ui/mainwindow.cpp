@@ -6,6 +6,7 @@
 
 #include <QBoxLayout>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QGraphicsPixmapItem>
 #include <QInputDialog>
 #include <QKeyEvent>
@@ -14,48 +15,45 @@
 #include <QThread>
 #include <QTimer>
 #include <QUrl>
-#include <QFileInfo>
 
 Gameboy *g_gameboy = nullptr;
 QMutex mutexGb;
 
 #include <unistd.h>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
-{
-    ui->setupUi(this);
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
+  ui->setupUi(this);
 
-	//Load icon
-	_pause_icon = QIcon(":/resources/pause.png");
-	_play_icon = QIcon(":/resources/play.png");
-	_sound_icon = QIcon(":/resources/sound.png");
-	_mute_icon = QIcon(":/resources/mute.png");
+  // Load icon
+  _pause_icon = QIcon(":/resources/pause.png");
+  _play_icon = QIcon(":/resources/play.png");
+  _sound_icon = QIcon(":/resources/sound.png");
+  _mute_icon = QIcon(":/resources/mute.png");
 
-	//Shortcut settings
-	ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
-	ui->actionSave->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-	ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
-	ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
-	ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
-	ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
-	ui->actionSpeed->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
-	ui->actionSnapshot->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Shift + Qt::Key_S));
-	ui->actionLoad_Snapshot->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Shift + Qt::Key_O));
+  // Shortcut settings
+  ui->actionOpen->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+  ui->actionSave->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+  ui->actionPlay->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_P));
+  ui->actionStop->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
+  ui->actionMute->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+  ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+  ui->actionSpeed->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_F));
+  ui->actionSnapshot->setShortcut(
+      QKeySequence(Qt::CTRL + Qt::Key_Shift + Qt::Key_S));
+  ui->actionLoad_Snapshot->setShortcut(
+      QKeySequence(Qt::CTRL + Qt::Key_Shift + Qt::Key_O));
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
-GbType MainWindow::get_gb_type(){
-	if (ui->actionDefault->isChecked())
-		return (GbType::DEFAULT);
-	if (ui->actionDMG->isChecked())
-		return (GbType::DMG);
-	if (ui->actionCGB->isChecked())
-		return (GbType::CGB);
-	else
-		return (GbType::DEFAULT);
+GbType MainWindow::get_gb_type() {
+  if (ui->actionDefault->isChecked()) return (GbType::DEFAULT);
+  if (ui->actionDMG->isChecked()) return (GbType::DMG);
+  if (ui->actionCGB->isChecked())
+    return (GbType::CGB);
+  else
+    return (GbType::DEFAULT);
 }
 
 void MainWindow::on_actionOpen_triggered() {
@@ -77,8 +75,7 @@ void MainWindow::on_actionOpen_triggered() {
     g_gameboy = nullptr;
   }
   g_gameboy = new Gameboy(_rom_path.toUtf8().constData(), get_gb_type());
-  if (_is_muted)
-    g_gameboy->mute_gameboy();
+  if (_is_muted) g_gameboy->mute_gameboy();
 
   // Setting up gameboy's screen
   _gameboy_screen = new GbmuScreen(this);
@@ -238,51 +235,49 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
   }
 }
 
-void MainWindow::on_actionSnapshot_triggered(){
+void MainWindow::on_actionSnapshot_triggered() {
   if (!g_gameboy) return;
   bool ok;
-  QString filename = QInputDialog::getText(this, tr("Choose a name"), tr("Name"), QLineEdit::Normal, "", &ok);
-  if (ok)
-  {
-	pause_gameboy(true);
-	QFileInfo fi(_rom_path);
-	QString snapshot_path = fi.path() + "/" + filename + ".ssgbmu";
+  QString filename = QInputDialog::getText(
+      this, tr("Choose a name"), tr("Name"), QLineEdit::Normal, "", &ok);
+  if (ok) {
+    pause_gameboy(true);
+    QFileInfo fi(_rom_path);
+    QString snapshot_path = fi.path() + "/" + filename + ".ssgbmu";
     g_gameboy->save_state(snapshot_path.toUtf8().constData());
-  	pause_gameboy(false);
+    pause_gameboy(false);
   }
 }
 
-void MainWindow::on_actionLoad_Snapshot_triggered(){
+void MainWindow::on_actionLoad_Snapshot_triggered() {
   if (!g_gameboy) return;
   pause_gameboy(true);
   QFileInfo fi(_rom_path);
   QString snapshot_path = QFileDialog::getOpenFileName(
-      this, tr("Open snapshot"),
-      fi.path(),
-      tr("*.ssgbmu"));
-  if (!snapshot_path.isEmpty()){
+      this, tr("Open snapshot"), fi.path(), tr("*.ssgbmu"));
+  if (!snapshot_path.isEmpty()) {
     g_gameboy->load_state(snapshot_path.toUtf8().constData());
   }
   pause_gameboy(false);
 }
 
-void MainWindow::on_actionDefault_toggled(bool arg1){
-	if (arg1){
-		ui->actionDMG->setChecked(false);
-		ui->actionCGB->setChecked(false);
-	}
+void MainWindow::on_actionDefault_toggled(bool arg1) {
+  if (arg1) {
+    ui->actionDMG->setChecked(false);
+    ui->actionCGB->setChecked(false);
+  }
 }
 
-void MainWindow::on_actionDMG_toggled(bool arg1){
-	if (arg1){
-		ui->actionDefault->setChecked(false);
-		ui->actionCGB->setChecked(false);
-	}
+void MainWindow::on_actionDMG_toggled(bool arg1) {
+  if (arg1) {
+    ui->actionDefault->setChecked(false);
+    ui->actionCGB->setChecked(false);
+  }
 }
 
-void MainWindow::on_actionCGB_toggled(bool arg1){
-	if (arg1){
-		ui->actionDefault->setChecked(false);
-		ui->actionDMG->setChecked(false);
-	}
+void MainWindow::on_actionCGB_toggled(bool arg1) {
+  if (arg1) {
+    ui->actionDefault->setChecked(false);
+    ui->actionDMG->setChecked(false);
+  }
 }

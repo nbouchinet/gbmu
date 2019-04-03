@@ -1,24 +1,23 @@
 #ifndef WORKER_H
-# define WORKER_H
+#define WORKER_H
 
-#include <QThread>
 #include <QMutex>
+#include <QThread>
 
-#include "src/Gameboy.hpp"
 #include "mainwindow.h"
+#include "src/Gameboy.hpp"
 
-class Worker : public QObject
-{
-	Q_OBJECT
-	
-	public:
-		Worker();
-		~Worker();
-	public slots:
-		void process();
-	signals:
-		void finished();
-		void error(QString err);
+class Worker : public QObject {
+  Q_OBJECT
+
+ public:
+  Worker();
+  ~Worker();
+ public slots:
+  void process();
+ signals:
+  void finished();
+  void error(QString err);
 };
 
-#endif 
+#endif

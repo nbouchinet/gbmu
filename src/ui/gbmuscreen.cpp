@@ -10,7 +10,7 @@ GbmuScreen::GbmuScreen(QWidget *parent)
   // srand(time(NULL));
   setAutoFillBackground(false);
   move(FIT_VIEW_W, FIT_VIEW_H);
-  //resize(parent->width(), parent->height());
+  // resize(parent->width(), parent->height());
 
   _scene = std::make_unique<QGraphicsScene>(this);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -32,13 +32,14 @@ void GbmuScreen::updateGbScreen(void) {
       image.setPixel(i, j, qRgba(r, g, b, a));
     }
   }
-  image = image.scaled(_parent->width(), _parent->height() - 28, Qt::KeepAspectRatio);
+  image = image.scaled(_parent->width(), _parent->height() - 28,
+                       Qt::KeepAspectRatio);
   QPixmap p = QPixmap::fromImage(image);
-  if (_do_resize)
-  {
+  if (_do_resize) {
     resize(image.width(), image.height());
-	move(QPoint( (_parent->width() - image.width()) / 2, ((_parent->height() - image.height()) / 2) + 14));
-	_do_resize = false;
+    move(QPoint((_parent->width() - image.width()) / 2,
+                ((_parent->height() - image.height()) / 2) + 14));
+    _do_resize = false;
   }
   _scene->clear();
   _scene->addPixmap(p);
