@@ -107,7 +107,7 @@ void PortAudioInterface::terminate() {
 }
 
 void PortAudioInterface::toggle_mute() {
-  constexpr float fade_time = .25;  // seconds
+  constexpr float fade_time = .15;  // seconds
   _mute = !_mute;
   _fill_lock = true;
   if (_mute)
