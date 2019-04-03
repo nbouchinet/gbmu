@@ -206,7 +206,7 @@ void DebuggerWindow::reset_color(QTableWidget *widget, int column)
 	for (int i = 0; i < nbItem; i++)
 	{
 		QTableWidgetItem *item = widget->item(i, column);
-		item->setForeground(QBrush(QColor(Qt::black)));
+		item->setForeground(QBrush(QApplication::palette().text()));
 	}
 }
 
