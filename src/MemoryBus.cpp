@@ -2,7 +2,6 @@
 
 #include "src/Cartridge.hpp"
 #include "src/Gameboy.hpp"
-#include "src/LCDRegisters.hpp"
 #include "src/UnitWorkingRAM.hpp"
 #include "src/cpu/Core.hpp"
 #include "src/cpu/InputController.hpp"

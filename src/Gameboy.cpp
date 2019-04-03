@@ -1,7 +1,6 @@
 #include "Gameboy.hpp"
 #include "src/Bios.hpp"
 #include "src/Cartridge.hpp"
-#include "src/LCDRegisters.hpp"
 #include "src/MemoryBus.hpp"
 #include "src/UnitWorkingRAM.hpp"
 #include "src/cpu/Core.hpp"
@@ -25,7 +24,6 @@ ComponentsContainer::ComponentsContainer(
   input_controller = std::make_unique<InputController>(*this);
   core = std::make_unique<Core>(*this);
   timer = std::make_unique<Timer>(*this);
-  lcd_registers = std::make_unique<LCDRegisters>();
   unit_working_ram = std::make_unique<UnitWorkingRAM>();
   ppu = std::make_unique<PPU>(*this);
   apu = std::make_unique<sound::APU>(audio_interace, *this);
@@ -68,7 +66,6 @@ void Gameboy::reset() {
   _components.interrupt_controller->reset();
   _components.input_controller->reset();
   _components.timer->reset();
-  _components.lcd_registers->reset();
   _components.ppu->reset();
   _components.apu->reset();
   _components.driver_screen->reset_screen();
