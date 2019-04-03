@@ -6,21 +6,17 @@ class FadeEffect {
   enum class Type { Ascending, Descending };
 
  private:
-  static constexpr unsigned max_divider = 100;
+  static constexpr float max_divider = 10.;
 
-  unsigned _divider = 1;
-  unsigned _total_steps = 0;
-  unsigned _steps_left = 0;
+  float _divider = 1.;
+  float _divider_step = 0.;
   Type _way = Type::Ascending;
   bool _done = true;
 
  public:
   FadeEffect() = default;
   FadeEffect(unsigned steps, Type way = Type::Ascending)
-      : _total_steps(steps),
-        _steps_left(steps / max_divider),
-        _way(way),
-        _done(false) {
+      : _divider_step(1. / (steps / max_divider)), _way(way), _done(false) {
     if (way == Type::Ascending)
       _divider = max_divider;
     else
@@ -29,15 +25,12 @@ class FadeEffect {
 
   void step() {
     if (done()) return;
-    if (_steps_left-- == 0) {
-      _steps_left = _total_steps / max_divider;
-      if (_way == Type::Ascending) {
-        --_divider;
-        if (_divider <= 1) _done = true;
-      } else {
-        ++_divider;
-        if (_divider >= max_divider) _done = true;
-      }
+    if (_way == Type::Ascending) {
+      _divider -= _divider_step;
+      if (_divider <= 1.) _done = true;
+    } else {
+      _divider += _divider_step;
+      if (_divider >= max_divider) _done = true;
     }
   }
 
