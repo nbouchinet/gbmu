@@ -91,7 +91,6 @@ void PPU::reset() {
   _unsigned_tile_numbers = false;
   _windowing_on = false;
   _nb_sprites = 0;
-  _gb_mode = 0;
 
   _h_blank_hdma_src_addr = 0;
   _h_blank_hdma_dst_addr = 0;
