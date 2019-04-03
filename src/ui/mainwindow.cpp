@@ -244,14 +244,17 @@ void MainWindow::on_actionSnapshot_triggered(){
   QString filename = QInputDialog::getText(this, tr("Choose a name"), tr("Name"), QLineEdit::Normal, "", &ok);
   if (ok)
   {
+	pause_gameboy(true);
 	QFileInfo fi(_rom_path);
 	QString snapshot_path = fi.path() + "/" + filename + ".ssgbmu";
     g_gameboy->save_state(snapshot_path.toUtf8().constData());
+  	pause_gameboy(false);
   }
 }
 
 void MainWindow::on_actionLoad_Snapshot_triggered(){
   if (!g_gameboy) return;
+  pause_gameboy(true);
   QFileInfo fi(_rom_path);
   QString snapshot_path = QFileDialog::getOpenFileName(
       this, tr("Open snapshot"),
@@ -260,6 +263,7 @@ void MainWindow::on_actionLoad_Snapshot_triggered(){
   if (!snapshot_path.isEmpty()){
     g_gameboy->load_state(snapshot_path.toUtf8().constData());
   }
+  pause_gameboy(false);
 }
 
 void MainWindow::on_actionDefault_toggled(bool arg1){
