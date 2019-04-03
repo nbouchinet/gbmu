@@ -96,7 +96,6 @@ HEADERS += \
 	src/Fwd.hpp \
 	src/Gameboy.hpp \
 	src/IReadWrite.hpp \
-	src/LCDRegisters.hpp \
 	src/MemoryBankController1.hpp \
 	src/MemoryBankController2.hpp \
 	src/MemoryBankController3.hpp \
