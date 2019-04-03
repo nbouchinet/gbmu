@@ -34,7 +34,6 @@ void PPU::handle_cgb_bg_palette_write(uint8_t bcpd_arg) {
 	if (test_bit(_bcps, 7) == true) {
 		_bcps += 1;
 	}
-	//  std::cerr << "================" << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -104,6 +103,7 @@ Byte PPU::handle_cgb_bg_palette_read() const {
 	}
 	return (ret);
 }
+
 //------------------------------------------------------------------------------
 uint32_t PPU::translate_cgb_color_value(uint16_t value) {
 	uint32_t ret = 0;
@@ -123,8 +123,10 @@ uint32_t PPU::translate_cgb_color_value(uint16_t value) {
 }
 
 //------------------------------------------------------------------------------
-uint32_t PPU::translate_dmg_color_value(uint8_t value) {
-	switch (value) {
+uint32_t PPU::translate_dmg_color_value(uint8_t value)
+{
+	switch (value)
+	{
 		case 0:
 			return (0xFFFFFFFF);
 		case 1:
@@ -134,12 +136,13 @@ uint32_t PPU::translate_dmg_color_value(uint8_t value) {
 		case 3:
 			return (0x000000FF);
 	}
-	return (0);
+	return (0xAA00AAFF);
 }
 
 //------------------------------------------------------------------------------
 void PPU::translate_dmg_palettes() {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 4; i++)
+	{
 		_background_dmg_palette[i] = extract_value(_bgp, (i * 2), (i * 2) + 1);
 		_background_dmg_palette_translated[i] =
 			translate_dmg_color_value(extract_value(_bgp, (i * 2), (i * 2) + 1));
