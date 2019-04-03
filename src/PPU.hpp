@@ -18,12 +18,6 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/array.hpp>
 
-/* TODO LIST
-
-        finish the pixel mixing algorythm for CGB
-        hdma transfers !!!
-*/
-
 typedef struct s_sprite_info {
   uint8_t y_pos; // in screen (0-143)
   uint8_t x_pos; // in screen (0-159)
@@ -46,7 +40,6 @@ typedef struct s_pixel_segment {
   uint8_t value; // Color ID
   bool is_sprite;
   t_sprite_info sprite_info;
-  // need to add stuff related to palette // actually maybe not
 
   friend class boost::serialization::access;
   template <class Archive> void serialize(Archive &ar, const unsigned int) {
@@ -244,6 +237,7 @@ private:
 
   friend class boost::serialization::access;
   template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &_speed;
     ar &_lcdc;
     ar &_stat;
     ar &_scy;
@@ -299,6 +293,9 @@ private:
     ar &_lcd_memory_bank_1;
     ar &_lcd_memory_bank_0;
     ar &_lcd_oam_ram;
+
+    ar &_nb_frames_rendered;
+	ar &_wait_frames_turn_on;
   }
 };
 
