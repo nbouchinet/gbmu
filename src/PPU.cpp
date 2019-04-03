@@ -609,21 +609,6 @@ void PPU::setup_background_data() {
 }
 
 //------------------------------------------------------------------------------
-void PPU::setup_gb_mode() {
-  uint8_t mode_flag = 0;
-
-  if (_gb_mode == 0) {
-    mode_flag = _components.mem_bus->read<Byte>(0x0143);
-    if (mode_flag == 0xC0) {
-      _gb_mode = MODE_GB_CGB;
-    } else if (mode_flag == 0x80) {
-      _gb_mode = MODE_GB_CGB; // Need to set custom palettes
-    } else {
-      _gb_mode = MODE_GB_DMG;
-    }
-  }
-}
-
 //------------------------------------------------------------------------------
 void PPU::set_pixel(uint8_t y, uint8_t x, uint32_t value) {
   _components.driver_screen->set_rgba(y, x, value);
@@ -1212,7 +1197,6 @@ void PPU::update_lcd_status() {
 
 //------------------------------------------------------------------------------
 void PPU::update_graphics(Word cycles) {
-  setup_gb_mode();
   _lcd_cycles += cycles;
   if (is_lcd_enabled()) {
     update_lcd_status();

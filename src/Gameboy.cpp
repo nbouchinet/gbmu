@@ -205,6 +205,7 @@ void Gameboy::read_type() {
   }
   else if (_type == GbType::CGB && value == 0x80)
     _type = GbType::CGB_DMG;
+  _components.ppu->set_gb_type(_type);
 }
 
 void Gameboy::save_state(std::string save_name) {

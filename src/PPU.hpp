@@ -11,6 +11,7 @@
 #include <array>
 #include <iostream>
 #include <string>
+#include "src/GbType.hpp"
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -72,6 +73,16 @@ public:
   void unset_bit(uint8_t &src, uint8_t bit_number);
   void update_graphics(Word cycles);
   Byte get_ly() const { return _ly; }
+
+  void set_gb_type(GbType gb_type) {
+    if (gb_type == GbType::CGB) {
+      _gb_mode = MODE_GB_CGB;
+    } else if (gb_type == GbType::CGB_DMG) {
+      _gb_mode = MODE_GB_CGB;
+    } else {
+      _gb_mode = MODE_GB_DMG;
+    }
+  };
 
   static constexpr Word LCDC = 0xFF40;
   static constexpr Word STAT = 0xFF41;
@@ -167,8 +178,6 @@ private:
   void update_lcd_status();
   void replace_pixel_segment(t_pixel_segment &holder,
                              t_pixel_segment &contender);
-  void setup_gb_mode();
-
   ComponentsContainer &_components;
 
   uint8_t _lcdc; // (0xFF40) lcd controller register
