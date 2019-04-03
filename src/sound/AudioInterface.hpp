@@ -24,6 +24,8 @@ class AudioInterface {
   virtual void start() = 0;
   virtual void terminate() = 0;
   virtual void toggle_mute() = 0;
+
+  virtual operator bool() const = 0;
 };
 
 }  // namespace sound
