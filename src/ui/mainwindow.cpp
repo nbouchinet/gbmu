@@ -100,7 +100,12 @@ void MainWindow::on_actionOpen_triggered() {
   ui->actionSave->setEnabled(true);
   ui->actionPlay->setEnabled(true);
   ui->actionStop->setEnabled(true);
-  ui->actionMute->setEnabled(true);
+  if (*g_gameboy->audio_interface())
+    ui->actionMute->setEnabled(true);
+  else {
+    ui->actionMute->setIcon(_mute_icon);
+    _is_muted = true;
+  }
   ui->actionDebug->setEnabled(true);
   ui->actionSpeed->setEnabled(true);
   ui->actionSnapshot->setEnabled(true);

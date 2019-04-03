@@ -42,6 +42,7 @@ class PortAudioInterface : public AudioInterface {
   void start() override;
   void terminate() override;
   void toggle_mute() override;
+  operator bool() const override { return _stream != nullptr; }
 };
 }  // namespace sound
 
