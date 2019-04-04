@@ -7,10 +7,8 @@
 
 GbmuScreen::GbmuScreen(QWidget *parent)
     : QGraphicsView(parent), _parent(parent) {
-  // srand(time(NULL));
   setAutoFillBackground(false);
   move(FIT_VIEW_W, FIT_VIEW_H);
-  // resize(parent->width(), parent->height());
 
   _scene = std::make_unique<QGraphicsScene>(this);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
