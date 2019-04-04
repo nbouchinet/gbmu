@@ -35,7 +35,7 @@ struct ComponentsContainer {
 class Accessor;
 
 class Gameboy {
- private:
+private:
   using GameSave = std::array<Byte, AMemoryBankController::RAMSize>;
 
   sound::PortAudioInterface _audio_interface;
@@ -52,7 +52,7 @@ class Gameboy {
   void do_checksum();
   void read_type();
 
- public:
+public:
   Gameboy(const std::string &rom_path, GbType gb_type);
   Gameboy() = delete;
 

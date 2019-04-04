@@ -19,8 +19,7 @@ private:
   friend class Accessor;
 
   friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive &ar, const unsigned int) {
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
     ar &rom;
     ar &ram;
     ar &*mbc;

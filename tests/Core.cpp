@@ -1,6 +1,6 @@
 #include "src/cpu/Core.hpp"
-#include "gtest/gtest.h"
 #include "src/Gameboy.hpp"
+#include "gtest/gtest.h"
 #define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
 #include <tuple>
@@ -8,7 +8,7 @@
 #define test_flags(...) test_flags_base((TestCoreFixture::s_flags){__VA_ARGS__})
 
 class Accessor {
- public:
+public:
   ComponentsContainer container;
   Core &core;
   Register &getPc(void) { return core._pc; }
@@ -22,7 +22,7 @@ class Accessor {
 };
 
 class TestCoreFixture : public ::testing::Test {
- public:
+public:
   struct s_flags {
     int c, z, n, h;
   };
@@ -36,10 +36,14 @@ class TestCoreFixture : public ::testing::Test {
   }
 
   void test_flags_base(struct s_flags f) {
-    if (f.c != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), f.c);
-    if (f.z != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), f.z);
-    if (f.n != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), f.n);
-    if (f.h != -1) EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), f.h);
+    if (f.c != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), f.c);
+    if (f.z != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z), f.z);
+    if (f.n != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), f.n);
+    if (f.h != -1)
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), f.h);
   }
 
   void reset_flags() {
@@ -402,20 +406,20 @@ TEST_F(TestCoreFixture, sbc) {
   }
 }
 
-#define TEST_OPERAND(OPNAME, OP, _C, _H, _N)                 \
-  constexpr Byte max = std::numeric_limits<Byte>::max();     \
-  for (Byte a = 0u; a < max; ++a) {                          \
-    for (Byte b = 0u; b < max; ++b) {                        \
-      Byte a_save = a;                                       \
-      accessor.core.OPNAME(a_save, b);                       \
-      Byte res = a OP b;                                     \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), _C); \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), _H); \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), _N); \
-      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z),      \
-                static_cast<Byte>(res) == 0);                \
-      EXPECT_EQ(static_cast<Byte>(a_save), res);             \
-    }                                                        \
+#define TEST_OPERAND(OPNAME, OP, _C, _H, _N)                                   \
+  constexpr Byte max = std::numeric_limits<Byte>::max();                       \
+  for (Byte a = 0u; a < max; ++a) {                                            \
+    for (Byte b = 0u; b < max; ++b) {                                          \
+      Byte a_save = a;                                                         \
+      accessor.core.OPNAME(a_save, b);                                         \
+      Byte res = a OP b;                                                       \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::C), _C);                   \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::H), _H);                   \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::N), _N);                   \
+      EXPECT_EQ(accessor.core.get_flag(Core::Flags::Z),                        \
+                static_cast<Byte>(res) == 0);                                  \
+      EXPECT_EQ(static_cast<Byte>(a_save), res);                               \
+    }                                                                          \
   }
 
 TEST_F(TestCoreFixture, and) {
