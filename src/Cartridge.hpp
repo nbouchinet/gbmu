@@ -1,7 +1,7 @@
 #ifndef CARTRIDGE_HPP
 #define CARTRIDGE_HPP
 
-#include "MemoryBankController1.hpp"
+#include "AMemoryBankController.hpp"
 #include "src/Fwd.hpp"
 #include "src/IReadWrite.hpp"
 #include <boost/serialization/access.hpp>
