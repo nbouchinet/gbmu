@@ -63,7 +63,7 @@ public:
     case 0xB000: /* 0xA000 to 0xBFFF */
       if (!_is_ram_enabled)
         break;
-      _ram[(addr - 0xA000) + (_ram_bank * 0x2000)] = value;
+      _ram.at((addr - 0xA000) + (_ram_bank * 0x2000)) = value;
       break;
     default:
       break;
@@ -78,17 +78,17 @@ public:
     case 0x1000:
     case 0x2000:
     case 0x3000:
-      return _rom[addr];
+      return _rom.at(addr);
     case 0x4000:
     case 0x5000:
     case 0x6000:
     case 0x7000:
-      return _rom[(addr - 0x4000) + _rom_bank * 0x4000];
+      return _rom.at((addr - 0x4000) + _rom_bank * 0x4000);
     case 0xA000:
     case 0xB000:
       if (!_is_ram_enabled)
         break;
-      return _ram[(addr - 0xA000) + (_ram_bank * 0x2000)];
+      return _ram.at((addr - 0xA000) + (_ram_bank * 0x2000));
     }
     return 0;
   }

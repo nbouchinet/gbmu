@@ -37,15 +37,18 @@ public:
   void set_ram_content(const Byte *, std::size_t);
 
   Byte read(Word addr) const override {
-    if (mbc)
+    if (mbc.get())
       return mbc->read(addr);
-    return (0);
+	throw std::exception();
   }
 
   void write(Word addr, Byte v) override {
-    if (mbc) {
+    if (mbc.get()) {
       mbc->write(addr, v);
     }
+	else {
+		throw std::exception();
+	}
   }
 
   void load_rom(const std::string &path);
