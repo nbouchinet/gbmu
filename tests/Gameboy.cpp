@@ -1,5 +1,5 @@
-#include "src/Cartridge.hpp"
 #include "src/Gameboy.hpp"
+#include "src/Cartridge.hpp"
 #include "gtest/gtest.h"
 #include <fstream>
 

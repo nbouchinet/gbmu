@@ -99,7 +99,7 @@ TEST_F(mbc1_f, rom_data_bank_switch) {
       if (c > 'Z')
         c = 'A';
       for (int x = 0; x < 0x3FFF; x++)
-	      romData[0x4000 * i + j] = c;
+        romData[0x4000 * i + j] = c;
 
       mbc.write(0x2000, i);
       if (i == 0)
@@ -119,7 +119,7 @@ TEST_F(mbc1_f, rom_bank_00) {
     if (c > 'Z')
       c = 'A';
     for (int j = 0; j < 0x3FFF; j++)
-	    romData[0x4000 * i + j] = c;
+      romData[0x4000 * i + j] = c;
   }
 
   mbc.write(0x6000, 0x0);
@@ -129,7 +129,7 @@ TEST_F(mbc1_f, rom_bank_00) {
   EXPECT_EQ(mbc.read(0x4000), 'B');
 }
 
-int main(int ac, char* av[]) {
+int main(int ac, char *av[]) {
   ::testing::InitGoogleTest(&ac, av);
   return RUN_ALL_TESTS();
 }

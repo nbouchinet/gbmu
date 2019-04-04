@@ -5,7 +5,7 @@
 #include <string>
 
 class Logger {
- public:
+public:
   enum LogOutput { Console, File };
   enum LogLevel { Error = 0, Warning = 1, Debug = 2 };
 
@@ -19,7 +19,7 @@ class Logger {
     instance().log(level, out, message);
   }
 
- private:
+private:
   Logger();
 
   void log_to_console(const std::string &message);
@@ -29,7 +29,7 @@ class Logger {
   std::ofstream _file;
   LogLevel _level;
 
- public:
+public:
   Logger(const Logger &) = delete;
   void operator=(const Logger &) = delete;
 

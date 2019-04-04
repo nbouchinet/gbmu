@@ -32,7 +32,7 @@ MemoryBus::MemoryBus(ComponentsContainer &components) {
   push_component(0xFF80, 0xFFFE, components.core.get());
   push_component(0xFFFF, 0xFFFF, components.interrupt_controller.get());
   push_component(0xFF00, 0xFF00, components.input_controller.get());
-	reset(components);
+  reset(components);
 }
 
 void MemoryBus::reset(ComponentsContainer &components) {

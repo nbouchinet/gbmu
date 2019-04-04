@@ -9,14 +9,12 @@
 #include "MemoryBankController3.hpp"
 #include "MemoryBankController5.hpp"
 
-Cartridge::Cartridge(const std::string &rom_path) : rom(0) {
-	reset(rom_path);
-}
+Cartridge::Cartridge(const std::string &rom_path) : rom(0) { reset(rom_path); }
 
 void Cartridge::reset(const std::string &rom_path) {
-	std::fill(ram.begin(), ram.end(), 0);
-	load_rom(rom_path);
-	mbc = get_mbc(rom[0x147]);
+  std::fill(ram.begin(), ram.end(), 0);
+  load_rom(rom_path);
+  mbc = get_mbc(rom[0x147]);
 }
 
 void Cartridge::load_rom(const std::string &path) {

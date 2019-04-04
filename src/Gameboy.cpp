@@ -35,12 +35,8 @@ ComponentsContainer::ComponentsContainer(
 ComponentsContainer::~ComponentsContainer() {}
 
 Gameboy::Gameboy(const std::string &rom_path, GbType type)
-    : _components(rom_path, &_audio_interface),
-      _debugger(_components),
-	  _type(type),
-      _rom_path(rom_path),
-      _is_abort(false),
-      _pause(false) {}
+    : _components(rom_path, &_audio_interface), _debugger(_components),
+      _type(type), _rom_path(rom_path), _is_abort(false), _pause(false) {}
 
 void Gameboy::notify_debugger(Debugger::e_dbg_state state, int duration) {
   switch (state) {
@@ -196,11 +192,10 @@ void Gameboy::read_type() {
     if (value == 0xC0)
       _type = GbType::CGB;
     else if (value == 0x80)
-	    _type = GbType::CGB_DMG;
+      _type = GbType::CGB_DMG;
     else
       _type = GbType::DMG;
-  }
-  else if (_type == GbType::CGB && value == 0x80)
+  } else if (_type == GbType::CGB && value == 0x80)
     _type = GbType::CGB_DMG;
   _components.ppu->set_gb_type(_type);
 }
