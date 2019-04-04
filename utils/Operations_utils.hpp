@@ -2,22 +2,17 @@
 #ifndef OPERATIONS_UTILS_HPP
 #define OPERATIONS_UTILS_HPP
 
-#include <type_traits>
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
-template <typename T>
-bool test_bit(uint8_t bit, T t) {
-  return (t >> bit) & 1;
-}
+template <typename T> bool test_bit(uint8_t bit, T t) { return (t >> bit) & 1; }
 
-template <typename T>
-void set_bit(uint8_t bit, T& t) {
+template <typename T> void set_bit(uint8_t bit, T &t) {
   t = (t & ~(1 << bit)) | (1 << bit);
 }
 
-template <typename T>
-void reset_bit(uint8_t bit, T& t) {
+template <typename T> void reset_bit(uint8_t bit, T &t) {
   t = (t & ~(1 << bit)) | (0 << bit);
 }
 

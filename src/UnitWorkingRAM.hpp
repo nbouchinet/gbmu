@@ -18,10 +18,9 @@ private:
   Byte _svbk;
 
   friend class boost::serialization::access;
-  template<class Archive>
-  void serialize(Archive &ar, const unsigned int) {
-	  ar & _ram;
-	  ar & _svbk;
+  template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    ar &_ram;
+    ar &_svbk;
   }
 
 public:
@@ -52,8 +51,8 @@ public:
     }
   }
 
-  void dump(std::array<Byte,0x8000> &buffer) {
-	  std::copy(std::begin(_ram), std::end(_ram), buffer.begin());
+  void dump(std::array<Byte, 0x8000> &buffer) {
+    std::copy(std::begin(_ram), std::end(_ram), buffer.begin());
   }
 };
 

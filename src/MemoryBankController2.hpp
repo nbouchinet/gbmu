@@ -48,7 +48,8 @@ public:
     default:
       break;
     }
-    if (_rom_bank == 0x20 || _rom_bank == 0x40 || _rom_bank == 0x60 || _rom_bank == 0x0)
+    if (_rom_bank == 0x20 || _rom_bank == 0x40 || _rom_bank == 0x60 ||
+        _rom_bank == 0x0)
       _rom_bank += 0x1;
   };
 

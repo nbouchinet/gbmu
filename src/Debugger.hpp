@@ -7,9 +7,9 @@
 #include "src/MemoryBus.hpp"
 #include <atomic>
 #include <chrono>
+#include <iostream>
 #include <map>
 #include <vector>
-#include <iostream>
 class Debugger {
 
 public:

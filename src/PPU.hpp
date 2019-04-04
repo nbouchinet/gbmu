@@ -8,10 +8,10 @@
 #include "Fwd.hpp"
 #include "IReadWrite.hpp"
 #include "ScreenOutput.hpp"
+#include "src/GbType.hpp"
 #include <array>
 #include <iostream>
 #include <string>
-#include "src/GbType.hpp"
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -295,7 +295,7 @@ private:
     ar &_lcd_oam_ram;
 
     ar &_nb_frames_rendered;
-	ar &_wait_frames_turn_on;
+    ar &_wait_frames_turn_on;
   }
 };
 

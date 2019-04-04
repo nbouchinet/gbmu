@@ -2,12 +2,12 @@
 #define BIOS_H
 
 #include "src/Fwd.hpp"
-#include "src/IReadWrite.hpp"
 #include "src/GbType.hpp"
+#include "src/IReadWrite.hpp"
 
+#include <boost/serialization/access.hpp>
 #include <exception>
 #include <vector>
-#include <boost/serialization/access.hpp>
 
 class Bios : public IReadWrite {
 
@@ -24,13 +24,13 @@ private:
   friend boost::serialization::access;
   template <class Archive> void serialize(Archive &, const unsigned int) {}
 
-  const std::vector<Byte>& get_bios() const;
+  const std::vector<Byte> &get_bios() const;
 
   GbType _type = GbType::DMG;
 
 public:
   Byte read(Word addr) const { return get_bios()[addr]; }
-  void write(Word, Byte) { }
+  void write(Word, Byte) {}
 
   auto get_begin() const { get_bios().cbegin(); }
   void set_type(GbType type) { _type = type; }

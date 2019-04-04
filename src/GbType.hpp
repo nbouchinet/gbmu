@@ -8,4 +8,4 @@ enum class GbType {
   CGB = 0xC0,
 };
 
-#endif  // GBTYPE_HPP
+#endif // GBTYPE_HPP

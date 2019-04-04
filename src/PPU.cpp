@@ -1,6 +1,6 @@
+#include "PPU.hpp"
 #include "Gameboy.hpp"
 #include "MemoryBus.hpp"
-#include "PPU.hpp"
 #include "cpu/InterruptController.hpp"
 
 #include <bitset>
@@ -150,114 +150,115 @@ void PPU::lyc_check() {
 
 //------------------------------------------------------------------------------
 void PPU::write(Word address, Byte value) {
-	if (address >= 0x8000 && address < 0xA000) {
-		if (test_bit(_vbk, 0) == false) {
-			_lcd_memory_bank_0[address - 0x8000] = value;
-			return;
-		} else if (test_bit(_vbk, 0) == true) {
-			_lcd_memory_bank_1[address - 0x8000] = value;
-			return;
-		}
-	}
-	if (address >= 0xFE00 && address < 0xFEA0) {
-		_lcd_oam_ram[address - 0xFE00] = value;
-		return;
-	}
+  if (address >= 0x8000 && address < 0xA000) {
+    if (test_bit(_vbk, 0) == false) {
+      _lcd_memory_bank_0[address - 0x8000] = value;
+      return;
+    } else if (test_bit(_vbk, 0) == true) {
+      _lcd_memory_bank_1[address - 0x8000] = value;
+      return;
+    }
+  }
+  if (address >= 0xFE00 && address < 0xFEA0) {
+    _lcd_oam_ram[address - 0xFE00] = value;
+    return;
+  }
 
-	switch (address) {
-		case 0xFF40:
-			handle_lcdc_write(value);
-			break;
-		case 0xFF41:
-			_stat = value; // need to set interrupt TODO
+  switch (address) {
+  case 0xFF40:
+    handle_lcdc_write(value);
+    break;
+  case 0xFF41:
+    _stat = value; // need to set interrupt TODO
 
-			if (test_bit(_stat, 5) == true) {
-				_components.interrupt_controller->request_interrupt(
-						_components.interrupt_controller->LCDCSI);
-			}
+    if (test_bit(_stat, 5) == true) {
+      _components.interrupt_controller->request_interrupt(
+          _components.interrupt_controller->LCDCSI);
+    }
 
-			if (test_bit(_stat, 4) == true) {
-				_components.interrupt_controller->request_interrupt(
-						_components.interrupt_controller->LCDCSI);
-			}
+    if (test_bit(_stat, 4) == true) {
+      _components.interrupt_controller->request_interrupt(
+          _components.interrupt_controller->LCDCSI);
+    }
 
-			if (test_bit(_stat, 3) == true) {
-				_components.interrupt_controller->request_interrupt(
-						_components.interrupt_controller->LCDCSI);
-			}
+    if (test_bit(_stat, 3) == true) {
+      _components.interrupt_controller->request_interrupt(
+          _components.interrupt_controller->LCDCSI);
+    }
 
-			lyc_check();
-			break;
-		case 0xFF42:
-			_scy = value;
-			break;
-		case 0xFF43:
-			_scx = value;
-			break;
-		case 0xFF44:
-			_ly = 0;
-			lyc_check();
-			break;
-		case 0xFF45:
-			_lyc = value;
-			lyc_check();
-			break;
-		case 0xFF46:
-			dma_transfer(value);
-			break;
-		case 0xFF47:
-			_bgp = value;
-			translate_dmg_palettes();
-			break;
-		case 0xFF48:
-			_obp0 = value;
-			translate_dmg_palettes();
-			break;
-		case 0xFF49:
-			_obp1 = value;
-			translate_dmg_palettes();
-			break;
-		case 0xFF4A:
-			_wy = value;
-			break;
-		case 0xFF4B:
-			_wx = value;
-			break;
-		case 0xFF4F:
-//			if (test_bit(_hdma5, 7) == false && _vbk != value)
-//				std::cerr << "changing vbk during a transfer, BAD!" << std::endl;
-			_vbk = value;
-			break;
-		case 0xFF51:
-			_hdma1 = value;
-			break;
-		case 0xFF52:
-			_hdma2 = value;
-			break;
-		case 0xFF53:
-			_hdma3 = value;
-			break;
-		case 0xFF54:
-			_hdma4 = value;
-			break;
-		case 0xFF55:
-			handle_hdma_transfer(value);
-			break;
-		case 0xFF68:
-			_bcps = value;
-			break;
-		case 0xFF69:
-			// std::endl;
-			handle_cgb_bg_palette_write(value);
-			break;
-		case 0xFF6A:
-			_ocps = value;
-			break;
-		case 0xFF6B:
-			// std::endl;
-			handle_cgb_obj_palette_write(value);
-			break;
-	}
+    lyc_check();
+    break;
+  case 0xFF42:
+    _scy = value;
+    break;
+  case 0xFF43:
+    _scx = value;
+    break;
+  case 0xFF44:
+    _ly = 0;
+    lyc_check();
+    break;
+  case 0xFF45:
+    _lyc = value;
+    lyc_check();
+    break;
+  case 0xFF46:
+    dma_transfer(value);
+    break;
+  case 0xFF47:
+    _bgp = value;
+    translate_dmg_palettes();
+    break;
+  case 0xFF48:
+    _obp0 = value;
+    translate_dmg_palettes();
+    break;
+  case 0xFF49:
+    _obp1 = value;
+    translate_dmg_palettes();
+    break;
+  case 0xFF4A:
+    _wy = value;
+    break;
+  case 0xFF4B:
+    _wx = value;
+    break;
+  case 0xFF4F:
+    //			if (test_bit(_hdma5, 7) == false && _vbk != value)
+    //				std::cerr << "changing vbk during a transfer, BAD!"
+    //<< std::endl;
+    _vbk = value;
+    break;
+  case 0xFF51:
+    _hdma1 = value;
+    break;
+  case 0xFF52:
+    _hdma2 = value;
+    break;
+  case 0xFF53:
+    _hdma3 = value;
+    break;
+  case 0xFF54:
+    _hdma4 = value;
+    break;
+  case 0xFF55:
+    handle_hdma_transfer(value);
+    break;
+  case 0xFF68:
+    _bcps = value;
+    break;
+  case 0xFF69:
+    // std::endl;
+    handle_cgb_bg_palette_write(value);
+    break;
+  case 0xFF6A:
+    _ocps = value;
+    break;
+  case 0xFF6B:
+    // std::endl;
+    handle_cgb_obj_palette_write(value);
+    break;
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -470,75 +471,82 @@ void PPU::replace_pixel_segment(t_pixel_segment &holder,
 
 //------------------------------------------------------------------------------
 void PPU::blend_pixels(t_pixel_segment &holder, t_pixel_segment &contender) {
-	// note : we can assume that contender is always a sprite because we first render
-	// all tiles (which cannot intersect)
+  // note : we can assume that contender is always a sprite because we first
+  // render all tiles (which cannot intersect)
 
-	if (_gb_mode == MODE_GB_DMG) // is DMG
-	{
-		if (holder.is_sprite == false) // sprite VS background
-		{
-			if (test_bit(contender.sprite_info.flags, 7) ==
-					false               // contender sprite has priority to BG
-					&& contender.value > 0) // == not transparent pixel | value 0 is
-				// always transparent for sprites
-			{
-				replace_pixel_segment(holder, contender);
-			} else if (test_bit(contender.sprite_info.flags, 7) ==
-					true // contender sprite does not have priority to BG
-					&& holder.value == 0) // background is transparent;
-			{
-				replace_pixel_segment(holder, contender);
-			}
-		}
-		else if (holder.is_sprite == true) // sprite VS sprite
-		{
-			if (holder.value == 0 &&
-					contender.value != 0) // transparent pixel vs not transparent
-				replace_pixel_segment(holder, contender);
-			else if (holder.value != 0 &&
-					contender.value != 0) // neither sprites pixels are transparent
-			{
-				if (contender.sprite_info.x_pos <
-						holder.sprite_info.x_pos // comparing x_pos
-						|| (contender.sprite_info.x_pos == holder.sprite_info.x_pos // if still can't determine, use obj number instead
-						 && contender.sprite_info.obj_number < holder.sprite_info.obj_number))
-				{
-					replace_pixel_segment(holder, contender);
-				}
-			}
-		}
-	}
+  if (_gb_mode == MODE_GB_DMG) // is DMG
+  {
+    if (holder.is_sprite == false) // sprite VS background
+    {
+      if (test_bit(contender.sprite_info.flags, 7) ==
+              false               // contender sprite has priority to BG
+          && contender.value > 0) // == not transparent pixel | value 0 is
+                                  // always transparent for sprites
+      {
+        replace_pixel_segment(holder, contender);
+      } else if (test_bit(contender.sprite_info.flags, 7) ==
+                     true // contender sprite does not have priority to BG
+                 && holder.value == 0) // background is transparent;
+      {
+        replace_pixel_segment(holder, contender);
+      }
+    } else if (holder.is_sprite == true) // sprite VS sprite
+    {
+      if (holder.value == 0 &&
+          contender.value != 0) // transparent pixel vs not transparent
+        replace_pixel_segment(holder, contender);
+      else if (holder.value != 0 &&
+               contender.value != 0) // neither sprites pixels are transparent
+      {
+        if (contender.sprite_info.x_pos <
+                holder.sprite_info.x_pos // comparing x_pos
+            ||
+            (contender.sprite_info.x_pos ==
+                 holder.sprite_info
+                     .x_pos // if still can't determine, use obj number instead
+             && contender.sprite_info.obj_number <
+                    holder.sprite_info.obj_number)) {
+          replace_pixel_segment(holder, contender);
+        }
+      }
+    }
+  }
 
-	else if (_gb_mode == MODE_GB_CGB) // is CGB
-	{
-		if (holder.is_sprite == false) // holder is a tile
-		{
-			// tiles also have priority flag in CGB
-			if (test_bit(holder.sprite_info.flags, 7) == false) // priority according to sprite flag
-			{
-				if (test_bit(contender.sprite_info.flags, 7) == false // contender sprite has priority to BG
-						&& contender.value > 0) // == not transparent pixel | value 0 is always transparent for sprites
-				{
-					replace_pixel_segment(holder, contender);
-				}
-				else if (test_bit(contender.sprite_info.flags, 7) == true && holder.value == 0 && contender.value > 0) // contender sprite does not have priority to BG
-				{
-					replace_pixel_segment(holder, contender);
-				}
-			}
-			else if (holder.value == 0 && contender.value > 0)
-				replace_pixel_segment(holder, contender);
-		}
-		else if (holder.is_sprite == true) // same as DMG
-		{
-			if (holder.value == 0 && contender.value != 0) // transparent pixel vs not transparent
-				replace_pixel_segment(holder, contender);
-			else if (holder.sprite_info.obj_number > contender.sprite_info.obj_number
-					&& contender.value > 0) {
-				replace_pixel_segment(holder, contender);
-			}
-		}
-	}
+  else if (_gb_mode == MODE_GB_CGB) // is CGB
+  {
+    if (holder.is_sprite == false) // holder is a tile
+    {
+      // tiles also have priority flag in CGB
+      if (test_bit(holder.sprite_info.flags, 7) ==
+          false) // priority according to sprite flag
+      {
+        if (test_bit(contender.sprite_info.flags, 7) ==
+                false               // contender sprite has priority to BG
+            && contender.value > 0) // == not transparent pixel | value 0 is
+                                    // always transparent for sprites
+        {
+          replace_pixel_segment(holder, contender);
+        } else if (test_bit(contender.sprite_info.flags, 7) == true &&
+                   holder.value == 0 &&
+                   contender.value >
+                       0) // contender sprite does not have priority to BG
+        {
+          replace_pixel_segment(holder, contender);
+        }
+      } else if (holder.value == 0 && contender.value > 0)
+        replace_pixel_segment(holder, contender);
+    } else if (holder.is_sprite == true) // same as DMG
+    {
+      if (holder.value == 0 &&
+          contender.value != 0) // transparent pixel vs not transparent
+        replace_pixel_segment(holder, contender);
+      else if (holder.sprite_info.obj_number >
+                   contender.sprite_info.obj_number &&
+               contender.value > 0) {
+        replace_pixel_segment(holder, contender);
+      }
+    }
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -706,41 +714,41 @@ void PPU::render_tiles() {
 
 //------------------------------------------------------------------------------
 void PPU::send_pixel_pipeline() {
-	for (int i = 0; i < LCD_WIDTH; i++) {
-		if (_gb_mode == MODE_GB_DMG) {
-			if (_pixel_pipeline[i].is_sprite == false) {
-				set_pixel(_ly, i,
-						_background_dmg_palette_translated[_pixel_pipeline[i].value]);
-			} else if (_pixel_pipeline[i].is_sprite == true) {
-				if (test_bit(_pixel_pipeline[i].sprite_info.flags, 4) == true)
-					set_pixel(
-							_ly, i,
-							_sprites_dmg_palettes_translated[1][_pixel_pipeline[i].value]);
-				else
-					set_pixel(
-							_ly, i,
-							_sprites_dmg_palettes_translated[0][_pixel_pipeline[i].value]);
-			}
-		} else if (_gb_mode == MODE_GB_CGB) {
-			// enforce_debug_palettes();
+  for (int i = 0; i < LCD_WIDTH; i++) {
+    if (_gb_mode == MODE_GB_DMG) {
+      if (_pixel_pipeline[i].is_sprite == false) {
+        set_pixel(_ly, i,
+                  _background_dmg_palette_translated[_pixel_pipeline[i].value]);
+      } else if (_pixel_pipeline[i].is_sprite == true) {
+        if (test_bit(_pixel_pipeline[i].sprite_info.flags, 4) == true)
+          set_pixel(
+              _ly, i,
+              _sprites_dmg_palettes_translated[1][_pixel_pipeline[i].value]);
+        else
+          set_pixel(
+              _ly, i,
+              _sprites_dmg_palettes_translated[0][_pixel_pipeline[i].value]);
+      }
+    } else if (_gb_mode == MODE_GB_CGB) {
+      // enforce_debug_palettes();
 
-			uint8_t palette_number = 0;
-			if (_pixel_pipeline[i].is_sprite == false) {
-				palette_number =
-					extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-				set_pixel(
-						_ly, i,
-						_background_color_palettes_translated[palette_number]
-						[_pixel_pipeline[i].value]);
-			} else if (_pixel_pipeline[i].is_sprite == true) {
-				palette_number =
-					extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
-				set_pixel(_ly, i,
-						_sprite_color_palettes_translated[palette_number]
-						[_pixel_pipeline[i].value]);
-			}
-		}
-	}
+      uint8_t palette_number = 0;
+      if (_pixel_pipeline[i].is_sprite == false) {
+        palette_number =
+            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+        set_pixel(
+            _ly, i,
+            _background_color_palettes_translated[palette_number]
+                                                 [_pixel_pipeline[i].value]);
+      } else if (_pixel_pipeline[i].is_sprite == true) {
+        palette_number =
+            extract_value(_pixel_pipeline[i].sprite_info.flags, 0, 2);
+        set_pixel(_ly, i,
+                  _sprite_color_palettes_translated[palette_number]
+                                                   [_pixel_pipeline[i].value]);
+      }
+    }
+  }
 }
 
 //------------------------------------------------------------------------------

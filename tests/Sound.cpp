@@ -72,7 +72,8 @@ void test_sweep(bool neg) {
 
   for (auto a = 50; a > 0; --a) {
     Word oldfreq = frequency;
-    for (auto i = sweep.sweep_period(); i > 0; --i) ASSERT_TRUE(sweep.call());
+    for (auto i = sweep.sweep_period(); i > 0; --i)
+      ASSERT_TRUE(sweep.call());
     EXPECT_EQ(frequency, oldfreq + (oldfreq >> 2) * -neg);
   }
 }
@@ -145,7 +146,8 @@ void test_envelope(bool neg) {
     for (auto i = 0; i < period; ++i) {
       ASSERT_TRUE(env.call());
     }
-    if (not env.is_enabled()) break;
+    if (not env.is_enabled())
+      break;
     EXPECT_EQ(vol, oldvol + ((neg) ? -1 : 1));
   }
   EXPECT_FALSE(env.is_enabled());
@@ -306,11 +308,13 @@ void noise_chan_test(NoiseChannel &chan, Byte shift, bool mode,
   const Word timer = NoiseChannel::get_divider(divider_code) << shift;
   Word reg = 0xffff;
   for (auto i = 0; i < 20; ++i) {
-    for (auto y = 0; y < timer; ++y) chan.update();
+    for (auto y = 0; y < timer; ++y)
+      chan.update();
     Byte xored = (reg & 1) ^ ((reg & 2) >> 1);
     reg >>= 1;
     reg |= xored << 15;
-    if (mode) reg |= xored << 6;
+    if (mode)
+      reg |= xored << 6;
     ASSERT_EQ(chan.get_raw_volume(), (~reg & 1) * vol);
   }
 }
@@ -334,6 +338,6 @@ int main(int ac, char *av[]) {
   return RUN_ALL_TESTS();
 }
 
-}  // namespace sound
+} // namespace sound
 
 int main(int argc, char *argv[]) { return sound::main(argc, argv); }

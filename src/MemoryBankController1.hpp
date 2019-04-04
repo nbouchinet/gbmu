@@ -21,10 +21,10 @@ private:
 
   friend class boost::serialization::access;
   template <class Archive> void serialize(Archive &ar, const unsigned int) {
-    ar & _rom_bank;
-    ar & _ram_bank;
-    ar & _is_rom_banking;
-    ar & _is_ram_enabled;
+    ar &_rom_bank;
+    ar &_ram_bank;
+    ar &_is_rom_banking;
+    ar &_is_ram_enabled;
   }
 
 public:

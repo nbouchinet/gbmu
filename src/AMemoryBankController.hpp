@@ -20,8 +20,8 @@ protected:
 
 public:
   AMemoryBankController(ROMContainer &rom, RAMContainer &ram)
-	  : _rom(rom), _ram(ram) {}
-  virtual ~AMemoryBankController() {};
+      : _rom(rom), _ram(ram) {}
+  virtual ~AMemoryBankController(){};
 
   template <class Archive> void serialize(Archive &, const unsigned int) {}
 
