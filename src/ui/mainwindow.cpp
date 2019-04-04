@@ -62,14 +62,17 @@ void MainWindow::on_actionOpen_triggered() {
       "/Users/oyagci/Workspace/42/gbmu/tools/blargg-test-roms",
       tr("*.gb *.gbc"));
   if (_rom_path.isEmpty()) return;
-  if (g_gameboy && _gameboy_thread && _gameboy_worker && _timer_screen &&
-      _gameboy_screen) {
+  if (g_gameboy && _gameboy_thread && _gameboy_worker 
+	  && _timer_screen &&
+      _gameboy_screen) 
+	  {
+	g_gameboy->reset();
     g_gameboy->set_is_abort(true);
     _gameboy_thread->quit();
     _gameboy_thread->wait();
-    _gameboy_worker->deleteLater();
-    _gameboy_thread->deleteLater();
-    _timer_screen->deleteLater();
+	delete _gameboy_worker;
+	delete _gameboy_thread;
+	delete _timer_screen;
     delete _gameboy_screen;
     delete g_gameboy;
     g_gameboy = nullptr;
@@ -237,16 +240,16 @@ void MainWindow::resizeEvent(QResizeEvent *event) {
 
 void MainWindow::on_actionSnapshot_triggered() {
   if (!g_gameboy) return;
+  pause_gameboy(true);
   bool ok;
   QString filename = QInputDialog::getText(
       this, tr("Choose a name"), tr("Name"), QLineEdit::Normal, "", &ok);
   if (ok) {
-    pause_gameboy(true);
     QFileInfo fi(_rom_path);
     QString snapshot_path = fi.path() + "/" + filename + ".ssgbmu";
     g_gameboy->save_state(snapshot_path.toUtf8().constData());
-    pause_gameboy(false);
   }
+  pause_gameboy(false);
 }
 
 void MainWindow::on_actionLoad_Snapshot_triggered() {
