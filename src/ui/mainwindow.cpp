@@ -108,8 +108,8 @@ void MainWindow::on_actionOpen_triggered() {
   }
   ui->actionDebug->setEnabled(true);
   ui->actionSpeed->setEnabled(true);
-  ui->actionSnapshot->setEnabled(true);
-  ui->actionLoad_Snapshot->setEnabled(true);
+  //ui->actionSnapshot->setEnabled(true);
+  //ui->actionLoad_Snapshot->setEnabled(true);
 
   QFileInfo fi(_rom_path);
   setWindowTitle(fi.baseName());
