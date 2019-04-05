@@ -152,7 +152,7 @@ void MainWindow::on_actionMute_triggered() {
 }
 
 void MainWindow::on_actionDebug_triggered() {
-  if (g_gameboy) {
+  if (g_gameboy && !g_gameboy->get_pause()) {
     g_gameboy->get_debugger().toggle();
     DebuggerWindow *debuggerwindow = new DebuggerWindow(this);
     debuggerwindow->setModal(false);
