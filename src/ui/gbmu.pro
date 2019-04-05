@@ -62,7 +62,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     resource.qrc
 
-ICON = gbmu.png
+ICON = gbmu.icns
 
 SOURCES += \
 	src/Cartridge.cpp \
