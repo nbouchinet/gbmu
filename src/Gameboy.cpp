@@ -200,11 +200,18 @@ void Gameboy::read_type() {
   _components.ppu->set_gb_type(_type);
 }
 
-void Gameboy::save_state(std::string save_name) {
+bool Gameboy::save_state(std::string save_name) {
   std::ofstream ofs(save_name);
+
+  std::array<Byte, 0x10> title;
+
+  for (int i = 0; i < 0x10; i++)
+    title[i] = _components.mem_bus->read<Byte>(0x134 + i);
 
   {
     boost::archive::text_oarchive oa(ofs);
+    oa << title;
+    oa << *_components.mem_bus;
     oa << *_components.core;
     oa << *_components.cartridge;
     oa << *_components.ppu;
@@ -217,13 +224,28 @@ void Gameboy::save_state(std::string save_name) {
     oa << *_components.bios;
   }
   ofs.close();
+  return true;
 }
 
-void Gameboy::load_state(std::string save_name) {
+bool Gameboy::load_state(std::string save_name) {
   std::ifstream ifs(save_name);
+
+  std::array<Byte, 0x10> current_title;
+  std::array<Byte, 0x10> title;
+
+  for (int i = 0; i < 0x10; i++)
+    current_title[i] = _components.mem_bus->read<Byte>(0x134 + i);
 
   {
     boost::archive::text_iarchive ia(ifs);
+    ia >> title;
+
+    if (current_title != title) {
+      ifs.close();
+      return false;
+    }
+
+    ia >> *_components.mem_bus;
     ia >> *_components.core;
     ia >> *_components.cartridge;
     ia >> *_components.ppu;
@@ -236,4 +258,5 @@ void Gameboy::load_state(std::string save_name) {
     ia >> *_components.bios;
   }
   ifs.close();
+  return true;
 }
