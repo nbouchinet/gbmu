@@ -245,17 +245,21 @@ bool Gameboy::load_state(std::string save_name) {
       return false;
     }
 
-    ia >> *_components.mem_bus;
-    ia >> *_components.core;
-    ia >> *_components.cartridge;
-    ia >> *_components.ppu;
-    ia >> *_components.unit_working_ram;
-    ia >> *_components.interrupt_controller;
-    ia >> *_components.input_controller;
-    ia >> *_components.timer;
-    ia >> *_components.apu;
-    ia >> *_components.driver_screen;
-    ia >> *_components.bios;
+    try {
+      ia >> *_components.mem_bus;
+      ia >> *_components.core;
+      ia >> *_components.cartridge;
+      ia >> *_components.ppu;
+      ia >> *_components.unit_working_ram;
+      ia >> *_components.interrupt_controller;
+      ia >> *_components.input_controller;
+      ia >> *_components.timer;
+      ia >> *_components.apu;
+      ia >> *_components.driver_screen;
+      ia >> *_components.bios;
+    } catch (std::exception &e) {
+      std::cerr << e.what() << std::endl;
+    }
   }
   ifs.close();
   return true;
