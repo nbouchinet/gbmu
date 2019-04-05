@@ -28,12 +28,23 @@ private:
 
   friend class boost::serialization::access;
   template <class Archive> void serialize(Archive &ar, const unsigned int) {
+    uint8_t seconds = this->seconds;
+    uint8_t minutes = this->minutes;
+    uint8_t hours = this->hours;
+
     ar &active_reg;
     ar &seconds;
     ar &minutes;
     ar &hours;
     ar &day_low;
     ar &day_high;
+	ar &clock_now;
+	ar &clock_last;
+	ar &elapsed_time;
+
+    this->seconds = seconds;
+    this->minutes = minutes;
+    this->hours = hours;
   }
 
 public:

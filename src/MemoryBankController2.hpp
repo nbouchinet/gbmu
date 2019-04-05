@@ -13,21 +13,30 @@ private:
   uint8_t _rom_bank : 4;
   bool _is_ram_enabled;
 
-private:
   void enableRAM() { _is_ram_enabled = true; };
   void disableRAM() { _is_ram_enabled = false; }
 
-  friend class boost::serialization::access;
-  template <class Archive> void serialize(Archive &ar, const unsigned int) {
-    ar &_rom_bank;
-    ar &_is_ram_enabled;
+  void do_serialize(boost::archive::text_iarchive &ar) override {
+    uint16_t rom_bank = _rom_bank;
+
+    ar >> rom_bank;
+    ar >> _is_ram_enabled;
+
+    _rom_bank = rom_bank;
+  }
+
+  void do_serialize(boost::archive::text_oarchive &ar) override {
+    uint16_t rom_bank = _rom_bank;
+
+    ar << rom_bank;
+    ar << _is_ram_enabled;
   }
 
 public:
   MemoryBankController2(ROMContainer &rom, RAMContainer &ram)
       : AMemoryBankController(rom, ram), _rom_bank(0), _is_ram_enabled(false) {}
 
-  void write(uint16_t addr, uint8_t value) {
+  void write(uint16_t addr, uint8_t value) override {
     switch (addr & 0xF000) {
     case 0x0000:
     case 0x1000: /* 0x0000 to 0x1FFF */
@@ -53,7 +62,7 @@ public:
       _rom_bank += 0x1;
   };
 
-  uint8_t read(uint16_t addr) const {
+  uint8_t read(uint16_t addr) const override {
     switch (addr & 0xF000) {
     case 0x0000:
     case 0x1000:
