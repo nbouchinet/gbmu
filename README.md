@@ -11,6 +11,16 @@ It is possible that some games do not work properly.
 * boost-devel
 * portaudio-devel
 * qt5-qmake
+* clang++
+
+# OSX
+```brew install boost portaudio```
+
+# Fedora
+```# dnf install portaudio-devel boost-devel clang qt5```
+
+# Debian
+```# apt-get install qt5-qmake portaudio19-dev llvm-clang libboost-all-dev```
 
 # Build
 ```./configure && make -j```
