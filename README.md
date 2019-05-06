@@ -20,7 +20,7 @@ It is possible that some games do not work properly.
 ```# dnf install portaudio-devel boost-devel clang qt5```
 
 # Debian
-```# apt-get install qt5-qmake portaudio19-dev llvm-clang libboost-all-dev```
+```# apt-get install qt5-qmake portaudio19-dev clang libboost-all-dev```
 
 # Build
 ```./configure && make -j```
