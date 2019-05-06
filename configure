@@ -5,7 +5,7 @@ PROJECT_PATH=$(pwd)
 UNAME=$(uname -s)
 
 if [ "$UNAME" == "Darwin" ]; then
-	/sgoinfre/goinfre/Perso/$NAME/Qt/5.10.0/clang_64/bin/qmake $PROJECT_PATH/src/ui/gbmu.pro -spec macx-clang CONFIG+=release CONFIG+=x86_64
+	qmake $PROJECT_PATH/src/ui/gbmu.pro -spec macx-clang CONFIG+=release CONFIG+=x86_64
 else
 	qmake-qt5 $PROJECT_PATH/src/ui/gbmu.pro CONFIG+=release CONFIG+=x86_64
 fi
