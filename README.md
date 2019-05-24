@@ -17,7 +17,7 @@ It is possible that some games do not work properly.
 ```brew install boost portaudio```
 
 # Fedora
-```# dnf install portaudio-devel boost-devel clang qt5```
+```# dnf install portaudio-devel boost-devel clang qt5 qt5-qtbase-devel```
 
 # Debian
 ```# apt-get install qt5-qmake portaudio19-dev clang libboost-all-dev```
